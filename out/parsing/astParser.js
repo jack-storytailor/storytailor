@@ -6,8 +6,8 @@ const unescape_1 = require("./unescape");
 const path = require("path");
 const config = {
     environmentName: '__env',
-    environmentPath: 'storyscript/out/environment',
-    defaultEnvironmentPath: 'storyscript/out/environment',
+    environmentPath: 'storytailor/out/environment',
+    defaultEnvironmentPath: 'storytailor/out/environment',
     contextName: 'context',
     requireName: 'require',
     moduleName: 'module',
@@ -141,7 +141,7 @@ exports.parseModule = (tokens, modulePath, stsConfig) => {
     };
     /**
      * function createStory() {
-     * this.environment = require('storyscript/environment');
+     * this.environment = require('storytailor/environment');
      *  this.serializer = environment.getSerializer();
      *  this.text = [];
      *  // ... user code
@@ -151,7 +151,7 @@ exports.parseModule = (tokens, modulePath, stsConfig) => {
      * const story = createStory();
      * export default story;
      */
-    // this.environment = require('storyscript/environment')
+    // this.environment = require('storytailor/environment')
     let importEnvironment = ts.createExpressionStatement(ts.createBinary(ts.createPropertyAccess(ts.createThis(), ts.createIdentifier(config.environmentName)), ts.SyntaxKind.EqualsToken, ts.createCall(ts.createIdentifier('require'), undefined, [
         ts.createStringLiteral(environmentPath)
     ])));

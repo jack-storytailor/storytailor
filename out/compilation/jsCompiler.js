@@ -7,7 +7,7 @@ const VariableDeclarationKind_1 = require("../ast/VariableDeclarationKind");
 const path = require("path");
 const textFieldName = "__text";
 exports.compilerConfig = {
-    environmentPath: "storyscript/out/environment",
+    environmentPath: "storytailor/out/environment",
     environmentVarName: '__env',
     contextVarName: "__context",
     serializerVarName: "__serializer",

@@ -446,7 +446,7 @@ exports.astFactory = {
             expression
         };
     },
-    // storyscript-specific
+    // storytailor-specific
     outerStatement: (indent, statement, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.OuterStatement,

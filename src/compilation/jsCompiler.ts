@@ -70,7 +70,7 @@ export interface ICompileResult<TResult = undefined> {
 
 const textFieldName = "__text";
 export const compilerConfig = {
-  environmentPath: "storyscript/out/environment",
+  environmentPath: "storytailor/out/environment",
   environmentVarName: '__env',
   contextVarName: "__context",
   serializerVarName: "__serializer",

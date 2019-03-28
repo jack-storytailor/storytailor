@@ -19,18 +19,18 @@ export const compile = (request: ICompileRequest): ICompilerState => {
     // state = addErrorAndLog(
     //   state,
     //   ParsingErrorType.Error,
-    //   `storyscript compilation started with request (config: ${request.configPath})`,
+    //   `storytailor compilation started with request (config: ${request.configPath})`,
     //   undefined,
     //   undefined,
     //   1,
     //   errorFilePath
     // );
-    console.log(`storyscript compilation started`, request);
+    console.log(`storytailor compilation started`, request);
     state = createCompilerState(request);
     // console.log('compiler state is ', state);
-    // compile storyscript
+    // compile storytailor
     state = compileProject(state);
-    console.log('storyscript compilation finished with status ', state.status);
+    console.log('storytailor compilation finished with status ', state.status);
     
     // compile typescript if needed
     if (request.tsConfigPath) {

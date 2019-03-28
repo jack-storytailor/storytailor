@@ -34,8 +34,8 @@ export interface IParseResult<TResult = any> {
 
 const config = {
   environmentName: '__env',
-  environmentPath: 'storyscript/out/environment',
-  defaultEnvironmentPath: 'storyscript/out/environment',
+  environmentPath: 'storytailor/out/environment',
+  defaultEnvironmentPath: 'storytailor/out/environment',
   contextName: 'context',
   requireName: 'require',
   moduleName: 'module',
@@ -193,7 +193,7 @@ export const parseModule = (tokens: ICodeToken[], modulePath: string, stsConfig:
 
   /**
    * function createStory() {
-   * this.environment = require('storyscript/environment');
+   * this.environment = require('storytailor/environment');
    *  this.serializer = environment.getSerializer();
    *  this.text = [];
    *  // ... user code
@@ -204,7 +204,7 @@ export const parseModule = (tokens: ICodeToken[], modulePath: string, stsConfig:
    * export default story;
    */
 
-   // this.environment = require('storyscript/environment')
+   // this.environment = require('storytailor/environment')
   let importEnvironment: ts.Statement = ts.createExpressionStatement(
     ts.createBinary(
       ts.createPropertyAccess(

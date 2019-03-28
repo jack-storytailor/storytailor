@@ -55,7 +55,7 @@ export enum AstNodeType {
   ConditionalExpression = "ConditionalExpression",
   NewExpression = "NewExpression",
   DeleteExpression = "DeleteExpression",
-  // storyscript-specific
+  // storytailor-specific
   OuterStatement = "OuterStatement",
   TextLineStatement = "TextLineStatement",
   ObjectLineStatement = "ObjectLineStatement",

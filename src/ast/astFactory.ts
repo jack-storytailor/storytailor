@@ -463,7 +463,7 @@ export const astFactory = {
     }
   },
 
-  // storyscript-specific
+  // storytailor-specific
 
   outerStatement: (indent: number, statement: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstOuterStatement => {
     return {

@@ -44,8 +44,8 @@ const separators = [
 ];
 const config = {
     environmentName: '__env',
-    environmentPath: 'storyscript/out/environment',
-    defaultEnvironmentPath: 'storyscript/out/environment',
+    environmentPath: 'storytailor/out/environment',
+    defaultEnvironmentPath: 'storytailor/out/environment',
     contextName: 'context',
     requireName: 'require',
     moduleName: 'module',
@@ -3313,7 +3313,7 @@ exports.parseNewExpression = (state, isMultiline) => {
         state
     };
 };
-// storyscript-specific
+// storytailor-specific
 exports.parseOuterStatement = (state) => {
     if (exports.isEndOfFile(state)) {
         return undefined;

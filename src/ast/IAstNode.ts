@@ -203,7 +203,7 @@ export interface IAstDeleteExpression extends IAstNode {
   expression: IAstNode;
 }
 
-// Storyscript-Specific
+// storytailor-Specific
 
 export interface IAstOuterStatement extends IAstNode {
   indent: number;

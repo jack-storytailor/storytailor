@@ -1,5 +1,5 @@
 /**
- * storyscript compiler
+ * storytailor compiler
  * 
  * configPath
  * -f filePath

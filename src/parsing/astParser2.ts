@@ -53,8 +53,8 @@ const separators = [
 
 const config = {
   environmentName: '__env',
-  environmentPath: 'storyscript/out/environment',
-  defaultEnvironmentPath: 'storyscript/out/environment',
+  environmentPath: 'storytailor/out/environment',
+  defaultEnvironmentPath: 'storytailor/out/environment',
   contextName: 'context',
   requireName: 'require',
   moduleName: 'module',
@@ -4172,7 +4172,7 @@ export const parseNewExpression = (state: IParserState2, isMultiline: boolean): 
   }
 }
 
-// storyscript-specific
+// storytailor-specific
 export const parseOuterStatement = (state: IParserState2): IParseResult<IAstOuterStatement> => {
   if (isEndOfFile(state)) {
     return undefined;

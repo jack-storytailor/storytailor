@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
- * storyscript compiler
+ * storytailor compiler
  *
  * configPath
  * -f filePath
