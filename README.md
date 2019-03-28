@@ -1,2 +1,2 @@
-# storytailor
-Programming language for making stories
+# storyscript
+programming language for processing text

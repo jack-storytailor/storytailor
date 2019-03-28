@@ -1,0 +1,27 @@
+{
+  "name": "storytailor",
+  "version": "0.0.1",
+  "description": "programming language for processing text",
+  "main": ".",
+  "author": "Jack Storytailor",
+  "license": "MIT",
+  "homepage": "https://github.com/freewebtime/storytailor",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jack-storytailor/storytailor.git"
+  },
+  "scripts": {
+    "compile": "tsc -p tsconfig.json"
+  },
+  "bin": {
+    "stsc": "./bin/stsc",
+    "stsp": "./bin/stsp"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.26",
+    "typescript": "^3.3.3"
+  },
+  "dependencies": {
+    "source-map": "^0.7.3"
+  }
+}

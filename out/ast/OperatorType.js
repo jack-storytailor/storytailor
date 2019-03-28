@@ -1,0 +1,26 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var OperatorType;
+(function (OperatorType) {
+    OperatorType["Equals"] = "Equals";
+    OperatorType["DoubleEquals"] = "DoubleEquals";
+    OperatorType["TripleEquals"] = "TripleEquals";
+    OperatorType["NotEqualsEquals"] = "NotEqualsEquals";
+    OperatorType["NotEquals"] = "NotEquals";
+    OperatorType["Plus"] = "Plus";
+    OperatorType["PlusPlus"] = "PlusPlus";
+    OperatorType["Minus"] = "Minus";
+    OperatorType["Not"] = "Not";
+    OperatorType["MinusMinus"] = "MinusMinus";
+    OperatorType["Multiply"] = "Multiply";
+    OperatorType["Divide"] = "Divide";
+    OperatorType["Greater"] = "Greater";
+    OperatorType["Less"] = "Less";
+    OperatorType["GreaterOrEquals"] = "GreaterOrEquals";
+    OperatorType["LessOrEquals"] = "LessOrEquals";
+    OperatorType["SpreadAssign"] = "SpreadAssign";
+    OperatorType["OrOr"] = "OrOr";
+    OperatorType["AndAnd"] = "AndAnd";
+    OperatorType["SingleOr"] = "SingleOr";
+    OperatorType["SingleAnd"] = "SingleAnd";
+})(OperatorType = exports.OperatorType || (exports.OperatorType = {}));
