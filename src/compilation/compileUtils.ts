@@ -14,20 +14,9 @@ import { ISymbolPosition } from '../shared/ISymbolPosition';
 export const compile = (request: ICompileRequest): ICompilerState => {
   let state: ICompilerState = undefined;
   try {
-    // create compiler state
-    
-    // state = addErrorAndLog(
-    //   state,
-    //   ParsingErrorType.Error,
-    //   `storytailor compilation started with request (config: ${request.configPath})`,
-    //   undefined,
-    //   undefined,
-    //   1,
-    //   errorFilePath
-    // );
     console.log(`storytailor compilation started`, request);
     state = createCompilerState(request);
-    // console.log('compiler state is ', state);
+
     // compile storytailor
     state = compileProject(state);
     console.log('storytailor compilation finished with status ', state.status);
