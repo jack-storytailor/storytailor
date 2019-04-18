@@ -26,19 +26,24 @@ const getEnvPath = (request) => {
         let envPath = path.resolve(request.outputRoot, environmentPath + '.js');
         let moduleDir = path.dirname(request.targetFileName);
         let envDir = path.dirname(envPath);
+        let envFileName = path.basename(environmentPath);
         let relativeModulePath = path.relative(moduleDir, envDir);
         if (relativeModulePath === '') {
             relativeModulePath = '.';
         }
-        relativeModulePath = relativeModulePath.replace('\\', '/');
-        let envModulePath = relativeModulePath + '/' + environmentPath;
+        // relativeModulePath = relativeModulePath.replace('\\', '/');
+        let envModulePath = relativeModulePath + '/' + envFileName;
         environmentPath = envModulePath;
     }
     if (!environmentPath) {
         environmentPath = exports.compilerConfig.environmentPath;
     }
+    environmentPath = escapeRegExp(environmentPath);
     return environmentPath;
 };
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
 exports.compile = (request) => {
     if (!request || !request.ast || request.ast.length === 0) {
         return undefined;

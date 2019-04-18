@@ -92,12 +92,13 @@ const getEnvPath = (request: ICompileRequest): string => {
     let envPath = path.resolve(request.outputRoot, environmentPath + '.js');
     let moduleDir = path.dirname(request.targetFileName);
     let envDir = path.dirname(envPath);
+    let envFileName = path.basename(environmentPath);
     let relativeModulePath = path.relative(moduleDir, envDir);
     if (relativeModulePath === '') {
       relativeModulePath = '.';
     }
-    relativeModulePath = relativeModulePath.replace('\\', '/');
-    let envModulePath = relativeModulePath + '/' + environmentPath;
+    // relativeModulePath = relativeModulePath.replace('\\', '/');
+    let envModulePath = relativeModulePath + '/' + envFileName;
     environmentPath = envModulePath;
   }
 
@@ -105,7 +106,12 @@ const getEnvPath = (request: ICompileRequest): string => {
     environmentPath = compilerConfig.environmentPath;
   }
 
+  environmentPath = escapeRegExp(environmentPath);
   return environmentPath;
+}
+
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
 export const compile = (request: ICompileRequest): ICompilerResponse => {
