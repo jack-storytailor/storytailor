@@ -1179,14 +1179,14 @@ exports.compileImportStatement = (node, state) => {
     state = exports.writeJsToken(state, ` = `);
     // write require('
     // state = writeJsToken(state, `require('${ast.path}')`);
-    state = exports.writeJsToken(state, `require('`);
+    state = exports.writeJsToken(state, `require(`);
     // write import path
     let pathResult = exports.compileAstNode(ast.path, state, false);
     if (pathResult) {
         state = pathResult.state;
     }
     // write )
-    state = exports.writeJsToken(state, `')`);
+    state = exports.writeJsToken(state, `)`);
     return {
         state,
         result: ast
