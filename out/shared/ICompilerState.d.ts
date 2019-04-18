@@ -8,7 +8,6 @@ export interface ICompilerState {
     sourceFileNames?: string[];
     relativeFileNames?: string[];
     javascriptFileNames?: string[];
-    typescriptFileNames?: string[];
     diagnostics: IDiagnostic[];
     sortedDiagnostics: IHash<IDiagnostic[]>;
     status: CompileStatus;

@@ -13,19 +13,8 @@ const IParsingError_1 = require("../shared/IParsingError");
 exports.compile = (request) => {
     let state = undefined;
     try {
-        // create compiler state
-        // state = addErrorAndLog(
-        //   state,
-        //   ParsingErrorType.Error,
-        //   `storytailor compilation started with request (config: ${request.configPath})`,
-        //   undefined,
-        //   undefined,
-        //   1,
-        //   errorFilePath
-        // );
         console.log(`storytailor compilation started`, request);
         state = exports.createCompilerState(request);
-        // console.log('compiler state is ', state);
         // compile storytailor
         state = exports.compileProject(state);
         console.log('storytailor compilation finished with status ', state.status);
@@ -71,7 +60,6 @@ exports.compileProject = (state) => {
     }
     let sourceFileNames = state.sourceFileNames;
     let jsFileNames = state.javascriptFileNames;
-    let tsFileNames = state.typescriptFileNames;
     let config = state.config;
     let sourceFileName = undefined;
     // for each file read file content, tokenize, parse and save as js/ts
@@ -121,27 +109,6 @@ exports.compileProject = (state) => {
                     outputFileContent = compileResult.javascript;
                 }
             }
-            // save typescript file if needed
-            if (config.isEmitTypescript) {
-                let outputFileName = tsFileNames && tsFileNames.length > i ? tsFileNames[i] : undefined;
-                if (config.typescriptExtension) {
-                    let newFileName = path.basename(outputFileName, path.extname(outputFileName)) + config.typescriptExtension;
-                    let newDirName = path.dirname(outputFileName);
-                    outputFileName = path.resolve(newDirName, newFileName);
-                }
-                if (!outputFileName) {
-                    state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Error, `can't create corresponding typescript file name for the file ${sourceFileName}`, undefined, undefined, 1, sourceFileName);
-                    continue;
-                }
-                try {
-                    const outputDir = path.dirname(outputFileName);
-                    fsUtils.mkDirByPathSync(outputDir);
-                    fs.writeFileSync(outputFileName, outputFileContent);
-                }
-                catch (error) {
-                    state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Error, `can't save file ${outputFileName}. error: ${error.message}; ${error}`, undefined, undefined, 1, sourceFileName);
-                }
-            }
             // save javascript file if needed
             if (config.isEmitJavascript) {
                 const outputFileName = jsFileNames && jsFileNames.length > i ? jsFileNames[i] : undefined;
@@ -185,12 +152,14 @@ exports.createCompilerState = (request) => {
     state = Object.assign({}, state, { config: config });
     let sourceFileNames;
     let relativeFileNames;
+    // if filePath is specified in a request, compilation will affect only this certain file
     if (request.filePath) {
         let fullPath = path.resolve(config.sourceRoot, request.filePath);
         sourceFileNames = [fullPath];
         relativeFileNames = [request.filePath];
     }
     else {
+        // if filePath is not specified in a request, compile files that will be found in a folders from a config
         sourceFileNames = fsUtils.getFileNamesAndFilter(config.sourceRoot, true, config.includeParsed, config.excludeParsed);
         relativeFileNames = sourceFileNames ? sourceFileNames.map((fileName) => fsUtils.getRelativeFileName(fileName, config.sourceRoot)) : undefined;
     }
@@ -199,15 +168,9 @@ exports.createCompilerState = (request) => {
         result = path.resolve(path.dirname(result), path.basename(result, path.extname(result)) + '.js');
         return result;
     }) : undefined;
-    let typescriptFileNames = relativeFileNames ? relativeFileNames.map((fileName) => {
-        let result = path.resolve(config.typescriptOutputRoot, fileName);
-        result = path.resolve(path.dirname(result), path.basename(result, path.extname(result)) + '.ts');
-        return result;
-    }) : undefined;
     state = Object.assign({}, state, { sourceFileNames,
         relativeFileNames,
-        javascriptFileNames,
-        typescriptFileNames });
+        javascriptFileNames });
     return state;
 };
 /**

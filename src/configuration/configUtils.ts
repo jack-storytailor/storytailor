@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import { IStsConfig } from '../shared/IStsConfig';
 import * as path from 'path';
-import * as fsUtils from '../fileSystem/fsUtils';
 
 export const loadConfig = (configPath: string): IStsConfig => {
   if (!fs.existsSync(configPath)) {
@@ -16,7 +15,6 @@ export const loadConfig = (configPath: string): IStsConfig => {
     let configDir = path.dirname(configPath);
     config.sourceRoot = path.resolve(configDir, config.sourceRoot);
     config.javascriptOutputRoot = path.resolve(configDir, config.javascriptOutputRoot);
-    config.typescriptOutputRoot = path.resolve(configDir, config.typescriptOutputRoot);
 
     // parse inclide and exclude
     let exclude = config.exclude ? config.exclude.map((strPattern: string): RegExp => {

@@ -13,7 +13,6 @@ exports.loadConfig = (configPath) => {
         let configDir = path.dirname(configPath);
         config.sourceRoot = path.resolve(configDir, config.sourceRoot);
         config.javascriptOutputRoot = path.resolve(configDir, config.javascriptOutputRoot);
-        config.typescriptOutputRoot = path.resolve(configDir, config.typescriptOutputRoot);
         // parse inclide and exclude
         let exclude = config.exclude ? config.exclude.map((strPattern) => {
             try {

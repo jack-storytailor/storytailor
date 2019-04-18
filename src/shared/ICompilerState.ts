@@ -11,7 +11,6 @@ export interface ICompilerState {
   relativeFileNames?: string[];
 
   javascriptFileNames?: string[];
-  typescriptFileNames?: string[];
 
   diagnostics: IDiagnostic[];
   sortedDiagnostics: IHash<IDiagnostic[]>;

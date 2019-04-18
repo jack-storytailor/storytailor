@@ -93,9 +93,7 @@ exports.compile = (request) => {
     state = exports.writeEndline(state);
     state = exports.writeJsToken(state, `// INFO: this trick is for making this file node module`);
     state = exports.writeEndline(state);
-    state = exports.writeJsToken(state, `export default ${exports.compilerConfig.contextVarName}`);
-    state = exports.writeEndline(state);
-    state = exports.writeJsToken(state, `module.exports = {...${exports.compilerConfig.contextVarName}}`);
+    state = exports.writeJsToken(state, `module.exports = ${exports.compilerConfig.contextVarName};`);
     state = exports.writeEndline(state);
     // prepare source maps
     let sourceMapTokens = state.targetState.sourceMaps;
