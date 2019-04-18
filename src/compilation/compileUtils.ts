@@ -284,12 +284,14 @@ export const createCompilerState = (request: ICompileRequest): ICompilerState =>
   let sourceFileNames: string[];
   let relativeFileNames: string[];
   
+  // if filePath is specified in a request, compilation will affect only this certain file
   if (request.filePath) {
     let fullPath = path.resolve(config.sourceRoot, request.filePath);
     sourceFileNames = [fullPath];
     relativeFileNames = [request.filePath];
   }
   else {
+    // if filePath is not specified in a request, compile files that will be found in a folders from a config
     sourceFileNames = fsUtils.getFileNamesAndFilter(config.sourceRoot, true, config.includeParsed, config.excludeParsed);
     relativeFileNames = sourceFileNames ? sourceFileNames.map((fileName: string) => fsUtils.getRelativeFileName(fileName, config.sourceRoot)) : undefined;
   }
