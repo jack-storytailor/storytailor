@@ -65,8 +65,6 @@ var AstNodeType;
     AstNodeType["StringIncludeStatement"] = "StringIncludeStatement";
     AstNodeType["PrototypeExpression"] = "PrototypeExpression";
     AstNodeType["DeleteLineExpression"] = "DeleteLineExpression";
-    AstNodeType["ImportPathStatement"] = "ImportPathStatement";
-    AstNodeType["ImportPathItem"] = "ImportPathItem";
     AstNodeType["Scope"] = "Scope";
     AstNodeType["Tag"] = "Tag";
 })(AstNodeType = exports.AstNodeType || (exports.AstNodeType = {}));

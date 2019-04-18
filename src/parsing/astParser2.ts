@@ -1,4 +1,3 @@
-import * as path from 'path';
 import { ICodeToken } from "../shared/ICodeToken";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { IHash } from "../shared/IHash";
@@ -7,11 +6,9 @@ import { ParsingErrorType, IDiagnostic } from "../shared/IParsingError";
 import { KeywordType } from "../ast/KeywordType";
 import { VariableDeclarationKind } from "../ast/VariableDeclarationKind";
 import { OperatorType } from "../ast/OperatorType";
-import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumberLiteral, IAstStringLiteral, IAstStringIncludeStatement, IAstBooleanLiteral, IAstArrayLiteral, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionDeclaration, IAstProgram, IAstVariableDeclaration, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstImportPathStatement, IAstImportPathItem, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression } from "../ast/IAstNode";
+import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumberLiteral, IAstStringLiteral, IAstStringIncludeStatement, IAstBooleanLiteral, IAstArrayLiteral, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionDeclaration, IAstProgram, IAstVariableDeclaration, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression } from "../ast/IAstNode";
 import { astFactory } from "../ast/astFactory";
-import { IStsConfig } from "../shared/IStsConfig";
 import { AstNodeType } from '../ast/AstNodeType';
-import { objectToString } from '../environment';
 
 let keywords = [];
 for (const key in KeywordType) {
@@ -134,6 +131,7 @@ export interface IParserState2 {
   scope: string[];
   errors: IDiagnostic[];
   indent: number;
+  imports: IAstImportStatement[];
 }
 
 export interface IParseResult<TResult = any> {
@@ -157,7 +155,8 @@ export const parseModule = (tokens: ICodeToken[], modulePath: string): IParseRes
     errors: [],
     indent: 0,
     scope: [],
-    tokens: tokens
+    tokens: tokens,
+    imports: []
   };
 
   var programContent: IAstNode[] = [];
@@ -192,8 +191,8 @@ export const parseModule = (tokens: ICodeToken[], modulePath: string): IParseRes
   if (programContent.length > 0) {
     moduleEnd = {...programContent[programContent.length - 1].end}
   }
-  var astProgram = astFactory.program(programContent, moduleStart, moduleEnd);
-  var astModule = astFactory.module(tokens, astProgram, modulePath);
+  let astProgram = astFactory.program(programContent, moduleStart, moduleEnd);
+  let astModule = astFactory.module(tokens, astProgram, state.imports, modulePath);
   
   var result: IParseResult<IAstModule> = {
     result: astModule,
@@ -3162,79 +3161,49 @@ export const parseImportStatement = (state: IParserState2): IParseResult<IAstImp
     start,
     getCursorPosition(state)
   );
+  
+  // add import statement to the imports registry
+  state = {
+    ...state,
+    imports: [...state.imports, result]
+  };
 
   return {
     result,
     state
   }
 }
-export const parseImportPath = (state: IParserState2): IParseResult<IAstImportPathStatement> => {
+export const parseImportPath = (state: IParserState2): IParseResult<IAstStringLiteral> => {
   if (isEndOfFile(state)) {
     return undefined;
   }
 
-  // parse open token
-  if (!getTokenOfType(state, [CodeTokenType.Prime])) {
-    return undefined;
+  let stringResult = parseStringLiteral(state);
+  if (stringResult)
+  {
+    return stringResult;
   }
-  let start = getCursorPosition(state);
-  state = skipTokens(state, 1);
 
-  // parse import path items separated by '/'
-  let pathItems: IAstNode[] = [];
-  do {
-    // check end token
-    if (isEndOfFile(state) || getTokenOfType(state, [CodeTokenType.Prime])) {
-      break;
-    }
-    
-    // parse import item
-    let pathItemResult = parseImportPathItem(state);
-    if (pathItemResult) {
-      pathItems = [
-        ...pathItems,
-        pathItemResult.result
-      ];
-      state = pathItemResult.state;
-      continue;
-    }
-
-    // skip other token
-    state = skipTokens(state, 1);
-  } while (true);
-
-  // skip end token
-  if (getTokenOfType(state, [CodeTokenType.Prime])) {
-    state = skipTokens(state, 1);
+  let scopeResult = parseScope(
+    state,
+    (state) => parseTokenSequence(state, [CodeTokenType.Prime]),
+    (state) => parseStringLiteralItem(state),
+    (state) => parseTokenSequence(state, [CodeTokenType.Prime]),
+  );
+  if (!scopeResult) {
+    return undefined;
   }
 
   // prepare result
-  let end = getCursorPosition(state);
-  let result = astFactory.importPathStatement(pathItems, start, end);
+  state = scopeResult.state;
+  let pathContent = scopeResult.result.content;
+  let start = scopeResult.result.start;
+  let end = scopeResult.result.end;
+  let result = astFactory.stringLiteral(pathContent, start, end);
 
   return {
-    state,
-    result
-  }
-}
-export const parseImportPathItem = (state: IParserState2): IParseResult<IAstImportPathItem> => {
-  if (isEndOfFile(state)) {
-    return undefined;
-  }
-
-  let stringResult = readString(state, [CodeTokenType.Endline, CodeTokenType.Prime, CodeTokenType.Slash]);
-  if (!stringResult) {
-    return undefined;
-  }
-  let pathItemValue = stringResult.result;
-  let start = getCursorPosition(state);
-  state = stringResult.state;
-  let end = getCursorPosition(state);
-  let result = astFactory.importPathItem(pathItemValue, start, end);
-
-  return {
-    state,
-    result
+    result,
+    state
   }
 }
 export const parseTryStatement = (state: IParserState2, isMultiline: boolean): IParseResult<IAstTryStatement> => {

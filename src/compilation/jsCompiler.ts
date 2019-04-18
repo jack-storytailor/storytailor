@@ -1,10 +1,9 @@
-import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumberLiteral, IAstBooleanLiteral, IAstIdentifier, IAstStringLiteral, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstImportPathStatement, IAstImportPathItem, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArrayLiteral, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression } from "../ast/IAstNode";
+import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumberLiteral, IAstBooleanLiteral, IAstIdentifier, IAstStringLiteral, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArrayLiteral, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression } from "../ast/IAstNode";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { SourceMapGenerator } from 'source-map';
 import { AstNodeType } from "../ast/AstNodeType";
 import { astFactory } from "../ast/astFactory";
 import { VariableDeclarationKind } from "../ast/VariableDeclarationKind";
-import { OperatorType } from "../ast/OperatorType";
 import { ICodeToken } from "../shared/ICodeToken";
 import * as path from 'path';
 
@@ -46,7 +45,7 @@ export interface ICompilerState {
   targetState: ITargetState;
 }
 
-export interface ICompileRequest {
+export interface ICompileFileRequest {
   sourceFileName: string;
   targetFileName: string;
   sourceRoot: string;
@@ -55,8 +54,8 @@ export interface ICompileRequest {
   ast: IAstNode[];
 }
 
-export interface ICompilerResponse {
-  request: ICompileRequest;
+export interface ICompileFileResult {
+  request: ICompileFileRequest;
   state: ICompilerState;
   javascript: string;
   javascriptLines: string[];
@@ -82,7 +81,7 @@ export const compilerConfig = {
   defaultObject: `{ ${textFieldName}: [] }`,
 }
 
-const getEnvPath = (request: ICompileRequest): string => {
+const getEnvPath = (request: ICompileFileRequest): string => {
   let environmentPath = request.environmentPath || compilerConfig.environmentPath;
 
   // prepare environment path
@@ -114,7 +113,7 @@ function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
-export const compile = (request: ICompileRequest): ICompilerResponse => {
+export const compile = (request: ICompileFileRequest): ICompileFileResult => {
   if (!request || !request.ast || request.ast.length === 0) {
     return undefined;
   }
@@ -415,18 +414,6 @@ export const compileAstNode = (ast: IAstNode, state: ICompilerState, isRaw: bool
     return importResult;
   }
 
-  // import path
-  let importPathResult = compileImportPathStatement(ast, state);
-  if (importPathResult) {
-    return importPathResult;
-  }
-
-  // import path item
-  let importPathItemResult = compileImportPathItem(ast, state);
-  if (importPathItemResult) {
-    return importPathItemResult;
-  }
-
   // for statement
   let forResult = compileForStatement(ast, state);
   if (forResult) {
@@ -666,10 +653,6 @@ export const compileObjectLine = (node: IAstNode, state: ICompilerState): ICompi
     // || {}
     state = writeJsToken(state, ` || ${compilerConfig.defaultObject}`);
   }
-
-  // prepare result
-  // state = writeJsToken(state, ';');
-  // state = writeEndline(state);
 
   return {
     state,
@@ -1464,7 +1447,8 @@ export const compileImportStatement = (node: IAstNode, state: ICompilerState): I
   state = writeJsToken(state, ` = `);
 
   // write require('
-  state = writeJsToken(state, `require('`);
+  // state = writeJsToken(state, `require('${ast.path}')`);
+  state = writeJsToken(state, `require(`);
 
   // write import path
   let pathResult = compileAstNode(ast.path, state, false);
@@ -1473,46 +1457,7 @@ export const compileImportStatement = (node: IAstNode, state: ICompilerState): I
   }
 
   // write )
-  state = writeJsToken(state, `')`);
-
-
-  return {
-    state,
-    result: ast
-  }  
-}
-export const compileImportPathStatement = (node: IAstNode, state: ICompilerState): ICompileResult<IAstImportPathStatement> => {
-  let ast = astFactory.asNode<IAstImportPathStatement>(node, AstNodeType.ImportPathStatement);
-  if (!ast || !state) {
-    return undefined;
-  }
-
-  // write path items
-  let pathItems = ast.pathItems;
-  for (let i = 0; i < pathItems.length; i++) {
-    if (i > 0) {
-      state = writeJsToken(state, `/`);
-    }
-    
-    const pathItem = pathItems[i];
-    let pathItemResult = compileAstNode(pathItem, state, false);
-    if (pathItemResult) {
-      state = pathItemResult.state;
-    }
-  }
-
-  return {
-    state,
-    result: ast
-  }  
-}
-export const compileImportPathItem = (node: IAstNode, state: ICompilerState): ICompileResult<IAstImportPathItem> => {
-  let ast = astFactory.asNode<IAstImportPathItem>(node, AstNodeType.ImportPathItem);
-  if (!ast || !state) {
-    return undefined;
-  }
-
-  state = writeJsToken(state, ast.value);
+  state = writeJsToken(state, `)`);
 
   return {
     state,

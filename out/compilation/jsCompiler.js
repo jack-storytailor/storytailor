@@ -297,16 +297,6 @@ exports.compileAstNode = (ast, state, isRaw = false) => {
     if (importResult) {
         return importResult;
     }
-    // import path
-    let importPathResult = exports.compileImportPathStatement(ast, state);
-    if (importPathResult) {
-        return importPathResult;
-    }
-    // import path item
-    let importPathItemResult = exports.compileImportPathItem(ast, state);
-    if (importPathItemResult) {
-        return importPathItemResult;
-    }
     // for statement
     let forResult = exports.compileForStatement(ast, state);
     if (forResult) {
@@ -509,9 +499,6 @@ exports.compileObjectLine = (node, state) => {
         // || {}
         state = exports.writeJsToken(state, ` || ${exports.compilerConfig.defaultObject}`);
     }
-    // prepare result
-    // state = writeJsToken(state, ';');
-    // state = writeEndline(state);
     return {
         state,
         result: ast
@@ -1191,6 +1178,7 @@ exports.compileImportStatement = (node, state) => {
     // write = 
     state = exports.writeJsToken(state, ` = `);
     // write require('
+    // state = writeJsToken(state, `require('${ast.path}')`);
     state = exports.writeJsToken(state, `require('`);
     // write import path
     let pathResult = exports.compileAstNode(ast.path, state, false);
@@ -1199,39 +1187,6 @@ exports.compileImportStatement = (node, state) => {
     }
     // write )
     state = exports.writeJsToken(state, `')`);
-    return {
-        state,
-        result: ast
-    };
-};
-exports.compileImportPathStatement = (node, state) => {
-    let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.ImportPathStatement);
-    if (!ast || !state) {
-        return undefined;
-    }
-    // write path items
-    let pathItems = ast.pathItems;
-    for (let i = 0; i < pathItems.length; i++) {
-        if (i > 0) {
-            state = exports.writeJsToken(state, `/`);
-        }
-        const pathItem = pathItems[i];
-        let pathItemResult = exports.compileAstNode(pathItem, state, false);
-        if (pathItemResult) {
-            state = pathItemResult.state;
-        }
-    }
-    return {
-        state,
-        result: ast
-    };
-};
-exports.compileImportPathItem = (node, state) => {
-    let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.ImportPathItem);
-    if (!ast || !state) {
-        return undefined;
-    }
-    state = exports.writeJsToken(state, ast.value);
     return {
         state,
         result: ast

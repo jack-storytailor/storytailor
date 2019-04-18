@@ -55,8 +55,6 @@ export declare enum AstNodeType {
     StringIncludeStatement = "StringIncludeStatement",
     PrototypeExpression = "PrototypeExpression",
     DeleteLineExpression = "DeleteLineExpression",
-    ImportPathStatement = "ImportPathStatement",
-    ImportPathItem = "ImportPathItem",
     Scope = "Scope",
     Tag = "Tag"
 }

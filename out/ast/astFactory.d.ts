@@ -1,7 +1,7 @@
 import { AstNodeType } from "./AstNodeType";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { ICodeToken } from "../shared/ICodeToken";
-import { IAstToken, IAstKeyword, IAstText, IAstOperator, IAstProgram, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumberLiteral, IAstStringLiteral, IAstBooleanLiteral, IAstArrayLiteral, IAstIdentifier, IAstRawIdentifier, IAstIdentifierScope, IAstFunctionDeclaration, IAstVariableDeclaration, IAstPropertyDeclaration, IAstStatement, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstWhileStatement, IAstDoWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstExpressionStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstOperationExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstIndexerExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstStringIncludeStatement, IAstPrototypeExpression, IAstImportPathStatement, IAstImportPathItem, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstFinallyStatement, IAstCatchStatement, IAstTryStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression } from "./IAstNode";
+import { IAstToken, IAstKeyword, IAstText, IAstOperator, IAstProgram, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumberLiteral, IAstStringLiteral, IAstBooleanLiteral, IAstArrayLiteral, IAstIdentifier, IAstRawIdentifier, IAstIdentifierScope, IAstFunctionDeclaration, IAstVariableDeclaration, IAstPropertyDeclaration, IAstStatement, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstWhileStatement, IAstDoWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstExpressionStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstOperationExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstIndexerExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstStringIncludeStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstFinallyStatement, IAstCatchStatement, IAstTryStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression } from "./IAstNode";
 import { KeywordType } from "./KeywordType";
 import { OperatorType } from "./OperatorType";
 import { VariableDeclarationKind } from "./VariableDeclarationKind";
@@ -12,7 +12,7 @@ export declare const astFactory: {
     debuggerKeyword: (keywordType: KeywordType, start: ISymbolPosition, end: ISymbolPosition) => IAstDebuggerKeyword;
     text: (text: string, start: ISymbolPosition, end: ISymbolPosition) => IAstText;
     operator: (operatorType: OperatorType, value: string, start: ISymbolPosition, end: ISymbolPosition) => IAstOperator;
-    module: (tokens: ICodeToken[], content: IAstProgram, modulePath: string) => IAstModule;
+    module: (tokens: ICodeToken[], content: IAstProgram, imports: IAstImportStatement[], modulePath: string) => IAstModule;
     program: (content: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstProgram;
     commentLine: (text: string, start: ISymbolPosition, end: ISymbolPosition) => IAstCommentLine;
     commentBlock: (text: string, start: ISymbolPosition, end: ISymbolPosition) => IAstCommentBlock;
@@ -61,8 +61,6 @@ export declare const astFactory: {
     stringIncludeStatement: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstStringIncludeStatement;
     prototypeExpression: (value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstPrototypeExpression;
     deleteLineExpression: (object: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstDeleteLineExpression;
-    importPathStatement: (pathItems: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstImportPathStatement;
-    importPathItem: (value: string, start: ISymbolPosition, end: ISymbolPosition) => IAstImportPathItem;
     scope: (content: IAstNode[], open: IAstNode, close: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstScope;
     tag: (content: IAstNode[], open: IAstNode, close: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstScope;
     asNode: <TAst extends IAstNode>(ast: IAstNode, nodeType: AstNodeType) => TAst;

@@ -114,7 +114,8 @@ exports.parseModule = (tokens, modulePath) => {
         errors: [],
         indent: 0,
         scope: [],
-        tokens: tokens
+        tokens: tokens,
+        imports: []
     };
     var programContent = [];
     // parse module content
@@ -142,8 +143,8 @@ exports.parseModule = (tokens, modulePath) => {
     if (programContent.length > 0) {
         moduleEnd = Object.assign({}, programContent[programContent.length - 1].end);
     }
-    var astProgram = astFactory_1.astFactory.program(programContent, moduleStart, moduleEnd);
-    var astModule = astFactory_1.astFactory.module(tokens, astProgram, modulePath);
+    let astProgram = astFactory_1.astFactory.program(programContent, moduleStart, moduleEnd);
+    let astModule = astFactory_1.astFactory.module(tokens, astProgram, state.imports, modulePath);
     var result = {
         result: astModule,
         state: state
@@ -2506,6 +2507,8 @@ exports.parseImportStatement = (state) => {
     }
     // prepare result
     let result = astFactory_1.astFactory.importStatement(alias, aliasAst, importPathAst, start, exports.getCursorPosition(state));
+    // add import statement to the imports registry
+    state = Object.assign({}, state, { imports: [...state.imports, result] });
     return {
         result,
         state
@@ -2515,60 +2518,23 @@ exports.parseImportPath = (state) => {
     if (exports.isEndOfFile(state)) {
         return undefined;
     }
-    // parse open token
-    if (!exports.getTokenOfType(state, [CodeTokenType_1.CodeTokenType.Prime])) {
-        return undefined;
+    let stringResult = exports.parseStringLiteral(state);
+    if (stringResult) {
+        return stringResult;
     }
-    let start = exports.getCursorPosition(state);
-    state = exports.skipTokens(state, 1);
-    // parse import path items separated by '/'
-    let pathItems = [];
-    do {
-        // check end token
-        if (exports.isEndOfFile(state) || exports.getTokenOfType(state, [CodeTokenType_1.CodeTokenType.Prime])) {
-            break;
-        }
-        // parse import item
-        let pathItemResult = exports.parseImportPathItem(state);
-        if (pathItemResult) {
-            pathItems = [
-                ...pathItems,
-                pathItemResult.result
-            ];
-            state = pathItemResult.state;
-            continue;
-        }
-        // skip other token
-        state = exports.skipTokens(state, 1);
-    } while (true);
-    // skip end token
-    if (exports.getTokenOfType(state, [CodeTokenType_1.CodeTokenType.Prime])) {
-        state = exports.skipTokens(state, 1);
+    let scopeResult = exports.parseScope(state, (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.Prime]), (state) => exports.parseStringLiteralItem(state), (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.Prime]));
+    if (!scopeResult) {
+        return undefined;
     }
     // prepare result
-    let end = exports.getCursorPosition(state);
-    let result = astFactory_1.astFactory.importPathStatement(pathItems, start, end);
+    state = scopeResult.state;
+    let pathContent = scopeResult.result.content;
+    let start = scopeResult.result.start;
+    let end = scopeResult.result.end;
+    let result = astFactory_1.astFactory.stringLiteral(pathContent, start, end);
     return {
-        state,
-        result
-    };
-};
-exports.parseImportPathItem = (state) => {
-    if (exports.isEndOfFile(state)) {
-        return undefined;
-    }
-    let stringResult = exports.readString(state, [CodeTokenType_1.CodeTokenType.Endline, CodeTokenType_1.CodeTokenType.Prime, CodeTokenType_1.CodeTokenType.Slash]);
-    if (!stringResult) {
-        return undefined;
-    }
-    let pathItemValue = stringResult.result;
-    let start = exports.getCursorPosition(state);
-    state = stringResult.state;
-    let end = exports.getCursorPosition(state);
-    let result = astFactory_1.astFactory.importPathItem(pathItemValue, start, end);
-    return {
-        state,
-        result
+        result,
+        state
     };
 };
 exports.parseTryStatement = (state, isMultiline) => {

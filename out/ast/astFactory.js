@@ -52,7 +52,7 @@ exports.astFactory = {
             value
         };
     },
-    module: (tokens, content, modulePath) => {
+    module: (tokens, content, imports, modulePath) => {
         let start = {
             symbol: 0,
             line: 0,
@@ -69,6 +69,7 @@ exports.astFactory = {
             nodeType: AstNodeType_1.AstNodeType.AstModule,
             tokens,
             content,
+            imports,
             modulePath,
             start,
             end
@@ -497,22 +498,6 @@ exports.astFactory = {
             start,
             end,
             object
-        };
-    },
-    importPathStatement: (pathItems, start, end) => {
-        return {
-            nodeType: AstNodeType_1.AstNodeType.ImportPathStatement,
-            start,
-            end,
-            pathItems
-        };
-    },
-    importPathItem: (value, start, end) => {
-        return {
-            nodeType: AstNodeType_1.AstNodeType.ImportPathItem,
-            start,
-            end,
-            value
         };
     },
     scope: (content, open, close, start, end) => {

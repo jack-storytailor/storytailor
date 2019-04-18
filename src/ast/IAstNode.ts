@@ -33,6 +33,7 @@ export interface IAstModule extends IAstNode {
   tokens: ICodeToken[];
   modulePath: string;
   content: IAstProgram;
+  imports: IAstImportStatement[];
 }
 export interface IAstProgram extends IAstNode {
   content: IAstNode[];
@@ -224,14 +225,8 @@ export interface IAstStringIncludeStatement extends IAstNode {
 export interface IAstPrototypeExpression extends IAstNode {
   value: IAstNode;
 }
-export interface IAstImportPathStatement extends IAstNode {
-  pathItems: IAstNode[];
-}
 export interface IAstDeleteLineExpression extends IAstNode {
   object: IAstNode;
-}
-export interface IAstImportPathItem extends IAstNode {
-  value: string;
 }
 export interface IAstScope extends IAstNode {
   content: IAstNode[];

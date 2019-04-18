@@ -21,17 +21,6 @@ export const compile = (request: ICompileRequest): ICompilerState => {
     state = compileProject(state);
     console.log('storytailor compilation finished with status ', state.status);
     
-    // compile typescript if needed
-    if (request.tsConfigPath) {
-      // TODO: REFACTOR THIS TO GET POSSIBILITY OF COLLECTING ALL THE DIAGNOSTICS DATA OF TYPESCRIPT COMPILATION
-
-      let commandText = "tsc -p " + request.tsConfigPath;
-      console.log('typescript compilation started. executing ', commandText);
-      let execResult = child_process.execSync(commandText);
-      let execOutput = (execResult || "No Execution Result!").toString();
-      console.log('typescript compilation done with output ', execOutput);
-    }
-
     // execute compiled program to serialize requested module
     if (request.output) {
       let printerPath = require.resolve('../printer');
@@ -157,7 +146,7 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
       }
 
       // save javascript file if needed
-      if (config.isEmitJavascript) {
+      if (config.isEmitJavascript === true) {
         const outputFileName = jsFileNames && jsFileNames.length > i ? jsFileNames[i] : undefined;
         if (!outputFileName) {
           state = addErrorAndLog(
@@ -212,16 +201,28 @@ export const createCompilerState = (request: ICompileRequest): ICompilerState =>
     return undefined;
   }
 
-  let configPath = request.configPath;
+  // by default use config specified by request
+  let config = request.config;
   let state: ICompilerState = {
-    config: undefined,
+    config,
     diagnostics: [],
     request: request,
     status: CompileStatus.Failed,
     sortedDiagnostics: {}
   };
 
-  let config = configUtils.loadConfig(configPath);
+  // if there no config, specified by user, try to load 
+  // config by configPath specified in a request
+  let configPath = request.configPath;
+  if (configPath && !config) {
+    config = configUtils.loadConfig(configPath);
+  }
+  state = {
+    ...state,
+    config
+  };
+
+  // if we still don't have a config, report error
   if (!config) {
     state = addErrorAndLog(
       state,
@@ -235,11 +236,8 @@ export const createCompilerState = (request: ICompileRequest): ICompilerState =>
 
     return state;
   }
-  state = {
-    ...state,
-    config: config
-  };
 
+  // Now it's time to prepare files that will be compiled
   let sourceFileNames: string[];
   let relativeFileNames: string[];
   
@@ -249,8 +247,8 @@ export const createCompilerState = (request: ICompileRequest): ICompilerState =>
     sourceFileNames = [fullPath];
     relativeFileNames = [request.filePath];
   }
+  // if filePath is not specified in a request, compile files that will be found in a folders from a config
   else {
-    // if filePath is not specified in a request, compile files that will be found in a folders from a config
     sourceFileNames = fsUtils.getFileNamesAndFilter(config.sourceRoot, true, config.includeParsed, config.excludeParsed);
     relativeFileNames = sourceFileNames ? sourceFileNames.map((fileName: string) => fsUtils.getRelativeFileName(fileName, config.sourceRoot)) : undefined;
   }
@@ -297,7 +295,6 @@ export const parseCompileRequest = (args: string[]): ICompileRequest => {
     configPath,
     output: undefined,
     filePath: undefined,
-    tsConfigPath: undefined
   }
 
   // read until params are expected
@@ -313,21 +310,6 @@ export const parseCompileRequest = (args: string[]): ICompileRequest => {
         request = {
           ...request,
           filePath: filePath
-        };
-      }
-
-      continue;
-    }
-
-    // -ts tsconfigPath
-    if (arg === '-ts') {
-      if (args.length > i + 1) {
-        let tsConfigPath = args[i + 1];
-        i++;
-
-        request = {
-          ...request,
-          tsConfigPath: tsConfigPath
         };
       }
 
@@ -350,11 +332,6 @@ export const parseCompileRequest = (args: string[]): ICompileRequest => {
             }
           }
         }
-
-        request = {
-          ...request,
-          tsConfigPath: sourceFile
-        };
       }
 
       continue;
