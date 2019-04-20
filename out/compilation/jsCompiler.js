@@ -44,6 +44,38 @@ const getEnvPath = (request) => {
 function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
+exports.compileSingleNode = (ast) => {
+    let cursor = Object.assign({}, ast[0].start);
+    // prepare compile state
+    let sourceState = {
+        ast: [ast],
+        astIndex: 0,
+        cursor,
+        fileName: 'nofile',
+        indent: 0,
+        indentScope: [],
+    };
+    let targetState = {
+        cursor,
+        javascript: [],
+        sourceMaps: [],
+        fileName: 'nofile'
+    };
+    let state = {
+        sourceState,
+        targetState
+    };
+    // compile node
+    let compileResult = exports.compileAstNode(ast, state);
+    if (!compileResult) {
+        return undefined;
+    }
+    state = compileResult.state;
+    // prepare result
+    let javascriptLines = state.targetState.javascript;
+    let javascript = javascriptLines.join("\r\n");
+    return javascript;
+};
 exports.compile = (request) => {
     if (!request || !request.ast || request.ast.length === 0) {
         return undefined;

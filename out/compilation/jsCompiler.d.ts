@@ -65,6 +65,7 @@ export declare const compilerConfig: {
     textFieldName: string;
     defaultObject: string;
 };
+export declare const compileSingleNode: (ast: IAstNode) => string;
 export declare const compile: (request: ICompileFileRequest) => ICompileFileResult;
 export declare const compileAstNode: (ast: IAstNode, state: ICompilerState, isRaw?: boolean) => ICompileResult<IAstNode>;
 export declare const compileAstModule: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstModule>;
