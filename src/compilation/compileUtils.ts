@@ -4,7 +4,7 @@ import * as configUtils from '../configuration/configUtils';
 import * as fsUtils from '../fileSystem/fsUtils';
 import * as child_process from 'child_process';
 import {stsTokenizer} from '../tokenizing/stsTokenizer';
-import * as astParser2 from '../parsing/astParser2';
+import * as astParser from '../parsing/astParser';
 import * as jsCompiler from '../compilation/jsCompiler';
 import { ICompileRequest } from '../shared/ICompileRequest';
 import { ICompilerState, CompileStatus } from '../shared/ICompilerState';
@@ -115,7 +115,7 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
       let outputFileContent: string = '';
       
       // parse sts2
-      let parseResult2 = astParser2.parseModule(tokens, sourceFileName);
+      let parseResult2 = astParser.parseModule(tokens, sourceFileName);
       const targetFileName = jsFileNames && jsFileNames.length > i ? jsFileNames[i] : undefined;
       if (parseResult2) {
         let astModule = parseResult2.result;

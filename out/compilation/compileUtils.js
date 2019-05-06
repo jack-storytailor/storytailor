@@ -6,7 +6,7 @@ const configUtils = require("../configuration/configUtils");
 const fsUtils = require("../fileSystem/fsUtils");
 const child_process = require("child_process");
 const stsTokenizer_1 = require("../tokenizing/stsTokenizer");
-const astParser2 = require("../parsing/astParser2");
+const astParser = require("../parsing/astParser");
 const jsCompiler = require("../compilation/jsCompiler");
 const ICompilerState_1 = require("../shared/ICompilerState");
 const IParsingError_1 = require("../shared/IParsingError");
@@ -73,7 +73,7 @@ exports.compileProject = (state) => {
             // print compiled
             let outputFileContent = '';
             // parse sts2
-            let parseResult2 = astParser2.parseModule(tokens, sourceFileName);
+            let parseResult2 = astParser.parseModule(tokens, sourceFileName);
             const targetFileName = jsFileNames && jsFileNames.length > i ? jsFileNames[i] : undefined;
             if (parseResult2) {
                 let astModule = parseResult2.result;
