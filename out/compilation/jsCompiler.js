@@ -116,7 +116,8 @@ exports.compile = (request) => {
     // compile ast
     while (!exports.isEndOfFile(state)) {
         // compile ast node
-        let compileAstResult = exports.compileAstNode(exports.getAst(state), state);
+        let nextAst = exports.getAst(state);
+        let compileAstResult = exports.compileAstNode(nextAst, state);
         if (compileAstResult) {
             state = compileAstResult.state;
             state = exports.skipAst(state);

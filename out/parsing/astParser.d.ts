@@ -100,7 +100,7 @@ export declare const parseObjectLine: (state: IParserState) => IParseResult<IAst
 export declare const parseDeleteLineExpression: (state: IParserState) => IParseResult<IAstDeleteLineExpression>;
 export declare const parsePrototypeExpression: (state: IParserState) => IParseResult<IAstPrototypeExpression>;
 export declare const parseTag: (state: IParserState) => IParseResult<IAstTag>;
-export declare const parseScope: (state: IParserState, openFilter: (stat: IParserState) => IParseResult<IAstNode>, itemFilter: (stat: IParserState) => IParseResult<IAstNode>, closeFilter: (stat: IParserState) => IParseResult<IAstNode>, skipOptional?: (stat: IParserState) => IParserState) => IParseResult<IAstScope>;
+export declare const parseScope: (state: IParserState, openFilter: (stat: IParserState) => IParseResult<IAstNode>, itemFilter: (stat: IParserState) => IParseResult<IAstNode>, closeFilter: (stat: IParserState) => IParseResult<IAstNode>, skipOptional?: (stat: IParserState) => IParserState, breakFilter?: (stat: IParserState) => boolean, separatorFilter?: (stat: IParserState) => IParseResult<IAstNode>) => IParseResult<IAstScope>;
 export declare const parseErrorTokens: (state: IParserState, filter: (state: IParserState) => boolean) => IParserState;
 export declare const readString: (state: IParserState, breakTokens: CodeTokenType[], trimString?: boolean) => IParseResult<string>;
 export declare const readWhitespace: (state: IParserState) => IParseResult<string>;

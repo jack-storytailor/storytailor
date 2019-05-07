@@ -74,7 +74,6 @@ export interface IAstIdentifierScope extends IAstNode {
 }
 
 // Declarations
-
 export interface IAstFunctionDeclaration extends IAstNode {
   args: IAstNode[];
   body: IAstProgram;
@@ -90,7 +89,6 @@ export interface IAstPropertyDeclaration extends IAstNode {
 }
 
 // Statements
-
 export interface IAstStatement extends IAstNode {
   statement: IAstNode;
 }
@@ -158,7 +156,6 @@ export interface IAstFinallyStatement extends IAstNode {
 }
 
 // Expressions
-
 export interface IAstParenExpression extends IAstNode {
   expression: IAstNode;
 }
@@ -208,7 +205,6 @@ export interface IAstDeleteExpression extends IAstNode {
 }
 
 // storytailor-Specific
-
 export interface IAstOuterStatement extends IAstNode {
   indent: number;
   statement: IAstNode;

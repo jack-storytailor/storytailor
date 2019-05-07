@@ -1058,44 +1058,18 @@ exports.parseFunctionDeclaration = (state, isMultiline) => {
         return undefined;
     }
     state = keywordResult.state;
-    // skip comments and whitespaces
-    state = exports.skipComments(state, true, isMultiline);
+    // // skip comments and whitespaces
+    // state = skipComments(state, true, isMultiline);
     // parse function params scope
-    // parse open paren
-    if (!exports.getTokenOfType(state, [CodeTokenType_1.CodeTokenType.ParenOpen])) {
+    let paramsScopeResult = exports.parseScope(exports.skipComments(state, true, isMultiline), (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => exports.parseAnyIdentifier(state), (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => exports.skipComments(state, true, true), undefined, (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.Comma]));
+    if (!paramsScopeResult) {
         return undefined;
     }
-    state = exports.skipTokens(state, 1);
-    // parse params
+    // extract function arguments
+    state = paramsScopeResult.state;
     let args = [];
-    do {
-        // skip comments and whitespaces
-        state = exports.skipComments(state, true, isMultiline);
-        if (exports.isEndOfFile(state) || exports.getTokenOfType(state, [CodeTokenType_1.CodeTokenType.ParenClose])) {
-            break;
-        }
-        // parse expression
-        let expressionResult = exports.parseExpression(state, isMultiline);
-        if (expressionResult) {
-            state = expressionResult.state;
-            args = [...args, expressionResult.result];
-            continue;
-        }
-        // parse separator
-        if (exports.getTokenOfType(state, [CodeTokenType_1.CodeTokenType.Comma])) {
-            state = exports.skipTokens(state, 1);
-            continue;
-        }
-        // otherwise it's invalid token
-        let nextToken = exports.getToken(state);
-        let errorStart = exports.getCursorPosition(state);
-        state = exports.skipTokens(state, 1);
-        let errorEnd = exports.getCursorPosition(state);
-        state = exports.addParsingError(state, IParsingError_1.ParsingErrorType.Error, "Invalid token '" + nextToken.value || nextToken.type + "'", errorStart, errorEnd);
-    } while (!exports.isEndOfFile(state));
-    // parse close paren
-    if (exports.getTokenOfType(state, [CodeTokenType_1.CodeTokenType.ParenClose])) {
-        state = exports.skipTokens(state, 1);
+    if (paramsScopeResult.result) {
+        args = paramsScopeResult.result.content || [];
     }
     // skip comments and whitespaces
     state = exports.skipComments(state, true, isMultiline);
@@ -3400,7 +3374,7 @@ exports.parseObjectLine = (state) => {
         break;
     }
     // parse identifier
-    let identifierResult = exports.parseOperandIdentifier(state);
+    let identifierResult = exports.parseAnyIdentifier(state);
     if (!identifierResult) {
         return undefined;
     }
@@ -3513,19 +3487,7 @@ exports.parseTag = (state) => {
         return undefined;
     }
     // parse scope from < to >
-    let scopeResult = exports.parseScope(state, (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.TupleOpen]), (state) => {
-        // check break token
-        if (exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.TupleClose])) {
-            return undefined;
-        }
-        // parse any token
-        let token = exports.parseToken(state);
-        if (token) {
-            return token;
-        }
-        // otherwise retrun undefined
-        return undefined;
-    }, (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.TupleClose]));
+    let scopeResult = exports.parseScope(state, (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.TupleOpen]), (state) => exports.parseToken(state), (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.TupleClose]), undefined, (state) => exports.checkTokenSequence(state, [CodeTokenType_1.CodeTokenType.TupleClose]));
     if (!scopeResult) {
         return undefined;
     }
@@ -3538,25 +3500,30 @@ exports.parseTag = (state) => {
     };
 };
 // SYSTEM FUNCTIONS
-exports.parseScope = (state, openFilter, itemFilter, closeFilter, skipOptional) => {
+exports.parseScope = (state, openFilter, itemFilter, closeFilter, skipOptional, breakFilter, separatorFilter) => {
     if (exports.isEndOfFile(state)) {
         return undefined;
     }
     if (!openFilter || !itemFilter || !closeFilter) {
         return undefined;
     }
+    // save start position
+    let start = exports.getCursorPosition(state);
     // parse open node
     let openResult = openFilter(state);
     if (!openResult) {
         return undefined;
     }
-    let start = exports.getCursorPosition(state);
     let open = openResult.result;
     state = openResult.state;
+    // prepare breakFilter
+    if (!breakFilter) {
+        breakFilter = () => true;
+    }
     // parse items
     let items = [];
     let finalState = state;
-    while (!exports.isEndOfFile(state) && !closeFilter(state)) {
+    while (!exports.isEndOfFile(state) && !closeFilter(state) && !breakFilter(state) && !breakFilter(state)) {
         // parse item
         let itemResult = itemFilter(state);
         if (itemResult) {
@@ -3564,8 +3531,18 @@ exports.parseScope = (state, openFilter, itemFilter, closeFilter, skipOptional) 
             state = itemResult.state;
             items = [...items, itemResult.result];
             finalState = state;
+            // skip separator
+            if (separatorFilter) {
+                let separatorResult = separatorFilter(state);
+                if (separatorResult) {
+                    state = separatorResult.state;
+                    finalState = state;
+                }
+            }
             continue;
         }
+        // if we here, that means here is not the item
+        // check if it optional symbol
         // skip optional symbols
         if (skipOptional) {
             let prevState = state;

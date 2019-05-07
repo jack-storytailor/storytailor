@@ -1305,58 +1305,26 @@ export const parseFunctionDeclaration = (state: IParserState, isMultiline: boole
   }
   state = keywordResult.state;
 
-  // skip comments and whitespaces
-  state = skipComments(state, true, isMultiline);
-
   // parse function params scope
-  // parse open paren
-  if (!getTokenOfType(state, [CodeTokenType.ParenOpen])) {
+  let paramsScopeResult = parseScope(
+    skipComments(state, true, isMultiline),
+    (state) => parseTokenSequence(state, [CodeTokenType.ParenOpen]),
+    (state) => parseAnyIdentifier(state),
+    (state) => parseTokenSequence(state, [CodeTokenType.ParenClose]),
+    (state) => skipComments(state, true, true),
+    undefined,
+    (state) => parseTokenSequence(state, [CodeTokenType.Comma])
+  );
+
+  if (!paramsScopeResult) {
     return undefined;
   }
-  state = skipTokens(state, 1);
 
-  // parse params
+  // extract function arguments
+  state = paramsScopeResult.state;
   let args: IAstNode[] = [];
-  do {
-    // skip comments and whitespaces
-    state = skipComments(state, true, isMultiline);
-
-    if (isEndOfFile(state) || getTokenOfType(state, [CodeTokenType.ParenClose])) {
-      break;
-    }
-
-    // parse expression
-    let expressionResult = parseExpression(state, isMultiline);
-    if (expressionResult) {
-      state = expressionResult.state;
-      args = [...args, expressionResult.result];
-      continue;
-    }
-
-    // parse separator
-    if (getTokenOfType(state, [CodeTokenType.Comma])) {
-      state = skipTokens(state, 1);
-      continue;
-    }
-
-    // otherwise it's invalid token
-    let nextToken = getToken(state);
-    let errorStart = getCursorPosition(state);
-    state = skipTokens(state, 1);
-    let errorEnd = getCursorPosition(state);
-    state = addParsingError(
-      state,
-      ParsingErrorType.Error,
-      "Invalid token '" + nextToken.value || nextToken.type + "'",
-      errorStart,
-      errorEnd
-    );
-
-  } while (!isEndOfFile(state));
-
-  // parse close paren
-  if (getTokenOfType(state, [CodeTokenType.ParenClose])) {
-    state = skipTokens(state, 1);
+  if (paramsScopeResult.result) {
+    args = paramsScopeResult.result.content || [];
   }
 
   // skip comments and whitespaces
@@ -4445,22 +4413,10 @@ export const parseTag = (state: IParserState): IParseResult<IAstTag> => {
   let scopeResult = parseScope(
     state,
     (state) => parseTokenSequence(state, [CodeTokenType.TupleOpen]),
-    (state) => {
-      // check break token
-      if (parseTokenSequence(state, [CodeTokenType.TupleClose])) {
-        return undefined;
-      }
-
-      // parse any token
-      let token = parseToken(state);
-      if (token) {
-        return token;
-      }
-
-      // otherwise retrun undefined
-      return undefined;
-    },
-    (state) => parseTokenSequence(state, [CodeTokenType.TupleClose])
+    (state) => parseToken(state),
+    (state) => parseTokenSequence(state, [CodeTokenType.TupleClose]),
+    undefined,
+    (state) => checkTokenSequence(state, [CodeTokenType.TupleClose])
   );
   if (!scopeResult) {
     return undefined;
@@ -4483,7 +4439,9 @@ export const parseScope = (
   openFilter: (stat: IParserState) => IParseResult<IAstNode>, 
   itemFilter: (stat: IParserState) => IParseResult<IAstNode>, 
   closeFilter: (stat: IParserState) => IParseResult<IAstNode>,
-  skipOptional?: (stat: IParserState) => IParserState
+  skipOptional?: (stat: IParserState) => IParserState,
+  breakFilter?: (stat: IParserState) => boolean,
+  separatorFilter?: (stat: IParserState) => IParseResult<IAstNode>,
 ): IParseResult<IAstScope> => {
   
   if (isEndOfFile(state)) {
@@ -4494,20 +4452,27 @@ export const parseScope = (
     return undefined;
   }
 
+  // save start position
+  let start = getCursorPosition(state);
+
   // parse open node
   let openResult = openFilter(state);
   if (!openResult) {
     return undefined;
   }
 
-  let start = getCursorPosition(state);
   let open = openResult.result;
   state = openResult.state;
+
+  // prepare breakFilter
+  if (!breakFilter) {
+    breakFilter = () => false;
+  }
 
   // parse items
   let items: IAstNode[] = [];
   let finalState = state;
-  while (!isEndOfFile(state) && !closeFilter(state)) {
+  while (!isEndOfFile(state) && !closeFilter(state) && !breakFilter(state) && !breakFilter(state)) {
     // parse item
     let itemResult = itemFilter(state);
     if (itemResult) {
@@ -4516,9 +4481,21 @@ export const parseScope = (
       items = [...items, itemResult.result];
       finalState = state;
 
+      // skip separator
+      if (separatorFilter) {
+        let separatorResult = separatorFilter(state);
+        if (separatorResult) {
+          state = separatorResult.state;
+          finalState = state;
+        }
+      }
+
       continue;
     }
 
+    // if we here, that means here is not the item
+
+    // check if it optional symbol
     // skip optional symbols
     if (skipOptional) {
       let prevState = state;
