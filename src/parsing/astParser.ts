@@ -6,7 +6,7 @@ import { ParsingErrorType, IDiagnostic } from "../shared/IParsingError";
 import { KeywordType } from "../ast/KeywordType";
 import { VariableDeclarationKind } from "../ast/VariableDeclarationKind";
 import { OperatorType } from "../ast/OperatorType";
-import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumberLiteral, IAstStringLiteral, IAstStringIncludeStatement, IAstBooleanLiteral, IAstArrayLiteral, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionDeclaration, IAstProgram, IAstVariableDeclaration, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier } from "../ast/IAstNode";
+import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstStringIncludeStatement, IAstBoolean, IAstArray, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionDeclaration, IAstProgram, IAstVariableDeclaration, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier } from "../ast/IAstNode";
 import { astFactory } from "../ast/astFactory";
 import { AstNodeType } from '../ast/AstNodeType';
 import { ISymbol } from "../ast/ISymbol";
@@ -49,12 +49,20 @@ const separators = [
   CodeTokenType.Comma
 ];
 
+export interface IParserSymbols {
+  symbols: IHash<ISymbol>;
+  currentId?: string;
+  currentName?: string;
+  currentFullName?: string[];
+}
+
 export interface IParserState {
   tokens: ICodeToken[];
   cursor: number;
   errors: IDiagnostic[];
   indent: number;
   imports: IAstImportStatement[];
+  symbols: IParserSymbols;
 }
 
 export interface IParseResult<TResult = any> {
@@ -73,15 +81,20 @@ export const parseModule = (tokens: ICodeToken[], modulePath: string): IParseRes
     return undefined;
   }
 
-  var state: IParserState = {
+  let symbols: IParserSymbols = {
+    symbols: {},
+  };
+
+  let state: IParserState = {
     cursor: 0,
     errors: [],
     indent: 0,
     tokens: tokens,
     imports: [],
+    symbols: symbols
   };
 
-  var programContent: IAstNode[] = [];
+  let programContent: IAstNode[] = [];
 
   // parse module content
   while (!isEndOfFile(state)) {
@@ -764,7 +777,7 @@ export const parseLiteral = (state: IParserState): IParseResult<IAstNode> => {
 
   return undefined;
 }
-export const parseNumberLiteral = (state: IParserState): IParseResult<IAstNumberLiteral> => {
+export const parseNumberLiteral = (state: IParserState): IParseResult<IAstNumber> => {
   if (isEndOfFile(state)) {
     return undefined;
   }
@@ -811,7 +824,7 @@ export const parseNumberLiteral = (state: IParserState): IParseResult<IAstNumber
 
   return undefined;
 }
-export const parseStringLiteral = (state: IParserState): IParseResult<IAstStringLiteral> => {
+export const parseStringLiteral = (state: IParserState): IParseResult<IAstString> => {
   if (isEndOfFile(state)) {
     return undefined;
   }
@@ -969,7 +982,7 @@ export const parseStringInclude = (state: IParserState): IParseResult<IAstString
     result
   }
 }
-export const parseBooleanLiteral = (state: IParserState): IParseResult<IAstBooleanLiteral> => {
+export const parseBooleanLiteral = (state: IParserState): IParseResult<IAstBoolean> => {
   if (isEndOfFile(state)) {
     return undefined;
   }
@@ -994,7 +1007,7 @@ export const parseBooleanLiteral = (state: IParserState): IParseResult<IAstBoole
 
   return undefined;
 }
-export const parseArrayLiteral = (state: IParserState): IParseResult<IAstArrayLiteral> => {
+export const parseArrayLiteral = (state: IParserState): IParseResult<IAstArray> => {
   if (isEndOfFile(state)) {
     return undefined;
   }
@@ -3120,7 +3133,7 @@ export const parseImportStatement = (state: IParserState): IParseResult<IAstImpo
     state
   }
 }
-export const parseImportPath = (state: IParserState): IParseResult<IAstStringLiteral> => {
+export const parseImportPath = (state: IParserState): IParseResult<IAstString> => {
   if (isEndOfFile(state)) {
     return undefined;
   }

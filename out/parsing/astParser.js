@@ -50,14 +50,18 @@ exports.parseModule = (tokens, modulePath) => {
     if (!tokens) {
         return undefined;
     }
-    var state = {
+    let symbols = {
+        symbols: {},
+    };
+    let state = {
         cursor: 0,
         errors: [],
         indent: 0,
         tokens: tokens,
         imports: [],
+        symbols: symbols
     };
-    var programContent = [];
+    let programContent = [];
     // parse module content
     while (!exports.isEndOfFile(state)) {
         var moduleContentResult = exports.parseModuleContent(state);

@@ -1,4 +1,4 @@
-import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumberLiteral, IAstBooleanLiteral, IAstIdentifier, IAstStringLiteral, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArrayLiteral, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier } from "../ast/IAstNode";
+import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier } from "../ast/IAstNode";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { SourceMapGenerator } from 'source-map';
 import { AstNodeType } from "../ast/AstNodeType";
@@ -556,7 +556,7 @@ export const compileAstNode = (ast: IAstNode, state: ICompilerState): ICompileRe
   }
 }
 export const compileAstModule = (node: IAstNode, state: ICompilerState): ICompileResult<IAstModule> => {
-  let ast = astFactory.asNode<IAstModule>(node, AstNodeType.AstModule);
+  let ast = astFactory.asNode<IAstModule>(node, AstNodeType.Module);
   if (!state || !ast) {
     return undefined;
   }
@@ -825,8 +825,8 @@ export const compileTextLine = (node: IAstNode, state: ICompilerState): ICompile
     result: ast
   }
 }
-export const compileNumber = (node: IAstNode, state: ICompilerState): ICompileResult<IAstNumberLiteral> => {
-  let ast = astFactory.asNode<IAstNumberLiteral>(node, AstNodeType.Number);
+export const compileNumber = (node: IAstNode, state: ICompilerState): ICompileResult<IAstNumber> => {
+  let ast = astFactory.asNode<IAstNumber>(node, AstNodeType.Number);
   if (!ast || !state) {
     return undefined;
   }
@@ -837,8 +837,8 @@ export const compileNumber = (node: IAstNode, state: ICompilerState): ICompileRe
     result: ast
   }  
 }
-export const compileBoolean = (node: IAstNode, state: ICompilerState): ICompileResult<IAstBooleanLiteral> => {
-  let ast = astFactory.asNode<IAstBooleanLiteral>(node, AstNodeType.Boolean);
+export const compileBoolean = (node: IAstNode, state: ICompilerState): ICompileResult<IAstBoolean> => {
+  let ast = astFactory.asNode<IAstBoolean>(node, AstNodeType.Boolean);
   if (!ast || !state) {
     return undefined;
   }
@@ -1611,8 +1611,8 @@ export const compileForInStatement = (node: IAstNode, state: ICompilerState): IC
       result: ast
     }
 }
-export const compileArrayLiteral = (node: IAstNode, state: ICompilerState): ICompileResult<IAstArrayLiteral> => {
-  let ast = astFactory.asNode<IAstArrayLiteral>(node, AstNodeType.Array);
+export const compileArrayLiteral = (node: IAstNode, state: ICompilerState): ICompileResult<IAstArray> => {
+  let ast = astFactory.asNode<IAstArray>(node, AstNodeType.Array);
   if (!ast || !state) {
     return undefined;
   }
@@ -1988,8 +1988,8 @@ export const compileOperator = (node: IAstNode, state: ICompilerState): ICompile
     result: ast
   }  
 }
-export const compileStringLiteral = (node: IAstNode, state: ICompilerState): ICompileResult<IAstStringLiteral> => {
-  let ast = astFactory.asNode<IAstStringLiteral>(node, AstNodeType.String);
+export const compileStringLiteral = (node: IAstNode, state: ICompilerState): ICompileResult<IAstString> => {
+  let ast = astFactory.asNode<IAstString>(node, AstNodeType.String);
   if (!ast || !state) {
     return undefined;
   }

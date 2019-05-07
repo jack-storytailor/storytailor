@@ -1,4 +1,4 @@
-import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumberLiteral, IAstBooleanLiteral, IAstIdentifier, IAstStringLiteral, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArrayLiteral, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier } from "../ast/IAstNode";
+import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier } from "../ast/IAstNode";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 export interface ISourceMapToken {
     generated: {
@@ -75,8 +75,8 @@ export declare const compileObjectLine: (node: IAstNode, state: ICompilerState) 
 export declare const compileDeleteLine: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstDeleteLineExpression>;
 export declare const compileStatement: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstStatement>;
 export declare const compileTextLine: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstTextLineStatement>;
-export declare const compileNumber: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstNumberLiteral>;
-export declare const compileBoolean: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstBooleanLiteral>;
+export declare const compileNumber: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstNumber>;
+export declare const compileBoolean: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstBoolean>;
 export declare const compileIdentifier: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstIdentifier>;
 export declare const compileIdentifierScope: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstIdentifierScope>;
 export declare const compileRawIdentifier: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstRawIdentifier>;
@@ -102,7 +102,7 @@ export declare const compileImportStatement: (node: IAstNode, state: ICompilerSt
 export declare const compilePropertyDeclaration: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstPropertyDeclaration>;
 export declare const compileForStatement: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstForStatement>;
 export declare const compileForInStatement: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstForInStatement>;
-export declare const compileArrayLiteral: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstArrayLiteral>;
+export declare const compileArrayLiteral: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstArray>;
 export declare const compileObjectExpression: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstObjectExpression>;
 export declare const compileUpdateExpression: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstUpdateExpression>;
 export declare const compileKeyword: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstKeyword>;
@@ -117,7 +117,7 @@ export declare const compileNewExpression: (node: IAstNode, state: ICompilerStat
 export declare const compileToken: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstToken>;
 export declare const compileTokenSequence: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstTokenSequence>;
 export declare const compileOperator: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstOperator>;
-export declare const compileStringLiteral: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstStringLiteral>;
+export declare const compileStringLiteral: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstString>;
 export declare const writeIndentScope: (indentScope: IIndentScopeItem[], state: ICompilerState) => ICompilerState;
 export declare const isEndOfFile: (state: ICompilerState) => boolean;
 export declare const getParentScope: (indent: number, state: ICompilerState) => IIndentScopeItem[];

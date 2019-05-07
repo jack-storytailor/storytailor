@@ -42,16 +42,16 @@ export interface IAstCommentLine extends IAstNode {
 export interface IAstCommentBlock extends IAstNode {
     text: string;
 }
-export interface IAstNumberLiteral extends IAstNode {
+export interface IAstNumber extends IAstNode {
     value: number;
 }
-export interface IAstStringLiteral extends IAstNode {
+export interface IAstString extends IAstNode {
     value: IAstNode[];
 }
-export interface IAstBooleanLiteral extends IAstNode {
+export interface IAstBoolean extends IAstNode {
     value: boolean;
 }
-export interface IAstArrayLiteral extends IAstNode {
+export interface IAstArray extends IAstNode {
     value: IAstNode[];
 }
 export interface IAstIdentifier extends IAstNode {

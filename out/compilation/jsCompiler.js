@@ -418,7 +418,7 @@ exports.compileAstNode = (ast, state) => {
     };
 };
 exports.compileAstModule = (node, state) => {
-    let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.AstModule);
+    let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.Module);
     if (!state || !ast) {
         return undefined;
     }

@@ -66,7 +66,7 @@ exports.astFactory = {
             end = Object.assign({}, lastToken.end);
         }
         return {
-            nodeType: AstNodeType_1.AstNodeType.AstModule,
+            nodeType: AstNodeType_1.AstNodeType.Module,
             tokens,
             content,
             imports,

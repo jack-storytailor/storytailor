@@ -1,7 +1,7 @@
 import { AstNodeType } from "./AstNodeType";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { ICodeToken } from "../shared/ICodeToken";
-import { IAstToken, IAstKeyword, IAstText, IAstOperator, IAstProgram, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumberLiteral, IAstStringLiteral, IAstBooleanLiteral, IAstArrayLiteral, IAstIdentifier, IAstRawIdentifier, IAstIdentifierScope, IAstFunctionDeclaration, IAstVariableDeclaration, IAstPropertyDeclaration, IAstStatement, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstWhileStatement, IAstDoWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstExpressionStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstOperationExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstIndexerExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstStringIncludeStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstFinallyStatement, IAstCatchStatement, IAstTryStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier } from "./IAstNode";
+import { IAstToken, IAstKeyword, IAstText, IAstOperator, IAstProgram, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstBoolean, IAstArray, IAstIdentifier, IAstRawIdentifier, IAstIdentifierScope, IAstFunctionDeclaration, IAstVariableDeclaration, IAstPropertyDeclaration, IAstStatement, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstWhileStatement, IAstDoWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstExpressionStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstOperationExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstIndexerExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstStringIncludeStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstFinallyStatement, IAstCatchStatement, IAstTryStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier } from "./IAstNode";
 import { KeywordType } from "./KeywordType";
 import { OperatorType } from "./OperatorType";
 import { VariableDeclarationKind } from "./VariableDeclarationKind";
@@ -16,10 +16,10 @@ export declare const astFactory: {
     program: (content: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstProgram;
     commentLine: (text: string, start: ISymbolPosition, end: ISymbolPosition) => IAstCommentLine;
     commentBlock: (text: string, start: ISymbolPosition, end: ISymbolPosition) => IAstCommentBlock;
-    numberLiteral: (value: number, start: ISymbolPosition, end: ISymbolPosition) => IAstNumberLiteral;
-    stringLiteral: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstStringLiteral;
-    booleanLiteral: (value: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstBooleanLiteral;
-    arrayLiteral: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstArrayLiteral;
+    numberLiteral: (value: number, start: ISymbolPosition, end: ISymbolPosition) => IAstNumber;
+    stringLiteral: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstString;
+    booleanLiteral: (value: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstBoolean;
+    arrayLiteral: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstArray;
     identifier: (value: string, start: ISymbolPosition, end: ISymbolPosition) => IAstIdentifier;
     rawIndentifier: (value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstRawIdentifier;
     contextIndentifier: (value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstContextIdentifier;

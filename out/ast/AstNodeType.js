@@ -7,14 +7,13 @@ var AstNodeType;
     AstNodeType["TokenSequence"] = "TokenSequence";
     AstNodeType["Text"] = "Text";
     AstNodeType["Operator"] = "Operator";
-    AstNodeType["AstModule"] = "AstModule";
+    AstNodeType["Module"] = "Module";
     AstNodeType["Program"] = "Program";
     AstNodeType["Keyword"] = "Keyword";
     AstNodeType["DebuggerKeyword"] = "DebuggerKeyword";
     AstNodeType["CommentLine"] = "CommentLine";
     AstNodeType["CommentBlock"] = "CommentBlock";
     // literals
-    AstNodeType["Literal"] = "Literal";
     AstNodeType["Number"] = "Number";
     AstNodeType["String"] = "String";
     AstNodeType["Boolean"] = "Boolean";

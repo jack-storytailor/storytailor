@@ -1,7 +1,67 @@
 import { AstNodeType } from "./AstNodeType";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { ICodeToken } from "../shared/ICodeToken";
-import { IAstToken, IAstKeyword, IAstText, IAstOperator, IAstProgram, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumberLiteral, IAstStringLiteral, IAstBooleanLiteral, IAstArrayLiteral, IAstIdentifier, IAstRawIdentifier, IAstIdentifierScope, IAstFunctionDeclaration, IAstVariableDeclaration, IAstPropertyDeclaration, IAstStatement, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstWhileStatement, IAstDoWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstExpressionStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstOperationExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstIndexerExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstStringIncludeStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstFinallyStatement, IAstCatchStatement, IAstTryStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier } from "./IAstNode";
+import { 
+  IAstToken, 
+  IAstKeyword, 
+  IAstText, 
+  IAstOperator, 
+  IAstProgram, 
+  IAstModule, 
+  IAstNode, 
+  IAstCommentLine, 
+  IAstCommentBlock, 
+  IAstNumber, 
+  IAstString, 
+  IAstBoolean, 
+  IAstArray, 
+  IAstIdentifier, 
+  IAstRawIdentifier, 
+  IAstIdentifierScope, 
+  IAstFunctionDeclaration, 
+  IAstVariableDeclaration, 
+  IAstPropertyDeclaration, 
+  IAstStatement, 
+  IAstBreakStatement, 
+  IAstReturnStatement, 
+  IAstContinueStatement, 
+  IAstBlockStatement, 
+  IAstIfStatement, 
+  IAstSwitchStatement, 
+  IAstCaseStatement, 
+  IAstWhileStatement, 
+  IAstDoWhileStatement, 
+  IAstForStatement, 
+  IAstForInStatement, 
+  IAstImportStatement, 
+  IAstExpressionStatement, 
+  IAstParenExpression, 
+  IAstObjectExpression, 
+  IAstCallExpression, 
+  IAstOperationExpression, 
+  IAstUpdateExpression, 
+  IAstBinaryExpression, 
+  IAstMemberExpression, 
+  IAstIndexerExpression, 
+  IAstOuterStatement, 
+  IAstTextLineStatement, 
+  IAstObjectLineStatement, 
+  IAstStringIncludeStatement, 
+  IAstPrototypeExpression, 
+  IAstScope, 
+  IAstTokenSequence, 
+  IAstConditionalExpression, 
+  IAstFinallyStatement, 
+  IAstCatchStatement, 
+  IAstTryStatement, 
+  IAstNewExpression, 
+  IAstThrowStatement, 
+  IAstDebuggerKeyword, 
+  IAstDeleteExpression, 
+  IAstDeleteLineExpression, 
+  IAstContextIdentifier, 
+  IAstTag 
+} from "./IAstNode";
 import { KeywordType } from "./KeywordType";
 import { OperatorType } from "./OperatorType";
 import { VariableDeclarationKind } from "./VariableDeclarationKind";
@@ -75,7 +135,7 @@ export const astFactory = {
     }
     
     return {
-      nodeType: AstNodeType.AstModule,
+      nodeType: AstNodeType.Module,
       tokens, 
       content,
       imports,
@@ -110,7 +170,7 @@ export const astFactory = {
   },
   
   // literals
-  numberLiteral: (value: number, start: ISymbolPosition, end: ISymbolPosition): IAstNumberLiteral => {
+  numberLiteral: (value: number, start: ISymbolPosition, end: ISymbolPosition): IAstNumber => {
     return {
       nodeType: AstNodeType.Number,
       value,
@@ -118,7 +178,7 @@ export const astFactory = {
       end
     }
   },
-  stringLiteral: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition): IAstStringLiteral => {
+  stringLiteral: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition): IAstString => {
     return {
       nodeType: AstNodeType.String,
       value,
@@ -126,7 +186,7 @@ export const astFactory = {
       end
     }
   },
-  booleanLiteral: (value: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstBooleanLiteral => {
+  booleanLiteral: (value: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstBoolean => {
     return {
       nodeType: AstNodeType.Boolean,
       value,
@@ -134,7 +194,7 @@ export const astFactory = {
       end
     }
   },
-  arrayLiteral: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition): IAstArrayLiteral => {
+  arrayLiteral: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition): IAstArray => {
     return {
       nodeType: AstNodeType.Array,
       value,

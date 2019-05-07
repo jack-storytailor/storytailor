@@ -4,17 +4,26 @@ import { IHash } from "../shared/IHash";
 export enum SymbolType {
   Primitive = "Primitive",
   Object = "Object",
-  Function = "Function"
+  Function = "Function",
 }
 
 export interface ISymbol {
-  name: string;
   type: SymbolType;
+  id: string;
 
-  parent: ISymbol;
-  subitems: IHash<ISymbol>;
+  localName: string;
+  fullName: string[];
+
+  start: ISymbolPosition;
+  end: ISymbolPosition;
+
+  subitems?: IHash<string>;
 }
 
+export interface ISymbolPrimitive extends ISymbol {}
 
+export interface ISymbolObject extends ISymbol {}
 
-
+export interface ISymbolFunction extends ISymbol {
+  args: IHash<ISymbol>;
+}
