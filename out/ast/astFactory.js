@@ -149,6 +149,14 @@ exports.astFactory = {
             end
         };
     },
+    contextIndentifier: (value, start, end) => {
+        return {
+            nodeType: AstNodeType_1.AstNodeType.ContextIdentifier,
+            value,
+            start,
+            end
+        };
+    },
     IdentifierScope: (value, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.IdentifierScope,

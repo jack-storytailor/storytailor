@@ -23,6 +23,7 @@ var AstNodeType;
     AstNodeType["Identifier"] = "Identifier";
     AstNodeType["IdentifierScope"] = "IdentifierScope";
     AstNodeType["RawIdentifier"] = "RawIdentifier";
+    AstNodeType["ContextIdentifier"] = "ContextIdentifier";
     // declarations
     AstNodeType["FunctionDeclaration"] = "FunctionDeclaration";
     AstNodeType["VariableDeclaration"] = "VariableDeclaration";

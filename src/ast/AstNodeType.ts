@@ -20,6 +20,7 @@ export enum AstNodeType {
   Identifier = "Identifier",
   IdentifierScope = "IdentifierScope",
   RawIdentifier = "RawIdentifier",
+  ContextIdentifier = "ContextIdentifier",
   // declarations
   FunctionDeclaration = "FunctionDeclaration",
   VariableDeclaration = "VariableDeclaration",

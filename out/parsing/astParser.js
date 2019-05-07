@@ -42,65 +42,6 @@ const separators = [
     CodeTokenType_1.CodeTokenType.BracketClose,
     CodeTokenType_1.CodeTokenType.Comma
 ];
-const config = {
-    environmentName: '__env',
-    environmentPath: 'storytailor/out/environment',
-    defaultEnvironmentPath: 'storytailor/out/environment',
-    contextName: 'context',
-    requireName: 'require',
-    moduleName: 'module',
-    exportsName: 'exports',
-    textName: 'text',
-    toStringName: 'objectToString',
-    joinName: 'join',
-    storyName: 'story',
-    serializerName: 'serializer',
-    serializeName: 'serialize',
-    createStoryName: 'createStory',
-    getSerializerName: 'getSerializer',
-    thisName: 'this',
-    objectName: 'Object',
-    functionName: 'Function',
-    booleanName: 'Boolean',
-    symbolName: 'Symbol',
-    errorName: 'Error',
-    evanErrorName: 'EvalError',
-    internalError: 'InternalError',
-    rangeError: 'RangeError',
-    referenceError: 'ReferenceError',
-    syntaxError: 'SyntaxError',
-    typeError: 'TypeError',
-    uriError: 'URIError',
-    numberName: 'Number',
-    mathName: 'Math',
-    dateName: 'Date',
-    stringName: 'String',
-    regexpName: 'RegExp',
-    array: 'Array',
-    int8Array: 'Int8Array',
-    uint8Array: 'Uint8Array',
-    uint8ClampedArray: 'Uint8ClampedArray',
-    int16Array: 'Int16Array',
-    uint16Array: 'Uint16Array',
-    int32Array: 'Int32Array',
-    uint32Array: 'Uint32Array',
-    float32Array: 'Float32Array',
-    float64Array: 'Float64Array',
-    nanName: 'NaN',
-    infinityName: 'Infinity',
-    undefinedName: 'undefined',
-    nullName: 'null',
-    evalName: 'eval',
-    isFinite: 'isFinite',
-    isNan: 'isNaN',
-    parseFloat: 'parseFloat',
-    parseInt: 'parseInt',
-    decodeUri: 'decodeURI',
-    encodeUri: 'encodeURI',
-    decodeUriComponent: 'decodeURIComponent',
-    encodeUriComponent: 'encodeURIComponent',
-    jsonName: 'JSON',
-};
 // && operator doesn't work in if (condition) statement
 // general
 exports.parseModule = (tokens, modulePath) => {
@@ -113,9 +54,8 @@ exports.parseModule = (tokens, modulePath) => {
         cursor: 0,
         errors: [],
         indent: 0,
-        scope: [],
         tokens: tokens,
-        imports: []
+        imports: [],
     };
     var programContent = [];
     // parse module content
@@ -767,14 +707,16 @@ exports.parseStringLiteral = (state) => {
         state
     };
 };
-exports.parseStringLiteralItem = (state) => {
+exports.parseStringLiteralItem = (state, allowIncludes = true) => {
     if (exports.isEndOfFile(state)) {
         return undefined;
     }
-    // parse mention
-    let stringIncludeResult = exports.parseStringInclude(state);
-    if (stringIncludeResult) {
-        return stringIncludeResult;
+    // parse include
+    if (allowIncludes) {
+        let stringIncludeResult = exports.parseStringInclude(state);
+        if (stringIncludeResult) {
+            return stringIncludeResult;
+        }
     }
     // parse word
     let nextToken = exports.getToken(state);
@@ -999,7 +941,7 @@ exports.parseIdentifierScope = (state) => {
         return undefined;
     }
     let start = exports.getCursorPosition(state);
-    let scopeResult = exports.parseScope(state, (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.Prime]), (state) => exports.parseStringLiteralItem(state), (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.Prime]));
+    let scopeResult = exports.parseScope(state, (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.Prime]), (state) => exports.parseStringLiteralItem(state, true), (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.Prime]));
     if (!scopeResult) {
         return undefined;
     }
@@ -1061,6 +1003,44 @@ exports.parseAnyIdentifier = (state) => {
     let identifierResult = exports.parseIdentifier(state);
     if (identifierResult) {
         return identifierResult;
+    }
+    return undefined;
+};
+exports.parseContextIdentifier = (state) => {
+    if (exports.isEndOfFile(state)) {
+        return undefined;
+    }
+    let identifierResult = exports.parseAnyIdentifier(state);
+    if (!identifierResult) {
+        return undefined;
+    }
+    // prepare result
+    state = identifierResult.state;
+    let identifier = identifierResult.result;
+    let start = identifier.start;
+    let end = identifier.end;
+    let result = astFactory_1.astFactory.contextIndentifier(identifier, start, end);
+    return {
+        state,
+        result
+    };
+};
+/**
+ * Operand identifier means: if no '@' symbol before identifier, it's context identifier (context['identifier'])
+ */
+exports.parseOperandIdentifier = (state) => {
+    if (exports.isEndOfFile(state)) {
+        return undefined;
+    }
+    // raw identifier
+    let rawResult = exports.parseRawIdentifier(state);
+    if (rawResult) {
+        return rawResult;
+    }
+    // context identifier
+    let contextResult = exports.parseContextIdentifier(state);
+    if (contextResult) {
+        return contextResult;
     }
     return undefined;
 };
@@ -2279,7 +2259,7 @@ exports.parseForInConditions = (state) => {
     // parse left expression
     let variable = undefined;
     // parse identifier
-    let identifierResult = exports.parseAnyIdentifier(state);
+    let identifierResult = exports.parseOperandIdentifier(state);
     if (identifierResult) {
         state = identifierResult.state;
         variable = identifierResult.result;
@@ -2465,7 +2445,7 @@ exports.parseImportStatement = (state) => {
         state = exports.skipTokens(state, 1);
         // parse alias until $, from, operator
         state = exports.skipComments(state, true);
-        let varAliasResult = exports.parseIdentifier(state);
+        let varAliasResult = exports.parseOperandIdentifier(state);
         if (varAliasResult) {
             state = varAliasResult.state;
             aliasAst = varAliasResult.result;
@@ -2618,8 +2598,8 @@ exports.parseCatchStatement = (state, isMultiline) => {
     // skip comments and whitespaces
     state = exports.skipComments(state, true, isMultiline);
     while (!exports.isEndOfFile(state) && !exports.getTokenOfType(state, breakTokens)) {
-        // parse (varDeclaration)
-        let scopeResult = exports.parseScope(state, (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => exports.parseAnyIdentifier(state), (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => exports.skipComments(state, true, true));
+        // parse (identifier)
+        let scopeResult = exports.parseScope(state, (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => exports.parseOperandIdentifier(state), (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => exports.skipComments(state, true, true));
         if (scopeResult) {
             // extract first item from parsed scope to 
             let scopeContent = scopeResult.result.content;
@@ -2632,7 +2612,7 @@ exports.parseCatchStatement = (state, isMultiline) => {
         // skip comments and whitespaces
         state = exports.skipComments(state, true, isMultiline);
         // check break tokens
-        if (exports.isEndOfFile(state) && exports.getTokenOfType(state, breakTokens)) {
+        if (exports.isEndOfFile(state) || exports.getTokenOfType(state, breakTokens)) {
             break;
         }
         // parse body
@@ -2812,7 +2792,7 @@ exports.parseOperand = (state) => {
         return parenExpressionResult;
     }
     // identifier
-    let identifierResult = exports.parseAnyIdentifier(state);
+    let identifierResult = exports.parseOperandIdentifier(state);
     if (identifierResult) {
         return identifierResult;
     }
@@ -3420,7 +3400,7 @@ exports.parseObjectLine = (state) => {
         break;
     }
     // parse identifier
-    let identifierResult = exports.parseAnyIdentifier(state);
+    let identifierResult = exports.parseOperandIdentifier(state);
     if (!identifierResult) {
         return undefined;
     }
@@ -3476,7 +3456,7 @@ exports.parseDeleteLineExpression = (state) => {
     if (exports.isEndOfFile(state)) {
         return undefined;
     }
-    // delete Object Name || Object Name = Value Expression
+    // delete Object Name
     // parse delete keyword
     let deleteResult = exports.parseKeywordOfType(state, [KeywordType_1.KeywordType.Delete]);
     if (!deleteResult) {
@@ -3488,7 +3468,7 @@ exports.parseDeleteLineExpression = (state) => {
     state = exports.skipComments(state, true, false);
     // parse identifier
     let identifier = undefined;
-    let identifierResult = exports.parseAnyIdentifier(state);
+    let identifierResult = exports.parseOperandIdentifier(state);
     if (identifierResult) {
         identifier = identifierResult.result;
         state = identifierResult.state;

@@ -60,6 +60,9 @@ export interface IAstIdentifier extends IAstNode {
 export interface IAstRawIdentifier extends IAstNode {
     value: IAstNode;
 }
+export interface IAstContextIdentifier extends IAstNode {
+    value: IAstNode;
+}
 export interface IAstIdentifierScope extends IAstNode {
     value: IAstNode[];
 }

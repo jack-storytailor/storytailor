@@ -194,6 +194,11 @@ exports.compileAstNode = (ast, state, isRaw = false) => {
     if (rawIdentResult) {
         return rawIdentResult;
     }
+    // raw identifier
+    let contextIdentResult = exports.compileContextIdentifier(ast, state);
+    if (contextIdentResult) {
+        return contextIdentResult;
+    }
     // statement
     let compileStatementResult = exports.compileStatement(ast, state);
     if (compileStatementResult) {
@@ -729,6 +734,27 @@ exports.compileRawIdentifier = (node, state) => {
     if (compileResult) {
         state = compileResult.state;
     }
+    return {
+        state,
+        result: ast
+    };
+};
+exports.compileContextIdentifier = (node, state) => {
+    let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.ContextIdentifier);
+    if (!ast || !state) {
+        return undefined;
+    }
+    // this is not raw identifier, so add context before it
+    state = exports.writeJsToken(state, `${exports.compilerConfig.contextVarName}`);
+    // ['
+    state = exports.writeJsToken(state, `['`);
+    // write identifier
+    var compileValResult = exports.compileAstNode(ast.value, state, true);
+    if (compileValResult) {
+        state = compileValResult.state;
+    }
+    //']
+    state = exports.writeJsToken(state, `']`);
     return {
         state,
         result: ast

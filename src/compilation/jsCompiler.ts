@@ -1,4 +1,4 @@
-import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumberLiteral, IAstBooleanLiteral, IAstIdentifier, IAstStringLiteral, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArrayLiteral, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression } from "../ast/IAstNode";
+import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumberLiteral, IAstBooleanLiteral, IAstIdentifier, IAstStringLiteral, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArrayLiteral, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier } from "../ast/IAstNode";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { SourceMapGenerator } from 'source-map';
 import { AstNodeType } from "../ast/AstNodeType";
@@ -287,6 +287,12 @@ export const compileAstNode = (ast: IAstNode, state: ICompilerState, isRaw: bool
   let rawIdentResult = compileRawIdentifier(ast, state);
   if (rawIdentResult) {
     return rawIdentResult;
+  }
+
+  // context identifier
+  let contextIdentResult = compileContextIdentifier(ast, state);
+  if (contextIdentResult) {
+    return contextIdentResult;
   }
 
   // statement
@@ -920,6 +926,29 @@ export const compileRawIdentifier = (node: IAstNode, state: ICompilerState): ICo
     state,
     result: ast
   }  
+}
+export const compileContextIdentifier = (node: IAstNode, state: ICompilerState): ICompileResult<IAstContextIdentifier> => {
+  let ast = astFactory.asNode<IAstContextIdentifier>(node, AstNodeType.ContextIdentifier);
+  if (!ast || !state) {
+    return undefined;
+  }
+
+  // this is not raw identifier, so add context before it
+  state = writeJsToken(state, `${compilerConfig.contextVarName}`);
+  // ['
+  state = writeJsToken(state, `['`);
+  // write identifier
+  var compileValResult = compileAstNode(ast.value, state, true);
+  if (compileValResult) {
+    state = compileValResult.state;
+  }
+  //']
+  state = writeJsToken(state, `']`);
+
+  return {
+    state,
+    result: ast
+  }
 }
 export const compileBinaryExpression = (node: IAstNode, state: ICompilerState): ICompileResult<IAstBinaryExpression> => {
   let ast = astFactory.asNode<IAstBinaryExpression>(node, AstNodeType.BinaryExpression);
