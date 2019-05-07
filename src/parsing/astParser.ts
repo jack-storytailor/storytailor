@@ -4296,7 +4296,7 @@ export const parseObjectLine = (state: IParserState): IParseResult<IAstObjectLin
   }
 
   // parse identifier
-  let identifierResult = parseOperandIdentifier(state);
+  let identifierResult = parseAnyIdentifier(state);
   if (!identifierResult) {
     return undefined;
   }

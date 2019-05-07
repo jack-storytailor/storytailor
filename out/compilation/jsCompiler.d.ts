@@ -67,7 +67,7 @@ export declare const compilerConfig: {
 };
 export declare const compileSingleNode: (ast: IAstNode) => string;
 export declare const compile: (request: ICompileFileRequest) => ICompileFileResult;
-export declare const compileAstNode: (ast: IAstNode, state: ICompilerState, isRaw?: boolean) => ICompileResult<IAstNode>;
+export declare const compileAstNode: (ast: IAstNode, state: ICompilerState) => ICompileResult<IAstNode>;
 export declare const compileAstModule: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstModule>;
 export declare const compileOuterStatement: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstOuterStatement>;
 export declare const compileBlockStatement: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstBlockStatement>;
@@ -77,8 +77,8 @@ export declare const compileStatement: (node: IAstNode, state: ICompilerState) =
 export declare const compileTextLine: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstTextLineStatement>;
 export declare const compileNumber: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstNumberLiteral>;
 export declare const compileBoolean: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstBooleanLiteral>;
-export declare const compileIdentifier: (node: IAstNode, state: ICompilerState, isRaw: boolean) => ICompileResult<IAstIdentifier>;
-export declare const compileIdentifierScope: (node: IAstNode, state: ICompilerState, isRaw: boolean) => ICompileResult<IAstIdentifierScope>;
+export declare const compileIdentifier: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstIdentifier>;
+export declare const compileIdentifierScope: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstIdentifierScope>;
 export declare const compileRawIdentifier: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstRawIdentifier>;
 export declare const compileContextIdentifier: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstContextIdentifier>;
 export declare const compileBinaryExpression: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstBinaryExpression>;

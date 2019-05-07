@@ -154,7 +154,7 @@ exports.compile = (request) => {
         sourceMaps
     };
 };
-exports.compileAstNode = (ast, state, isRaw = false) => {
+exports.compileAstNode = (ast, state) => {
     if (!ast) {
         return undefined;
     }
@@ -194,7 +194,7 @@ exports.compileAstNode = (ast, state, isRaw = false) => {
     if (rawIdentResult) {
         return rawIdentResult;
     }
-    // raw identifier
+    // context identifier
     let contextIdentResult = exports.compileContextIdentifier(ast, state);
     if (contextIdentResult) {
         return contextIdentResult;
@@ -245,12 +245,12 @@ exports.compileAstNode = (ast, state, isRaw = false) => {
         return booleanResult;
     }
     // identifier
-    let identifierResult = exports.compileIdentifier(ast, state, isRaw);
+    let identifierResult = exports.compileIdentifier(ast, state);
     if (identifierResult) {
         return identifierResult;
     }
     // identifier scope
-    let identifierScopeResult = exports.compileIdentifierScope(ast, state, isRaw);
+    let identifierScopeResult = exports.compileIdentifierScope(ast, state);
     if (identifierScopeResult) {
         return identifierScopeResult;
     }
@@ -478,7 +478,7 @@ exports.compileBlockStatement = (node, state) => {
             // write \t
             state = exports.writeJsToken(state, '\t');
             const contentNode = content[i];
-            let contentNodeResult = exports.compileAstNode(contentNode, state, false);
+            let contentNodeResult = exports.compileAstNode(contentNode, state);
             if (contentNodeResult) {
                 state = contentNodeResult.state;
             }
@@ -573,7 +573,7 @@ exports.compileStatement = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
-    let compileResult = exports.compileAstNode(ast.statement, state, true);
+    let compileResult = exports.compileAstNode(ast.statement, state);
     if (compileResult) {
         state = compileResult.state;
     }
@@ -668,56 +668,32 @@ exports.compileBoolean = (node, state) => {
         result: ast
     };
 };
-exports.compileIdentifier = (node, state, isRaw) => {
+exports.compileIdentifier = (node, state) => {
     let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.Identifier);
     if (!ast || !state) {
         return undefined;
     }
-    if (isRaw) {
-        state = exports.writeJsToken(state, ast.value);
-    }
-    else {
-        // this is not raw identifier, so add context before it
-        state = exports.writeJsToken(state, `${exports.compilerConfig.contextVarName}`);
-        // ['
-        state = exports.writeJsToken(state, `['`);
-        // write identifier
-        state = exports.writeJsToken(state, ast.value);
-        //']
-        state = exports.writeJsToken(state, `']`);
-    }
+    state = exports.writeJsToken(state, ast.value);
     return {
         state,
         result: ast
     };
 };
-exports.compileIdentifierScope = (node, state, isRaw) => {
+exports.compileIdentifierScope = (node, state) => {
     let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.IdentifierScope);
     if (!ast || !state) {
         return undefined;
-    }
-    // check is raw
-    if (!isRaw) {
-        // this is not raw identifier, so add context before it
-        state = exports.writeJsToken(state, `${exports.compilerConfig.contextVarName}`);
-        // ['
-        state = exports.writeJsToken(state, `['`);
     }
     // write items
     let valueItems = ast.value;
     if (valueItems && valueItems.length > 0) {
         for (let i = 0; i < valueItems.length; i++) {
             const itemNode = valueItems[i];
-            let itemResult = exports.compileAstNode(itemNode, state, true);
+            let itemResult = exports.compileAstNode(itemNode, state);
             if (itemResult) {
                 state = itemResult.state;
             }
         }
-    }
-    // write raw closure
-    if (!isRaw) {
-        //']
-        state = exports.writeJsToken(state, `']`);
     }
     // result
     return {
@@ -730,7 +706,7 @@ exports.compileRawIdentifier = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
-    let compileResult = exports.compileAstNode(ast.value, state, true);
+    let compileResult = exports.compileAstNode(ast.value, state);
     if (compileResult) {
         state = compileResult.state;
     }
@@ -749,7 +725,7 @@ exports.compileContextIdentifier = (node, state) => {
     // ['
     state = exports.writeJsToken(state, `['`);
     // write identifier
-    var compileValResult = exports.compileAstNode(ast.value, state, true);
+    var compileValResult = exports.compileAstNode(ast.value, state);
     if (compileValResult) {
         state = compileValResult.state;
     }
@@ -766,21 +742,21 @@ exports.compileBinaryExpression = (node, state) => {
         return undefined;
     }
     // left operand
-    let leftResult = exports.compileAstNode(ast.left, state, false);
+    let leftResult = exports.compileAstNode(ast.left, state);
     if (leftResult) {
         state = leftResult.state;
     }
     // add space
     state = exports.writeJsToken(state, ' ');
     // operator
-    let compileOperatorResult = exports.compileAstNode(ast.operator, state, false);
+    let compileOperatorResult = exports.compileAstNode(ast.operator, state);
     if (compileOperatorResult) {
         state = compileOperatorResult.state;
     }
     // add space
     state = exports.writeJsToken(state, ' ');
     // right operand
-    let rightResult = exports.compileAstNode(ast.right, state, false);
+    let rightResult = exports.compileAstNode(ast.right, state);
     if (rightResult) {
         state = rightResult.state;
     }
@@ -796,14 +772,14 @@ exports.compileMemberExpression = (node, state) => {
         return undefined;
     }
     // left operand
-    let leftResult = exports.compileAstNode(ast.object, state, false);
+    let leftResult = exports.compileAstNode(ast.object, state);
     if (leftResult) {
         state = leftResult.state;
     }
     // [
     state = exports.writeJsToken(state, `['`);
     // right operand
-    let rightResult = exports.compileAstNode(ast.property, state, true);
+    let rightResult = exports.compileAstNode(ast.property, state);
     if (rightResult) {
         state = rightResult.state;
     }
@@ -825,7 +801,7 @@ exports.compileStringInclude = (node, state) => {
     // write serializer.serialize(
     state = exports.writeJsToken(state, `${exports.compilerConfig.serializerVarName}.${exports.compilerConfig.serializeFuncName}( `);
     // write expression
-    let expResult = exports.compileAstNode(ast.expression, state, false);
+    let expResult = exports.compileAstNode(ast.expression, state);
     if (expResult) {
         state = expResult.state;
     }
@@ -847,7 +823,7 @@ exports.compileCallExpression = (node, state) => {
         return undefined;
     }
     // callee
-    let calleeResult = exports.compileAstNode(ast.calee, state, false);
+    let calleeResult = exports.compileAstNode(ast.calee, state);
     if (calleeResult) {
         state = calleeResult.state;
     }
@@ -862,7 +838,7 @@ exports.compileCallExpression = (node, state) => {
                 state = exports.writeJsToken(state, ', ');
             }
             const argNode = fArgs[i];
-            let argResult = exports.compileAstNode(argNode, state, false);
+            let argResult = exports.compileAstNode(argNode, state);
             if (argResult) {
                 state = argResult.state;
             }
@@ -892,7 +868,7 @@ exports.compileVarDeclaration = (node, state) => {
     // write prefix
     state = exports.writeJsToken(state, `${prefix} `);
     // write varname
-    let varnameResult = exports.compileAstNode(ast.identifier, state, true);
+    let varnameResult = exports.compileAstNode(ast.identifier, state);
     if (varnameResult) {
         state = varnameResult.state;
     }
@@ -901,7 +877,7 @@ exports.compileVarDeclaration = (node, state) => {
         // write =
         state = exports.writeJsToken(state, ` = `);
         // write init value
-        let initValResult = exports.compileAstNode(ast.value, state, false);
+        let initValResult = exports.compileAstNode(ast.value, state);
         if (initValResult) {
             state = initValResult.state;
         }
@@ -928,7 +904,7 @@ exports.compileFuncDeclaration = (node, state) => {
                 state = exports.writeJsToken(state, `, `);
             }
             const param = params[i];
-            let paramResult = exports.compileAstNode(param, state, true);
+            let paramResult = exports.compileAstNode(param, state);
             if (paramResult) {
                 state = paramResult.state;
             }
@@ -937,7 +913,7 @@ exports.compileFuncDeclaration = (node, state) => {
     // write )
     state = exports.writeJsToken(state, `) `);
     // write function body
-    let bodyResult = exports.compileAstNode(ast.body, state, false);
+    let bodyResult = exports.compileAstNode(ast.body, state);
     if (bodyResult) {
         state = bodyResult.state;
     }
@@ -959,7 +935,7 @@ exports.compileProgram = (node, state) => {
     if (content && content.length > 0) {
         for (let i = 0; i < content.length; i++) {
             const contentNode = content[i];
-            let contentResult = exports.compileAstNode(contentNode, state, false);
+            let contentResult = exports.compileAstNode(contentNode, state);
             if (contentResult) {
                 state = contentResult.state;
             }
@@ -983,7 +959,7 @@ exports.compileReturnStatement = (node, state) => {
     // write return
     state = exports.writeJsToken(state, `return `);
     // write return value if any
-    let valResult = exports.compileAstNode(ast.value, state, false);
+    let valResult = exports.compileAstNode(ast.value, state);
     if (valResult) {
         state = valResult.state;
     }
@@ -1000,7 +976,7 @@ exports.compileDeleteExpression = (node, state) => {
     // write delete
     state = exports.writeJsToken(state, `delete `);
     // write delete value if any
-    let valResult = exports.compileAstNode(ast.expression, state, false);
+    let valResult = exports.compileAstNode(ast.expression, state);
     if (valResult) {
         state = valResult.state;
     }
@@ -1041,21 +1017,21 @@ exports.compileIfStatement = (node, state) => {
     // write if (
     state = exports.writeJsToken(state, `if (`);
     // write condition
-    let conditionResult = exports.compileAstNode(ast.condition, state, false);
+    let conditionResult = exports.compileAstNode(ast.condition, state);
     if (conditionResult) {
         state = conditionResult.state;
     }
     // write )
     state = exports.writeJsToken(state, `) `);
     // write thenValue
-    let thenResult = exports.compileAstNode(ast.thenValue, state, false);
+    let thenResult = exports.compileAstNode(ast.thenValue, state);
     if (thenResult) {
         state = thenResult.state;
     }
     // write else if any
     if (ast.elseValue) {
         state = exports.writeJsToken(state, ` else `);
-        let elseResult = exports.compileAstNode(ast.elseValue, state, false);
+        let elseResult = exports.compileAstNode(ast.elseValue, state);
         if (elseResult) {
             state = elseResult.state;
         }
@@ -1074,14 +1050,14 @@ exports.compileWhileStatement = (node, state) => {
     // write while (
     state = exports.writeJsToken(state, `while (`);
     // write condition
-    let conditionResult = exports.compileAstNode(ast.condition, state, false);
+    let conditionResult = exports.compileAstNode(ast.condition, state);
     if (conditionResult) {
         state = conditionResult.state;
     }
     // write )
     state = exports.writeJsToken(state, `) `);
     // write body
-    let bodyResult = exports.compileAstNode(ast.body, state, false);
+    let bodyResult = exports.compileAstNode(ast.body, state);
     if (bodyResult) {
         state = bodyResult.state;
     }
@@ -1099,14 +1075,14 @@ exports.compileDoWhileStatement = (node, state) => {
     // write do
     state = exports.writeJsToken(state, `do `);
     // write body
-    let bodyResult = exports.compileAstNode(ast.body, state, false);
+    let bodyResult = exports.compileAstNode(ast.body, state);
     if (bodyResult) {
         state = bodyResult.state;
     }
     // write while (
     state = exports.writeJsToken(state, ` while (`);
     // write condition
-    let conditionResult = exports.compileAstNode(ast.condition, state, false);
+    let conditionResult = exports.compileAstNode(ast.condition, state);
     if (conditionResult) {
         state = conditionResult.state;
     }
@@ -1126,7 +1102,7 @@ exports.compileSwitchStatement = (node, state) => {
     // write while (
     state = exports.writeJsToken(state, `switch (`);
     // write condition
-    let conditionResult = exports.compileAstNode(ast.condition, state, false);
+    let conditionResult = exports.compileAstNode(ast.condition, state);
     if (conditionResult) {
         state = conditionResult.state;
     }
@@ -1140,7 +1116,7 @@ exports.compileSwitchStatement = (node, state) => {
     if (cases && cases.length > 0) {
         for (let i = 0; i < cases.length; i++) {
             const caseNode = cases[i];
-            let caseResult = exports.compileAstNode(caseNode, state, false);
+            let caseResult = exports.compileAstNode(caseNode, state);
             if (caseResult) {
                 state = caseResult.state;
             }
@@ -1172,7 +1148,7 @@ exports.compileCaseStatement = (node, state) => {
         // write case
         state = exports.writeJsToken(state, `case `);
         // write condition
-        let conditionResult = exports.compileAstNode(ast.condition, state, false);
+        let conditionResult = exports.compileAstNode(ast.condition, state);
         if (conditionResult) {
             state = conditionResult.state;
         }
@@ -1184,7 +1160,7 @@ exports.compileCaseStatement = (node, state) => {
         for (let i = 0; i < ast.body.length; i++) {
             state = exports.writeEndline(state);
             const bodyItem = ast.body[i];
-            let itemResult = exports.compileAstNode(bodyItem, state, false);
+            let itemResult = exports.compileAstNode(bodyItem, state);
             if (itemResult) {
                 state = itemResult.state;
             }
@@ -1194,7 +1170,7 @@ exports.compileCaseStatement = (node, state) => {
     // write consequent
     if (ast.consequent) {
         state = exports.writeEndline(state);
-        let consequentResult = exports.compileAstNode(ast.consequent, state, false);
+        let consequentResult = exports.compileAstNode(ast.consequent, state);
         if (consequentResult) {
             state = consequentResult.state;
         }
@@ -1212,7 +1188,7 @@ exports.compileParenExpression = (node, state) => {
     // write (
     state = exports.writeJsToken(state, `(`);
     // write content
-    let contentResult = exports.compileAstNode(ast.expression, state, false);
+    let contentResult = exports.compileAstNode(ast.expression, state);
     if (contentResult) {
         state = contentResult.state;
     }
@@ -1229,7 +1205,7 @@ exports.compileImportStatement = (node, state) => {
         return undefined;
     }
     // write identifier
-    let identifierResult = exports.compileAstNode(ast.identifier, state, false);
+    let identifierResult = exports.compileAstNode(ast.identifier, state);
     if (identifierResult) {
         state = identifierResult.state;
     }
@@ -1239,7 +1215,7 @@ exports.compileImportStatement = (node, state) => {
     // state = writeJsToken(state, `require('${ast.path}')`);
     state = exports.writeJsToken(state, `require(`);
     // write import path
-    let pathResult = exports.compileAstNode(ast.path, state, false);
+    let pathResult = exports.compileAstNode(ast.path, state);
     if (pathResult) {
         state = pathResult.state;
     }
@@ -1257,7 +1233,7 @@ exports.compilePropertyDeclaration = (node, state) => {
     }
     // write "identifier" : value
     // write identifier
-    let identResult = exports.compileAstNode(ast.identifier, state, true);
+    let identResult = exports.compileAstNode(ast.identifier, state);
     if (identResult) {
         state = identResult.state;
     }
@@ -1266,7 +1242,7 @@ exports.compilePropertyDeclaration = (node, state) => {
         // write :
         state = exports.writeJsToken(state, ` : `);
         // write value
-        let valResult = exports.compileAstNode(ast.value, state, false);
+        let valResult = exports.compileAstNode(ast.value, state);
         if (valResult) {
             state = valResult.state;
         }
@@ -1285,19 +1261,19 @@ exports.compileForStatement = (node, state) => {
     // for (
     state = exports.writeJsToken(state, `for (`);
     // write init 
-    let initResult = exports.compileAstNode(ast.init, state, false);
+    let initResult = exports.compileAstNode(ast.init, state);
     if (initResult) {
         state = initResult.state;
     }
     state = exports.writeJsToken(state, `; `);
     // write test
-    let testResult = exports.compileAstNode(ast.test, state, false);
+    let testResult = exports.compileAstNode(ast.test, state);
     if (testResult) {
         state = testResult.state;
     }
     state = exports.writeJsToken(state, `; `);
     // write update
-    let updateResult = exports.compileAstNode(ast.update, state, false);
+    let updateResult = exports.compileAstNode(ast.update, state);
     if (updateResult) {
         state = updateResult.state;
     }
@@ -1305,7 +1281,7 @@ exports.compileForStatement = (node, state) => {
     state = exports.writeJsToken(state, `)`);
     state = exports.writeEndline(state);
     // write body
-    let bodyResult = exports.compileAstNode(ast.body, state, false);
+    let bodyResult = exports.compileAstNode(ast.body, state);
     if (bodyResult) {
         state = bodyResult.state;
     }
@@ -1323,14 +1299,14 @@ exports.compileForInStatement = (node, state) => {
     // for (
     state = exports.writeJsToken(state, `for (`);
     // write left
-    let leftResult = exports.compileAstNode(ast.left, state, false);
+    let leftResult = exports.compileAstNode(ast.left, state);
     if (leftResult) {
         state = leftResult.state;
     }
     // write in
     state = exports.writeJsToken(state, ` in `);
     // write right
-    let rightResult = exports.compileAstNode(ast.right, state, false);
+    let rightResult = exports.compileAstNode(ast.right, state);
     if (rightResult) {
         state = rightResult.state;
     }
@@ -1338,7 +1314,7 @@ exports.compileForInStatement = (node, state) => {
     state = exports.writeJsToken(state, `)`);
     state = exports.writeEndline(state);
     // write body
-    let bodyResult = exports.compileAstNode(ast.body, state, false);
+    let bodyResult = exports.compileAstNode(ast.body, state);
     if (bodyResult) {
         state = bodyResult.state;
     }
@@ -1366,7 +1342,7 @@ exports.compileArrayLiteral = (node, state) => {
             state = exports.writeEndline(state);
             // write item
             const itemAst = items[i];
-            let itemResult = exports.compileAstNode(itemAst, state, false);
+            let itemResult = exports.compileAstNode(itemAst, state);
             if (itemResult) {
                 state = itemResult.state;
             }
@@ -1399,7 +1375,7 @@ exports.compileObjectExpression = (node, state) => {
             state = exports.writeEndline(state);
             // write prop
             const propASt = props[i];
-            let propResult = exports.compileAstNode(propASt, state, false);
+            let propResult = exports.compileAstNode(propASt, state);
             if (propResult) {
                 state = propResult.state;
             }
@@ -1421,20 +1397,20 @@ exports.compileUpdateExpression = (node, state) => {
     }
     if (ast.prefix === true) {
         // write operator
-        let operatorResult = exports.compileAstNode(ast.operator, state, false);
+        let operatorResult = exports.compileAstNode(ast.operator, state);
         if (operatorResult) {
             state = operatorResult.state;
         }
     }
     // write argument
-    let argResult = exports.compileAstNode(ast.argument, state, false);
+    let argResult = exports.compileAstNode(ast.argument, state);
     if (argResult) {
         state = argResult.state;
     }
     if (!ast.prefix) {
         // this is postfix
         // write operator
-        let operatorResult = exports.compileAstNode(ast.operator, state, false);
+        let operatorResult = exports.compileAstNode(ast.operator, state);
         if (operatorResult) {
             state = operatorResult.state;
         }
@@ -1462,21 +1438,21 @@ exports.compileConditionalExpression = (node, state) => {
         return undefined;
     }
     // condition ? then : else
-    let condResult = exports.compileAstNode(ast.condition, state, false);
+    let condResult = exports.compileAstNode(ast.condition, state);
     if (condResult) {
         state = condResult.state;
     }
     // ?
     state = exports.writeJsToken(state, ` ? `);
     // then
-    let thenResult = exports.compileAstNode(ast.whenTrue, state, false);
+    let thenResult = exports.compileAstNode(ast.whenTrue, state);
     if (thenResult) {
         state = thenResult.state;
     }
     // :
     state = exports.writeJsToken(state, ` : `);
     // else
-    let elseResult = exports.compileAstNode(ast.whenFalse, state, false);
+    let elseResult = exports.compileAstNode(ast.whenFalse, state);
     if (elseResult) {
         state = elseResult.state;
     }
@@ -1494,14 +1470,14 @@ exports.compileIndexerExpression = (node, state) => {
     let member = ast.member;
     if (member) {
         // write obj
-        let objResult = exports.compileAstNode(member.object, state, false);
+        let objResult = exports.compileAstNode(member.object, state);
         if (objResult) {
             state = objResult.state;
         }
         // write [
         state = exports.writeJsToken(state, `[`);
         // write property
-        let propResult = exports.compileAstNode(member.property, state, false);
+        let propResult = exports.compileAstNode(member.property, state);
         if (propResult) {
             state = propResult.state;
         }
@@ -1521,19 +1497,19 @@ exports.compileTryStatement = (node, state) => {
     // write try
     state = exports.writeJsToken(state, `try `);
     // write body 
-    let bodyResult = exports.compileAstNode(ast.body, state, false);
+    let bodyResult = exports.compileAstNode(ast.body, state);
     if (bodyResult) {
         state = bodyResult.state;
     }
     state = exports.writeEndline(state);
     // write catch
-    let catchResult = exports.compileAstNode(ast.catchClause, state, false);
+    let catchResult = exports.compileAstNode(ast.catchClause, state);
     if (catchResult) {
         state = catchResult.state;
     }
     state = exports.writeEndline(state);
     // write finally
-    let finallyResult = exports.compileAstNode(ast.finallyBlock, state, false);
+    let finallyResult = exports.compileAstNode(ast.finallyBlock, state);
     if (finallyResult) {
         state = finallyResult.state;
     }
@@ -1553,14 +1529,14 @@ exports.compileCatchStatement = (node, state) => {
     // write error declaration if any
     if (ast.varDeclaration) {
         state = exports.writeJsToken(state, `(`);
-        let varResult = exports.compileAstNode(ast.varDeclaration, state, false);
+        let varResult = exports.compileAstNode(ast.varDeclaration, state);
         if (varResult) {
             state = varResult.state;
         }
         state = exports.writeJsToken(state, `) `);
     }
     // write body 
-    let bodyResult = exports.compileAstNode(ast.body, state, false);
+    let bodyResult = exports.compileAstNode(ast.body, state);
     if (bodyResult) {
         state = bodyResult.state;
     }
@@ -1577,7 +1553,7 @@ exports.compileFinallyStatement = (node, state) => {
     // write catch
     state = exports.writeJsToken(state, `finally `);
     // write body 
-    let bodyResult = exports.compileAstNode(ast.body, state, false);
+    let bodyResult = exports.compileAstNode(ast.body, state);
     if (bodyResult) {
         state = bodyResult.state;
     }
@@ -1605,7 +1581,7 @@ exports.compileThrowStatement = (node, state) => {
     // write throw
     state = exports.writeJsToken(state, `throw `);
     // write expression
-    let exprResult = exports.compileAstNode(ast.expression, state, false);
+    let exprResult = exports.compileAstNode(ast.expression, state);
     if (exprResult) {
         state = exprResult.state;
     }
@@ -1622,7 +1598,7 @@ exports.compileNewExpression = (node, state) => {
     // write throw
     state = exports.writeJsToken(state, `new `);
     // write expression
-    let exprResult = exports.compileAstNode(ast.expression, state, false);
+    let exprResult = exports.compileAstNode(ast.expression, state);
     if (exprResult) {
         state = exprResult.state;
     }
@@ -1709,7 +1685,7 @@ exports.writeIndentScope = (indentScope, state) => {
         const indentItem = indentScope[i];
         state = exports.writeJsToken(state, "['");
         // compile indent identifier
-        let itemResult = exports.compileAstNode(indentItem.identifier, state, true);
+        let itemResult = exports.compileAstNode(indentItem.identifier, state);
         if (itemResult) {
             state = itemResult.state;
         }
