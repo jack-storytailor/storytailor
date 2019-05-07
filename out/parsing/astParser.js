@@ -1058,8 +1058,6 @@ exports.parseFunctionDeclaration = (state, isMultiline) => {
         return undefined;
     }
     state = keywordResult.state;
-    // // skip comments and whitespaces
-    // state = skipComments(state, true, isMultiline);
     // parse function params scope
     let paramsScopeResult = exports.parseScope(exports.skipComments(state, true, isMultiline), (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => exports.parseAnyIdentifier(state), (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => exports.skipComments(state, true, true), undefined, (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.Comma]));
     if (!paramsScopeResult) {
@@ -1074,7 +1072,8 @@ exports.parseFunctionDeclaration = (state, isMultiline) => {
     // skip comments and whitespaces
     state = exports.skipComments(state, true, isMultiline);
     // parse function body
-    let blockScopeResult = exports.parseBlockStatement(state);
+    // let blockScopeResult = parseBlockStatement(state);
+    let blockScopeResult = exports.parseScope(state, (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.BraceOpen]), (state) => exports.parseStatement(state, true), (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => exports.skipComments(state, true, true), undefined, (state) => exports.parseTokenSequence(state, [CodeTokenType_1.CodeTokenType.Semicolon]));
     let body;
     if (blockScopeResult) {
         state = blockScopeResult.state;
@@ -1123,18 +1122,20 @@ exports.parseVariableDeclaration = (state, isMultiline) => {
             break;
         default: return undefined;
     }
+    // prepare break tokens
+    let breakTokens = [CodeTokenType_1.CodeTokenType.Endfile, CodeTokenType_1.CodeTokenType.Semicolon];
     // following algorithm can be broken by semicolon or endline, so let's wrap it in while scope that we can easilly break
     let identifier = undefined;
     let initValue = undefined;
     do {
         // check end of statement
-        if (exports.isEndOfFile(state) || exports.getTokenOfType(state, [CodeTokenType_1.CodeTokenType.Endline, CodeTokenType_1.CodeTokenType.Semicolon])) {
+        if (exports.isEndOfFile(state) || exports.getTokenOfType(state, breakTokens)) {
             break;
         }
         // skip comments and whitespace
         state = exports.skipComments(state, true, false);
         // check end of statement
-        if (exports.isEndOfFile(state) || exports.getTokenOfType(state, [CodeTokenType_1.CodeTokenType.Endline, CodeTokenType_1.CodeTokenType.Semicolon])) {
+        if (exports.isEndOfFile(state) || exports.getTokenOfType(state, breakTokens)) {
             break;
         }
         // parse identifier
@@ -1144,13 +1145,13 @@ exports.parseVariableDeclaration = (state, isMultiline) => {
             identifier = identifierResult.result;
         }
         // check end of statement
-        if (exports.isEndOfFile(state) || exports.getTokenOfType(state, [CodeTokenType_1.CodeTokenType.Endline, CodeTokenType_1.CodeTokenType.Semicolon])) {
+        if (exports.isEndOfFile(state) || exports.getTokenOfType(state, breakTokens)) {
             break;
         }
         // skip comments and whitespace
         state = exports.skipComments(state, true, false);
         // check end of statement
-        if (exports.isEndOfFile(state) || exports.getTokenOfType(state, [CodeTokenType_1.CodeTokenType.Endline, CodeTokenType_1.CodeTokenType.Semicolon])) {
+        if (exports.isEndOfFile(state) || exports.getTokenOfType(state, breakTokens)) {
             break;
         }
         // parse equals
@@ -1158,13 +1159,13 @@ exports.parseVariableDeclaration = (state, isMultiline) => {
             /// skip equals token
             state = exports.skipTokens(state, 1);
             // check end of statement
-            if (exports.isEndOfFile(state) || exports.getTokenOfType(state, [CodeTokenType_1.CodeTokenType.Endline, CodeTokenType_1.CodeTokenType.Semicolon])) {
+            if (exports.isEndOfFile(state) || exports.getTokenOfType(state, breakTokens)) {
                 break;
             }
             // skip comments and whitespace
             state = exports.skipComments(state, true, false);
             // check end of statement
-            if (exports.isEndOfFile(state) || exports.getTokenOfType(state, [CodeTokenType_1.CodeTokenType.Endline, CodeTokenType_1.CodeTokenType.Semicolon])) {
+            if (exports.isEndOfFile(state) || exports.getTokenOfType(state, breakTokens)) {
                 break;
             }
             // parse init value expression
@@ -1191,7 +1192,7 @@ exports.parsePropertyDeclaration = (state) => {
     // identifier : value
     // identifier
     let identifier = undefined;
-    let identifierResult = exports.parseIdentifier(state);
+    let identifierResult = exports.parseAnyIdentifier(state);
     if (identifierResult) {
         state = identifierResult.state;
         identifier = identifierResult.result;
@@ -1217,7 +1218,7 @@ exports.parsePropertyDeclaration = (state) => {
             continue;
         }
         // colon
-        if (exports.getTokenOfType(state, [CodeTokenType_1.CodeTokenType.Colon, CodeTokenType_1.CodeTokenType.Endline])) {
+        if (exports.getTokenOfType(state, [CodeTokenType_1.CodeTokenType.Colon])) {
             // skip colon
             state = exports.skipTokens(state, 1);
             // skip comments and whitespace
@@ -3518,7 +3519,7 @@ exports.parseScope = (state, openFilter, itemFilter, closeFilter, skipOptional, 
     state = openResult.state;
     // prepare breakFilter
     if (!breakFilter) {
-        breakFilter = () => true;
+        breakFilter = () => false;
     }
     // parse items
     let items = [];
