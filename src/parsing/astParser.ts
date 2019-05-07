@@ -1331,7 +1331,16 @@ export const parseFunctionDeclaration = (state: IParserState, isMultiline: boole
   state = skipComments(state, true, isMultiline);
 
   // parse function body
-  let blockScopeResult = parseBlockStatement(state);
+  // let blockScopeResult = parseBlockStatement(state);
+  let blockScopeResult = parseScope(
+    state,
+    (state) => parseTokenSequence(state, [CodeTokenType.BraceOpen]),
+    (state) => parseStatement(state, true),
+    (state) => parseTokenSequence(state, [CodeTokenType.BraceClose]),
+    (state) => skipComments(state, true, true),
+    undefined,
+    (state) => parseTokenSequence(state, [CodeTokenType.Semicolon])
+  );
   let body: IAstProgram;
   if (blockScopeResult) {
     state = blockScopeResult.state;
@@ -1382,18 +1391,19 @@ export const parseVariableDeclaration = (state: IParserState, isMultiline: boole
     default: return undefined;
   }
 
+  // prepare break tokens
+  let breakTokens = [CodeTokenType.Endfile, CodeTokenType.Semicolon];
+
   // following algorithm can be broken by semicolon or endline, so let's wrap it in while scope that we can easilly break
   let identifier: IAstNode = undefined;
   let initValue: IAstNode = undefined;
   do {
     // check end of statement
-    if (isEndOfFile(state) || getTokenOfType(state, [CodeTokenType.Endline, CodeTokenType.Semicolon])) {
-      break;
-    }
+    if (isEndOfFile(state) || getTokenOfType(state, breakTokens)) { break; }
     // skip comments and whitespace
     state = skipComments(state, true, false);
     // check end of statement
-    if (isEndOfFile(state) || getTokenOfType(state, [CodeTokenType.Endline, CodeTokenType.Semicolon])) { break; }
+    if (isEndOfFile(state) || getTokenOfType(state, breakTokens)) { break; }
 
     // parse identifier
     let identifierResult = parseAnyIdentifier(state);
@@ -1403,11 +1413,11 @@ export const parseVariableDeclaration = (state: IParserState, isMultiline: boole
     }
 
     // check end of statement
-    if (isEndOfFile(state) || getTokenOfType(state, [CodeTokenType.Endline, CodeTokenType.Semicolon])) { break; }
+    if (isEndOfFile(state) || getTokenOfType(state, breakTokens)) { break; }
     // skip comments and whitespace
     state = skipComments(state, true, false);
     // check end of statement
-    if (isEndOfFile(state) || getTokenOfType(state, [CodeTokenType.Endline, CodeTokenType.Semicolon])) { break; }
+    if (isEndOfFile(state) || getTokenOfType(state, breakTokens)) { break; }
 
     // parse equals
     if (getTokenOfType(state, [CodeTokenType.Equals])) {
@@ -1415,11 +1425,11 @@ export const parseVariableDeclaration = (state: IParserState, isMultiline: boole
       state = skipTokens(state, 1);
 
       // check end of statement
-      if (isEndOfFile(state) || getTokenOfType(state, [CodeTokenType.Endline, CodeTokenType.Semicolon])) { break; }
+      if (isEndOfFile(state) || getTokenOfType(state, breakTokens)) { break; }
       // skip comments and whitespace
       state = skipComments(state, true, false);
       // check end of statement
-      if (isEndOfFile(state) || getTokenOfType(state, [CodeTokenType.Endline, CodeTokenType.Semicolon])) { break; }
+      if (isEndOfFile(state) || getTokenOfType(state, breakTokens)) { break; }
 
       // parse init value expression
       let expressionResult = parseExpression(state, isMultiline);
@@ -1448,7 +1458,7 @@ export const parsePropertyDeclaration = (state: IParserState): IParseResult<IAst
   
   // identifier
   let identifier: IAstNode = undefined;
-  let identifierResult = parseIdentifier(state);
+  let identifierResult = parseAnyIdentifier(state);
   if (identifierResult) {
     state = identifierResult.state;
     identifier = identifierResult.result;
@@ -1476,7 +1486,7 @@ export const parsePropertyDeclaration = (state: IParserState): IParseResult<IAst
     }
 
     // colon
-    if (getTokenOfType(state, [CodeTokenType.Colon, CodeTokenType.Endline])) {
+    if (getTokenOfType(state, [CodeTokenType.Colon])) {
       // skip colon
       state = skipTokens(state, 1);
 
@@ -1498,7 +1508,8 @@ export const parsePropertyDeclaration = (state: IParserState): IParseResult<IAst
 
   // skip comments and whitespace
   state = skipComments(state, true, true);
-    // skip comma
+  
+  // skip comma
   if (getTokenOfType(state, [CodeTokenType.Comma])) {
     state = skipTokens(state, 1);
     finalState = state;
