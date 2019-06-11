@@ -10,6 +10,7 @@ import { ICompileRequest } from '../shared/ICompileRequest';
 import { ICompilerState, CompileStatus } from '../shared/ICompilerState';
 import { IDiagnostic, ParsingErrorType } from '../shared/IParsingError';
 import { ISymbolPosition } from '../shared/ISymbolPosition';
+import { collectBindings, ICollectBindingsRequest } from '../parsing/astBinder';
 
 export const compile = (request: ICompileRequest): ICompilerState => {
   let state: ICompilerState = undefined;
@@ -115,11 +116,11 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
       let outputFileContent: string = '';
       
       // parse sts2
-      let parseResult2 = astParser.parseModule(tokens, sourceFileName);
+      let parseResult = astParser.parseModule(tokens, sourceFileName);
       const targetFileName = jsFileNames && jsFileNames.length > i ? jsFileNames[i] : undefined;
-      if (parseResult2) {
-        let astModule = parseResult2.result;
-        let parsingState = parseResult2.state;
+      if (parseResult) {
+        let astModule = parseResult.result;
+        let parsingState = parseResult.state;
 
         // check if there was parsing errors
         if (parsingState.errors) {
@@ -130,6 +131,13 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
             state = addDiagnostic(state, diagnostic);
           }
         }
+
+        // TEMP: Collect bindings
+        let collectBindingsRequest: ICollectBindingsRequest = {
+          ast: astModule
+        };
+        let collectBindingsResult = collectBindings(collectBindingsRequest);
+        
 
         // compile ast
         let compileResult = jsCompiler.compile({

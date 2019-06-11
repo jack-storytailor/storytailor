@@ -1363,7 +1363,7 @@ export const astUtils = {
 
   },
 
-  forEachChildSpecific: (root: IAstNode, operations: IHash<(node) => void>) => {
+  forEachChildSpecific: (root: IAstNode, operations: IHash<(node) => void>, defaultOp: (node) => void) => {
     if (!root || !operations) {
       return;
     }
@@ -1371,7 +1371,7 @@ export const astUtils = {
     let rootNodeType: AstNodeType = root.nodeType;
 
     switch (rootNodeType) {
-      
+
       case AstNodeType.Token: {
         let astNode = astFactory.asNode<IAstToken>(root, AstNodeType.Token);
         if (!astNode) { return; }
@@ -1384,7 +1384,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1405,7 +1405,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1426,7 +1426,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1447,7 +1447,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1468,7 +1468,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1489,7 +1489,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1510,7 +1510,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1531,7 +1531,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1552,7 +1552,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1573,7 +1573,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1594,7 +1594,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1615,7 +1615,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1636,7 +1636,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1657,7 +1657,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1678,7 +1678,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1699,7 +1699,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1720,7 +1720,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1741,7 +1741,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1762,7 +1762,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1783,7 +1783,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1804,7 +1804,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1825,7 +1825,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1846,7 +1846,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1867,7 +1867,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1888,7 +1888,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1909,7 +1909,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1930,7 +1930,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1951,7 +1951,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1972,7 +1972,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -1993,7 +1993,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2014,7 +2014,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2035,7 +2035,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2056,7 +2056,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2077,7 +2077,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2098,7 +2098,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2119,7 +2119,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2140,7 +2140,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2161,7 +2161,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2182,7 +2182,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2203,7 +2203,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2224,7 +2224,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2245,7 +2245,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2266,7 +2266,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2287,7 +2287,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2308,7 +2308,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2329,7 +2329,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2350,7 +2350,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2371,7 +2371,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2392,7 +2392,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2413,7 +2413,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2434,7 +2434,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2455,7 +2455,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2476,7 +2476,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2497,7 +2497,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2518,7 +2518,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2539,7 +2539,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2560,7 +2560,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);
@@ -2581,7 +2581,7 @@ export const astUtils = {
       
         children.forEach(child => { 
           if (child) {
-            let operation = operations[child.nodeType];
+            let operation = operations[child.nodeType] || defaultOp;
             if (!operation) { return; }
             
             operation(child);

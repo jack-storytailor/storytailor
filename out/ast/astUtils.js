@@ -1528,7 +1528,7 @@ exports.astUtils = {
             default: break;
         }
     },
-    forEachChildSpecific: (root, operations) => {
+    forEachChildSpecific: (root, operations, defaultOp) => {
         if (!root || !operations) {
             return;
         }
@@ -1549,7 +1549,7 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
-                        let operation = operations[child.nodeType];
+                        let operation = operations[child.nodeType] || defaultOp;
                         if (!operation) {
                             return;
                         }
@@ -1573,6 +1573,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1593,6 +1597,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1613,6 +1621,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1633,6 +1645,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1653,6 +1669,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1673,6 +1693,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1693,6 +1717,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1713,6 +1741,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1733,6 +1765,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1753,6 +1789,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1773,6 +1813,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1793,6 +1837,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1813,6 +1861,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1833,6 +1885,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1853,6 +1909,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1873,6 +1933,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1893,6 +1957,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1913,6 +1981,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1933,6 +2005,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1953,6 +2029,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1973,6 +2053,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -1993,6 +2077,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2013,6 +2101,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2033,6 +2125,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2053,6 +2149,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2073,6 +2173,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2093,6 +2197,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2113,6 +2221,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2133,6 +2245,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2153,6 +2269,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2173,6 +2293,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2193,6 +2317,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2213,6 +2341,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2233,6 +2365,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2253,6 +2389,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2273,6 +2413,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2293,6 +2437,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2313,6 +2461,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2333,6 +2485,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2353,6 +2509,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2373,6 +2533,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2393,6 +2557,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2413,6 +2581,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2433,6 +2605,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2453,6 +2629,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2473,6 +2653,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2493,6 +2677,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2513,6 +2701,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2533,6 +2725,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2553,6 +2749,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2573,6 +2773,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2593,6 +2797,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2613,6 +2821,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2633,6 +2845,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2653,6 +2869,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2673,6 +2893,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2693,6 +2917,10 @@ exports.astUtils = {
                 }
                 children.forEach(child => {
                     if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
                         operation(child);
                     }
                 });
@@ -2700,5 +2928,5 @@ exports.astUtils = {
             }
             default: break;
         }
-    }
+    },
 };

@@ -100,7 +100,7 @@ for (const key in obj) {
   caseResult = [...caseResult, ``];
   caseResult = [...caseResult, `  children.forEach(child => { `];
   caseResult = [...caseResult, `    if (child) {`];
-  caseResult = [...caseResult, `      let operation = operations[child.nodeType];`];
+  caseResult = [...caseResult, `      let operation = operations[child.nodeType] || defaultOp;`];
   caseResult = [...caseResult, `      if (!operation) { return; }`];
   caseResult = [...caseResult, `      `];
   caseResult = [...caseResult, `      operation(child);`];
@@ -124,3 +124,4 @@ let resultText = result.join('\n\n');
 // resultText = chResult.join(',\n\n');
 
 console.log(resultText);
+

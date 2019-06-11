@@ -62,5 +62,5 @@ export declare const astUtils: {
         Tag: (ast: IAstTag) => IAstNode[];
     };
     forEachChild: (root: IAstNode, operation: (node: IAstNode) => void) => void;
-    forEachChildSpecific: (root: IAstNode, operations: IHash<(node: any) => void>) => void;
+    forEachChildSpecific: (root: IAstNode, operations: IHash<(node: any) => void>, defaultOp: (node: any) => void) => void;
 };

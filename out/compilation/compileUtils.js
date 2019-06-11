@@ -10,6 +10,7 @@ const astParser = require("../parsing/astParser");
 const jsCompiler = require("../compilation/jsCompiler");
 const ICompilerState_1 = require("../shared/ICompilerState");
 const IParsingError_1 = require("../shared/IParsingError");
+const astBinder_1 = require("../parsing/astBinder");
 exports.compile = (request) => {
     let state = undefined;
     try {
@@ -73,11 +74,11 @@ exports.compileProject = (state) => {
             // print compiled
             let outputFileContent = '';
             // parse sts2
-            let parseResult2 = astParser.parseModule(tokens, sourceFileName);
+            let parseResult = astParser.parseModule(tokens, sourceFileName);
             const targetFileName = jsFileNames && jsFileNames.length > i ? jsFileNames[i] : undefined;
-            if (parseResult2) {
-                let astModule = parseResult2.result;
-                let parsingState = parseResult2.state;
+            if (parseResult) {
+                let astModule = parseResult.result;
+                let parsingState = parseResult.state;
                 // check if there was parsing errors
                 if (parsingState.errors) {
                     let parsingErrors = parsingState.errors;
@@ -87,6 +88,11 @@ exports.compileProject = (state) => {
                         state = addDiagnostic(state, diagnostic);
                     }
                 }
+                // TEMP: Collect bindings
+                let collectBindingsRequest = {
+                    ast: astModule
+                };
+                let collectBindingsResult = astBinder_1.collectBindings(collectBindingsRequest);
                 // compile ast
                 let compileResult = jsCompiler.compile({
                     ast: [astModule],
