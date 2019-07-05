@@ -1017,7 +1017,8 @@ export const parseArrayLiteral = (state: IParserState): IParseResult<IAstArray> 
     state,
     (state) => parseTokenSequence(state, [CodeTokenType.BracketOpen]),
     (state) => parseStatement(state, true),
-    (state) => parseTokenSequence(state, [CodeTokenType.BracketClose])
+    (state) => parseTokenSequence(state, [CodeTokenType.BracketClose]),
+    (state) => skipComments(state, true, true)
   );
   if (!scopeResult) {
     return undefined;
@@ -1464,7 +1465,7 @@ export const parseVariableDeclaration = (state: IParserState, isMultiline: boole
 export const parsePropertyDeclaration = (state: IParserState): IParseResult<IAstPropertyDeclaration> => {
   if (isEndOfFile(state)) {
     return undefined;
-  }
+  } 
 
   let start = getCursorPosition(state);
   // identifier : value
