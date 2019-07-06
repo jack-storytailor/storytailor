@@ -1,5 +1,5 @@
 /**
  * params:
- * configpath modulePath outputPath
+ * configPath modulePath outputPath [-multifile]
  */
 export {};

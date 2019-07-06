@@ -20,4 +20,5 @@ const visitNode = (node, state) => {
         return;
     }
     console.log("node, start, end: ", node.nodeType, node.start, node.end);
+    astUtils_1.astUtils.forEachChild(node, (node) => { visitNode(node, state); });
 };

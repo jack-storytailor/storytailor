@@ -45,3 +45,83 @@ export const loadConfig = (configPath: string): IStsConfig => {
 
   return undefined;
 }
+
+export const loadConfig2 = (configPath: string): {isSuccess: boolean, config: IStsConfig, errors: string[]} => {
+
+  let errors: string[] = [];
+  let isSuccess = false;
+  let config: IStsConfig = undefined;
+
+  try {
+
+    do {
+      
+      // check for file existance
+      if (!fs.existsSync(configPath)) {
+        errors = [...errors, `can't find config file ${configPath}`];
+        
+        // break execution
+        break;
+      }
+
+      // load file content
+      try {
+        const configContent = fs.readFileSync(configPath, 'utf8').toString();
+        config = JSON.parse(configContent) as IStsConfig;
+      } catch (error) {
+        errors = [
+          ...errors,
+          `error loading config: ${error}`
+        ];
+
+        // break execution
+        break;
+      }
+
+      // process config data
+      let configDir = path.dirname(configPath);
+      config.sourceRoot = path.resolve(configDir, config.sourceRoot);
+      config.javascriptOutputRoot = path.resolve(configDir, config.javascriptOutputRoot);
+
+      // parse inclide and exclude
+      let exclude = config.exclude ? config.exclude.map((strPattern: string): RegExp => {
+        try {
+          return new RegExp(strPattern);
+        } catch (error) {
+          console.error(error);
+          return undefined;
+        }
+      }).filter((item) => item instanceof RegExp) : undefined;
+      let include = config.include ? config.include.map((strPattern: string): RegExp => {
+        try {
+          return new RegExp(strPattern);
+        } catch (error) {
+          console.error(error);
+          return undefined;
+        }
+      }).filter((item) => item instanceof RegExp) : undefined;
+
+      config.includeParsed = include;
+      config.excludeParsed = exclude;
+    
+      isSuccess = true;
+
+      break;
+    } while (false)
+
+  } catch (error) {
+    errors = [
+      ...errors,
+      `error loading config: ${error}`
+    ];
+  }
+
+  // prepare result
+  let result = {
+    isSuccess,
+    config,
+    errors
+  };
+
+  return result;
+}
