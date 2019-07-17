@@ -213,7 +213,7 @@ export const compile = (request: ICompileFileRequest): ICompileFileResult => {
   state = writeEndline(state);
   state = writeJsToken(state, `// INFO: this trick is for making this file node module`);
   state = writeEndline(state);
-  state = writeJsToken(state, `module.exports = ${compilerConfig.contextVarName};`);
+  state = writeJsToken(state, `Object.assign(module.exports, ${compilerConfig.contextVarName});`);
   state = writeEndline(state);
   
   // prepare source maps
