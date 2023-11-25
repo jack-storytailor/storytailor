@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseCompileRequest = exports.createCompilerState = exports.compileProject = exports.compile = void 0;
 const path = require("path");
 const fs = require("fs");
 const configUtils = require("../configuration/configUtils");
@@ -31,7 +32,7 @@ exports.compile = (request) => {
             let execOuputText = execOutputResult.toString();
             console.log('executing ', command, ' done with result ', execOuputText);
         }
-        state = Object.assign({}, state, { status: ICompilerState_1.CompileStatus.Ok });
+        state = Object.assign(Object.assign({}, state), { status: ICompilerState_1.CompileStatus.Ok });
         console.log('compilation done with state', state.status);
         return state;
     }
@@ -84,7 +85,7 @@ exports.compileProject = (state) => {
                     let parsingErrors = parsingState.errors;
                     for (let i = 0; i < parsingErrors.length; i++) {
                         let diagnostic = parsingErrors[i];
-                        diagnostic = Object.assign({}, diagnostic, { source: sourceFileName });
+                        diagnostic = Object.assign(Object.assign({}, diagnostic), { source: sourceFileName });
                         state = addDiagnostic(state, diagnostic);
                     }
                 }
@@ -148,7 +149,7 @@ exports.createCompilerState = (request) => {
     if (configPath && !config) {
         config = configUtils.loadConfig(configPath);
     }
-    state = Object.assign({}, state, { config });
+    state = Object.assign(Object.assign({}, state), { config });
     // if we still don't have a config, report error
     if (!config) {
         state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Error, `can't load config file on path ${configPath}`, undefined, undefined, 1, configPath);
@@ -173,7 +174,7 @@ exports.createCompilerState = (request) => {
         result = path.resolve(path.dirname(result), path.basename(result, path.extname(result)) + '.js');
         return result;
     }) : undefined;
-    state = Object.assign({}, state, { sourceFileNames,
+    state = Object.assign(Object.assign({}, state), { sourceFileNames,
         relativeFileNames,
         javascriptFileNames });
     return state;
@@ -208,7 +209,7 @@ exports.parseCompileRequest = (args) => {
             if (args.length > i + 1) {
                 let filePath = args[i + 1];
                 i++;
-                request = Object.assign({}, request, { filePath: filePath });
+                request = Object.assign(Object.assign({}, request), { filePath: filePath });
             }
             continue;
         }
@@ -219,7 +220,7 @@ exports.parseCompileRequest = (args) => {
                 i++;
                 if (args.length > i + 1) {
                     let outFile = args[i + 1];
-                    request = Object.assign({}, request, { output: {
+                    request = Object.assign(Object.assign({}, request), { output: {
                             sourceFilePath: sourceFile,
                             outputFilePath: outFile
                         } });
@@ -281,10 +282,10 @@ const addDiagnostic = (state, diagnostic) => {
             ...diagArray,
             diagnostic
         ];
-        sortedDiagnostics = Object.assign({}, sortedDiagnostics, { [sourcePath]: diagArray });
-        state = Object.assign({}, state, { sortedDiagnostics: sortedDiagnostics });
+        sortedDiagnostics = Object.assign(Object.assign({}, sortedDiagnostics), { [sourcePath]: diagArray });
+        state = Object.assign(Object.assign({}, state), { sortedDiagnostics: sortedDiagnostics });
     }
-    state = Object.assign({}, state, { diagnostics: [
+    state = Object.assign(Object.assign({}, state), { diagnostics: [
             ...state.diagnostics,
             diagnostic
         ] });

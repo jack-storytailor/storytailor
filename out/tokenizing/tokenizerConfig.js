@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.stsConfig = void 0;
 const CodeTokenType_1 = require("../shared/CodeTokenType");
 const OperationType_1 = require("../shared/OperationType");
 const separators = [
@@ -226,19 +227,28 @@ const operationsByPriority = [
 ];
 const sortTokenConfigs = (configs) => {
     const result = configs.reduce((prev, curr, index, array) => {
-        return Object.assign({}, prev, { [curr.type]: curr });
+        return Object.assign(Object.assign({}, prev), { [curr.type]: curr });
     }, {});
     return result;
 };
 const sortOperationConfigs = (configs) => {
     const result = configs.reduce((prev, curr, index, array) => {
-        return Object.assign({}, prev, { [curr.type]: curr });
+        return Object.assign(Object.assign({}, prev), { [curr.type]: curr });
     }, {});
+    return result;
+};
+const makeOperationsByPattern = (configs) => {
+    let result = new Map();
+    for (let opIndex = 0; opIndex < configs.length; opIndex++) {
+        let operation = configs[opIndex];
+        result[`${operation.pattern}`] = operation;
+    }
     return result;
 };
 const sortedSeparators = sortTokenConfigs(separators);
 const sortedTokens = sortTokenConfigs(tokens);
 const sortedOperations = sortOperationConfigs(operations);
+const operationsByPattern = makeOperationsByPattern(operations);
 const combinePatterns = (patterns, separator = '|', isGroup = true) => {
     const result = patterns.reduce((prev, curr, index, array) => {
         const pattern = isGroup ? `(${curr})` : `(?:${curr})`;
@@ -285,6 +295,7 @@ exports.stsConfig = {
     sortedSeparators,
     sortedTokens,
     sortedOperations,
+    operationsByPattern,
     allSeparatorsPattern,
     allSeparatorsRegexp,
     allTokensPattern,

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AstNodeType = void 0;
 var AstNodeType;
 (function (AstNodeType) {
     // general

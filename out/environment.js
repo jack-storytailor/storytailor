@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.clearText = exports.subitemsToString = exports.getSerializer = exports.testFunction = exports.objectToString = void 0;
 exports.objectToString = (obj, separator, indent) => {
     if (!obj) {
         return '';
@@ -87,5 +88,5 @@ exports.clearText = (context) => {
     if (!context || !context.__text) {
         return context;
     }
-    return Object.assign({}, context, { __text: [] });
+    return Object.assign(Object.assign({}, context), { __text: [] });
 };

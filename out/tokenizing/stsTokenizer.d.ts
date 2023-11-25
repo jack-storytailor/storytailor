@@ -10,6 +10,7 @@ export interface ITokenizerState {
 export declare const stsTokenizer: {
     tokenizeCode: (sourceCode: string) => ICodeToken[];
     getNextToken: (state: ITokenizerState, fallbackTokenType: CodeTokenType, pattern?: string) => ICodeToken;
+    addToken_old: (state: ITokenizerState, token: ICodeToken) => ITokenizerState;
     addToken: (state: ITokenizerState, token: ICodeToken) => ITokenizerState;
     isEndOfFile: (state: ITokenizerState) => boolean;
 };

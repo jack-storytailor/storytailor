@@ -1,7 +1,7 @@
 import { ICodeToken } from "../shared/ICodeToken";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { IHash } from "../shared/IHash";
-import { CodeTokenType } from "../shared/CodeTokenType";
+import { CodeTokenType, CodeTokenTypeSequence } from "../shared/CodeTokenType";
 import { ParsingErrorType, IDiagnostic } from "../shared/IParsingError";
 import { KeywordType } from "../ast/KeywordType";
 import { OperatorType } from "../ast/OperatorType";
@@ -128,9 +128,9 @@ export declare const skipTokensOfType: (state: IParserState, tokenTypes: CodeTok
 export declare const skipUntil: (state: IParserState, tokenTypes: CodeTokenType[]) => IParserState;
 export declare const checkTokenSequence: (state: IParserState, tokenTypes: CodeTokenType[]) => boolean;
 export declare const parseTokenSequence: (state: IParserState, tokenTypes: CodeTokenType[]) => IParseResult<IAstTokenSequence>;
-export declare const checkTokenSequences: (state: IParserState, sequences: CodeTokenType[][]) => CodeTokenType[];
-export declare const parseTokenSequences: (state: IParserState, sequences: CodeTokenType[][]) => IParseResult<{
-    tokens: CodeTokenType[];
+export declare const checkTokenSequences: (state: IParserState, sequences: CodeTokenTypeSequence[]) => CodeTokenTypeSequence;
+export declare const parseTokenSequences: (state: IParserState, sequences: CodeTokenTypeSequence[]) => IParseResult<{
+    tokens: CodeTokenTypeSequence;
     sequence: IAstTokenSequence;
 }>;
 export declare const skipTokens: (state: IParserState, tokensCount: number) => IParserState;

@@ -11,7 +11,7 @@ export interface ITokenizerState {
 }
 
 export const stsTokenizer = {
-  tokenizeCode: (sourceCode: string): ICodeToken[] => {
+	tokenizeCode: (sourceCode: string): ICodeToken[] => {
 		let state: ITokenizerState = {
 			sourceCode: sourceCode,
 			cursor: { symbol: 0, line: 0, column: 0 },
@@ -28,44 +28,45 @@ export const stsTokenizer = {
 	},
 
 	getNextToken: (state: ITokenizerState, fallbackTokenType: CodeTokenType, pattern?: string): ICodeToken => {
-    if (stsTokenizer.isEndOfFile(state)) {
-      return undefined;
-    }
-    
-    pattern = pattern || stsConfig.allSeparatorsPattern;
-    pattern = stsConfig.wrapPatternWithCursorPos(pattern, state.globalCursor);
+		// check for end of file
+		if (stsTokenizer.isEndOfFile(state)) {
+			return undefined;
+		}
+
+		// prepare regexp and do the match
+		pattern = pattern || stsConfig.allSeparatorsPattern;
+		pattern = stsConfig.wrapPatternWithCursorPos(pattern, state.globalCursor);
 		const regexp = new RegExp(pattern);
 
-
 		let match = regexp.exec(state.sourceCode);
-    let searchIndex: number = match ? match.index : 0;
-    if (!match) {
-      
-      if (state.globalCursor < state.sourceCode.length) {
-        //check is it last token in file
-        let pattern2 = `(?:.|\\r|\\n){${state.globalCursor}}(.*)`;
-        match = new RegExp(pattern2).exec(state.sourceCode);
-      }
-      
-      if (!match) {
-        return undefined;
-      }
-    }
-    
+		let searchIndex: number = match ? match.index : 0;
+		if (!match) {
+
+			if (state.globalCursor < state.sourceCode.length) {
+				//check is it last token in file
+				let pattern2 = `(?:.|\\r|\\n){${state.globalCursor}}(.*)`;
+				match = new RegExp(pattern2).exec(state.sourceCode);
+			}
+
+			if (!match) {
+				return undefined;
+			}
+		}
+
 		let tokenLength: number;
 		let tokenValue: string;
 		let tokenType: CodeTokenType;
 
 		if (searchIndex === 0) {
-      tokenValue = match[0].substr(state.globalCursor);
+			tokenValue = match[0].substring(state.globalCursor);
 			tokenType = stsConfig.getTokenType(tokenValue) || fallbackTokenType;
 			tokenLength = tokenValue.length;
 		}
-		
+
 		if (!tokenValue) {
 			//token type is fallbackTokenType
 			tokenLength = searchIndex;
-      tokenValue = state.sourceCode.substr(state.globalCursor, tokenLength) || '';
+			tokenValue = state.sourceCode.substring(state.globalCursor, tokenLength) || '';
 			tokenType = fallbackTokenType;
 		}
 
@@ -87,7 +88,7 @@ export const stsTokenizer = {
 		return token;
 	},
 
-	addToken: (state: ITokenizerState, token: ICodeToken): ITokenizerState => {
+	addToken_old: (state: ITokenizerState, token: ICodeToken): ITokenizerState => {
 		const tokens = [
 			...state.tokens,
 			token,
@@ -97,7 +98,7 @@ export const stsTokenizer = {
 		let symbol: number = state.cursor.symbol + tokenLenght;
 		let column: number = state.cursor.column + tokenLenght;
 		let line: number = state.cursor.line;
-		
+
 		// check if token is endline, reset column to 0 and increase line
 		if (token.type === CodeTokenType.Endline) {
 			line = line + 1;
@@ -109,8 +110,8 @@ export const stsTokenizer = {
 			symbol,
 			column,
 			line
-    };
-		
+		};
+
 		state = {
 			...state,
 			tokens,
@@ -119,9 +120,52 @@ export const stsTokenizer = {
 		};
 
 		return state;
-  },
-  
-  isEndOfFile: (state: ITokenizerState): boolean => {
-    return !state.sourceCode || state.globalCursor >= state.sourceCode.length;
-  }
+	},
+
+	addToken: (state: ITokenizerState, token: ICodeToken): ITokenizerState => {
+		// add token
+		if (!state.tokens) {
+			state.tokens = [token];
+		}
+		else {
+			state.tokens.push(token);
+		}
+
+		// calculate all remaining values
+		const tokenLenght = token.end.symbol - token.start.symbol;
+		const symbol: number = state.cursor.symbol + tokenLenght;
+		let column: number = state.cursor.column + tokenLenght;
+		let line: number = state.cursor.line;
+
+		// check if token is endline, reset column to 0 and increase line
+		if (token.type === CodeTokenType.Endline) {
+			line = line + 1;
+			column = 0;
+		}
+
+		// update all remaining state's values
+
+		// global cursor
+		state.globalCursor = state.globalCursor + tokenLenght;
+
+		// cursor
+		if (!state.cursor) {
+			state.cursor = {
+				symbol,
+				column,
+				line
+			}
+		}
+		else {
+			state.cursor.symbol = symbol;
+			state.cursor.column = column;
+			state.cursor.line = line;
+		}
+
+		return state;
+	},
+
+	isEndOfFile: (state: ITokenizerState): boolean => {
+		return !state.sourceCode || state.globalCursor >= state.sourceCode.length;
+	}
 }

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.symbolFactory = void 0;
 const ISymbol_1 = require("./ISymbol");
 exports.symbolFactory = {
     primitive: (localName, fullName, start, end) => {

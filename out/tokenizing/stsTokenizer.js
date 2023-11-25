@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.stsTokenizer = void 0;
 const tokenizerConfig_1 = require("./tokenizerConfig");
 const CodeTokenType_1 = require("../shared/CodeTokenType");
 exports.stsTokenizer = {
@@ -17,9 +18,11 @@ exports.stsTokenizer = {
         return state.tokens;
     },
     getNextToken: (state, fallbackTokenType, pattern) => {
+        // check for end of file
         if (exports.stsTokenizer.isEndOfFile(state)) {
             return undefined;
         }
+        // prepare regexp and do the match
         pattern = pattern || tokenizerConfig_1.stsConfig.allSeparatorsPattern;
         pattern = tokenizerConfig_1.stsConfig.wrapPatternWithCursorPos(pattern, state.globalCursor);
         const regexp = new RegExp(pattern);
@@ -39,18 +42,18 @@ exports.stsTokenizer = {
         let tokenValue;
         let tokenType;
         if (searchIndex === 0) {
-            tokenValue = match[0].substr(state.globalCursor);
+            tokenValue = match[0].substring(state.globalCursor);
             tokenType = tokenizerConfig_1.stsConfig.getTokenType(tokenValue) || fallbackTokenType;
             tokenLength = tokenValue.length;
         }
         if (!tokenValue) {
             //token type is fallbackTokenType
             tokenLength = searchIndex;
-            tokenValue = state.sourceCode.substr(state.globalCursor, tokenLength) || '';
+            tokenValue = state.sourceCode.substring(state.globalCursor, tokenLength) || '';
             tokenType = fallbackTokenType;
         }
         const start = Object.assign({}, state.cursor);
-        const end = Object.assign({}, start, { symbol: start.symbol + tokenLength, column: start.column + tokenLength });
+        const end = Object.assign(Object.assign({}, start), { symbol: start.symbol + tokenLength, column: start.column + tokenLength });
         let token = {
             type: tokenType,
             value: tokenValue,
@@ -60,7 +63,7 @@ exports.stsTokenizer = {
         };
         return token;
     },
-    addToken: (state, token) => {
+    addToken_old: (state, token) => {
         const tokens = [
             ...state.tokens,
             token,
@@ -81,9 +84,45 @@ exports.stsTokenizer = {
             column,
             line
         };
-        state = Object.assign({}, state, { tokens,
+        state = Object.assign(Object.assign({}, state), { tokens,
             globalCursor,
             cursor });
+        return state;
+    },
+    addToken: (state, token) => {
+        // add token
+        if (!state.tokens) {
+            state.tokens = [token];
+        }
+        else {
+            state.tokens.push(token);
+        }
+        // calculate all remaining values
+        const tokenLenght = token.end.symbol - token.start.symbol;
+        const symbol = state.cursor.symbol + tokenLenght;
+        let column = state.cursor.column + tokenLenght;
+        let line = state.cursor.line;
+        // check if token is endline, reset column to 0 and increase line
+        if (token.type === CodeTokenType_1.CodeTokenType.Endline) {
+            line = line + 1;
+            column = 0;
+        }
+        // update all remaining state's values
+        // global cursor
+        state.globalCursor = state.globalCursor + tokenLenght;
+        // cursor
+        if (!state.cursor) {
+            state.cursor = {
+                symbol,
+                column,
+                line
+            };
+        }
+        else {
+            state.cursor.symbol = symbol;
+            state.cursor.column = column;
+            state.cursor.line = line;
+        }
         return state;
     },
     isEndOfFile: (state) => {

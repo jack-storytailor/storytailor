@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.CodeTokenType = void 0;
 var CodeTokenType;
 (function (CodeTokenType) {
     // \r?\n

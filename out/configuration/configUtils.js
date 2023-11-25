@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.loadConfig2 = exports.loadConfig = void 0;
 const fs = require("fs");
 const path = require("path");
 exports.loadConfig = (configPath) => {

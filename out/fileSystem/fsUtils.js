@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getRelativeFileName = exports.filterFileNames = exports.getFileNamesAndFilter = exports.getFileNames = exports.copyDirectory = exports.mkDirByPathSync = void 0;
 const fs = require("fs");
 const path = require("path");
 exports.mkDirByPathSync = (targetDir, { isRelativeToScript = false } = {}) => {

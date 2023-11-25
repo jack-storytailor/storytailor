@@ -9,6 +9,8 @@ export interface IOperationConfig {
     type: OperationType;
     pattern: string;
 }
+export interface IOperationsByPattern extends Map<string, IOperationConfig> {
+}
 export declare const stsConfig: {
     separators: ITokenConfig[];
     tokens: ITokenConfig[];
@@ -16,6 +18,7 @@ export declare const stsConfig: {
     sortedSeparators: IHash<ITokenConfig>;
     sortedTokens: IHash<ITokenConfig>;
     sortedOperations: IHash<IOperationConfig>;
+    operationsByPattern: IOperationsByPattern;
     allSeparatorsPattern: string;
     allSeparatorsRegexp: RegExp;
     allTokensPattern: string;

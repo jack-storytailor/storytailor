@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.SymbolType = void 0;
 var SymbolType;
 (function (SymbolType) {
     SymbolType["Primitive"] = "Primitive";

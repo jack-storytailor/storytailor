@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.addSourceMaps = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = exports.compileNewExpression = exports.compileThrowStatement = exports.compileDebuggerKeyword = exports.compileFinallyStatement = exports.compileCatchStatement = exports.compileTryStatement = exports.compileIndexerExpression = exports.compileConditionalExpression = exports.compileKeyword = exports.compileUpdateExpression = exports.compileObjectExpression = exports.compileArrayLiteral = exports.compileForInStatement = exports.compileForStatement = exports.compilePropertyDeclaration = exports.compileImportStatement = exports.compileParenExpression = exports.compileCaseStatement = exports.compileSwitchStatement = exports.compileDoWhileStatement = exports.compileWhileStatement = exports.compileIfStatement = exports.compileContinueStatement = exports.compileBreakStatement = exports.compileDeleteExpression = exports.compileReturnStatement = exports.compileProgram = exports.compileFuncDeclaration = exports.compileVarDeclaration = exports.compileCallExpression = exports.compileStringInclude = exports.compileMemberExpression = exports.compileBinaryExpression = exports.compileContextIdentifier = exports.compileRawIdentifier = exports.compileIdentifierScope = exports.compileIdentifier = exports.compileBoolean = exports.compileNumber = exports.compileTextLine = exports.compileStatement = exports.compileDeleteLine = exports.compileObjectLine = exports.compileBlockStatement = exports.compileOuterStatement = exports.compileAstModule = exports.compileAstNode = exports.compile = exports.compileSingleNode = exports.compilerConfig = void 0;
 const source_map_1 = require("source-map");
 const AstNodeType_1 = require("../ast/AstNodeType");
 const astFactory_1 = require("../ast/astFactory");
@@ -131,7 +132,7 @@ exports.compile = (request) => {
     state = exports.writeEndline(state);
     state = exports.writeJsToken(state, `// INFO: this trick is for making this file node module`);
     state = exports.writeEndline(state);
-    state = exports.writeJsToken(state, `module.exports = ${exports.compilerConfig.contextVarName};`);
+    state = exports.writeJsToken(state, `Object.assign(module.exports, ${exports.compilerConfig.contextVarName});`);
     state = exports.writeEndline(state);
     // prepare source maps
     let sourceMapTokens = state.targetState.sourceMaps;
@@ -449,8 +450,8 @@ exports.compileOuterStatement = (node, state) => {
     // check indent
     let newIndent = Math.floor(ast.indent / exports.compilerConfig.indentSize);
     let sourceState = state.sourceState;
-    sourceState = Object.assign({}, sourceState, { indent: newIndent });
-    state = Object.assign({}, state, { sourceState });
+    sourceState = Object.assign(Object.assign({}, sourceState), { indent: newIndent });
+    state = Object.assign(Object.assign({}, state), { sourceState });
     // compile statement
     let compileStatementResult = exports.compileAstNode(ast.statement, state);
     if (compileStatementResult) {
@@ -1734,14 +1735,14 @@ exports.addIndentScopeItem = (scopeItem, state) => {
     if (!state || !scopeItem) {
         return state;
     }
-    state = Object.assign({}, state, { sourceState: Object.assign({}, state.sourceState, { indentScope: [...state.sourceState.indentScope, scopeItem] }) });
+    state = Object.assign(Object.assign({}, state), { sourceState: Object.assign(Object.assign({}, state.sourceState), { indentScope: [...state.sourceState.indentScope, scopeItem] }) });
     return state;
 };
 exports.setIndentScope = (scope, state) => {
     if (!state || !scope) {
         return state;
     }
-    state = Object.assign({}, state, { sourceState: Object.assign({}, state.sourceState, { indentScope: scope }) });
+    state = Object.assign(Object.assign({}, state), { sourceState: Object.assign(Object.assign({}, state.sourceState), { indentScope: scope }) });
     return state;
 };
 exports.skipAst = (state, count = 1) => {
@@ -1750,8 +1751,8 @@ exports.skipAst = (state, count = 1) => {
             break;
         }
         let astIndex = state.sourceState.astIndex + 1;
-        let sourceState = Object.assign({}, state.sourceState, { astIndex });
-        state = Object.assign({}, state, { sourceState });
+        let sourceState = Object.assign(Object.assign({}, state.sourceState), { astIndex });
+        state = Object.assign(Object.assign({}, state), { sourceState });
     }
     return state;
 };
@@ -1766,16 +1767,16 @@ exports.addJavascript = (state, javascript) => {
     if (!state || !javascript) {
         return state;
     }
-    let targetState = Object.assign({}, state.targetState, { javascript: [...state.targetState.javascript, ...javascript] });
-    state = Object.assign({}, state, { targetState });
+    let targetState = Object.assign(Object.assign({}, state.targetState), { javascript: [...state.targetState.javascript, ...javascript] });
+    state = Object.assign(Object.assign({}, state), { targetState });
     return state;
 };
 exports.addSourceMaps = (state, sourceMaps) => {
     if (!state || !sourceMaps) {
         return state;
     }
-    let targetState = Object.assign({}, state.targetState, { sourceMaps: [...state.targetState.sourceMaps, ...sourceMaps] });
-    state = Object.assign({}, state, { targetState });
+    let targetState = Object.assign(Object.assign({}, state.targetState), { sourceMaps: [...state.targetState.sourceMaps, ...sourceMaps] });
+    state = Object.assign(Object.assign({}, state), { targetState });
     return state;
 };
 exports.writeJavascript = (state, javascript) => {
@@ -1813,19 +1814,19 @@ exports.writeJsToken = (state, jsToken) => {
     if (jsToken.match(/\r?\n/)) {
         // endline
         // cursor
-        cursor = Object.assign({}, cursor, { line: cursor.line + 1, column: 0, symbol: cursor.symbol + jsToken.length });
+        cursor = Object.assign(Object.assign({}, cursor), { line: cursor.line + 1, column: 0, symbol: cursor.symbol + jsToken.length });
         // target state
         javascript = [...javascript, ''];
-        targetState = Object.assign({}, targetState, { cursor,
+        targetState = Object.assign(Object.assign({}, targetState), { cursor,
             javascript });
         // update state
-        state = Object.assign({}, state, { targetState });
+        state = Object.assign(Object.assign({}, state), { targetState });
         // return result
         return state;
     }
     // if we here that means token is not endline
     // cursor
-    cursor = Object.assign({}, cursor, { column: cursor.column + jsToken.length, symbol: cursor.symbol + jsToken.length });
+    cursor = Object.assign(Object.assign({}, cursor), { column: cursor.column + jsToken.length, symbol: cursor.symbol + jsToken.length });
     // target state
     let lastLine = '';
     if (javascript.length > 0) {
@@ -1836,9 +1837,9 @@ exports.writeJsToken = (state, jsToken) => {
     }
     lastLine = lastLine + jsToken;
     javascript[javascript.length - 1] = lastLine;
-    targetState = Object.assign({}, targetState, { cursor,
+    targetState = Object.assign(Object.assign({}, targetState), { cursor,
         javascript });
     // update state
-    state = Object.assign({}, state, { targetState });
+    state = Object.assign(Object.assign({}, state), { targetState });
     return state;
 };

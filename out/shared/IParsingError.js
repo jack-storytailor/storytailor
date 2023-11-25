@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ParsingErrorType = void 0;
 var ParsingErrorType;
 (function (ParsingErrorType) {
     ParsingErrorType[ParsingErrorType["Hint"] = 3] = "Hint";

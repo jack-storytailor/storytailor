@@ -1,8 +1,8 @@
 export enum CodeTokenType {
 	// \r?\n
 	Endline = 'Endline',
-  // $
-  Endfile = 'Endfile',
+	// $
+	Endfile = 'Endfile',
 	// \s
 	Space = 'Space',
 	/**: */
@@ -19,14 +19,14 @@ export enum CodeTokenType {
 	Prime = 'Prime',
 	// `
 	Tilde = 'Tilde',
-	/**| */ 
+	/**| */
 	OrSign = 'OrSign',
 	// ?
 	Question = 'Question',
 	// №
-  NumSign = 'NumSign',
-  /**" */
-  Quote = 'Quote',
+	NumSign = 'NumSign',
+	/**" */
+	Quote = 'Quote',
 
 	/**\* */
 	Star = 'Star',
@@ -44,7 +44,7 @@ export enum CodeTokenType {
 	Dollar = 'Dollar',
 	// #
 	Hash = 'Hash',
-	/**@ */ 
+	/**@ */
 	AtSign = 'AtSign',
 	/**& */
 	Ampersand = 'Ampersand',
@@ -53,43 +53,43 @@ export enum CodeTokenType {
 	ParenOpen = 'ParenOpen',
 	// )
 	ParenClose = 'ParenClose',
-  /**
-   * [
-   */
+	/**
+	 * [
+	 */
 	BracketOpen = 'BracketOpen',
-  /**
-   * ]
-   */
-  BracketClose = 'BracketClose',
-  /**
-   * {
-   */
-  BraceOpen = 'BraceOpen',
-  /**
-   * }
-   */
+	/**
+	 * ]
+	 */
+	BracketClose = 'BracketClose',
+	/**
+	 * {
+	 */
+	BraceOpen = 'BraceOpen',
+	/**
+	 * }
+	 */
 	BraceClose = 'BraceClose',
-  /**
-   * <
-   */
-  TupleOpen = 'TupleOpen',
-  /**
-   * \>
-   */
+	/**
+	 * <
+	 */
+	TupleOpen = 'TupleOpen',
+	/**
+	 * \>
+	 */
 	TupleClose = 'TupleClose',
 
-  /**
-   * /
-   */
+	/**
+	 * /
+	 */
 	Slash = 'Slash',
-  /**
-   * \
-   */
-  Backslash = 'Backslash',
+	/**
+	 * \
+	 */
+	Backslash = 'Backslash',
 
 	// everything else is Word
 	Word = 'Word',
-	
+
 	// //
 	CommentLine = "CommentLine",
 	// /*

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.astUtils = void 0;
 const AstNodeType_1 = require("./AstNodeType");
 const astFactory_1 = require("./astFactory");
 const childrenRegistry = {

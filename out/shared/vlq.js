@@ -1,6 +1,7 @@
 "use strict";
 // original source: https://github.com/Rich-Harris/vlq
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.vlq = void 0;
 let charToInteger = {};
 let integerToChar = {};
 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='.split('').forEach(function (char, i) {

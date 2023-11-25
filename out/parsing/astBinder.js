@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.collectBindings = void 0;
 const astUtils_1 = require("../ast/astUtils");
 exports.collectBindings = (request) => {
     if (!request || !request.ast) {
@@ -19,6 +20,6 @@ const visitNode = (node, state) => {
         console.log("visit node returns without params");
         return;
     }
-    console.log("node, start, end: ", node.nodeType, node.start, node.end);
+    // console.log("node, start, end: ", node.nodeType, node.start, node.end);
     astUtils_1.astUtils.forEachChild(node, (node) => { visitNode(node, state); });
 };

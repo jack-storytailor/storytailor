@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.prepareTokens = exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isEndOfFile = exports.readTokensAsString = exports.readWhitespace = exports.readString = exports.parseErrorTokens = exports.parseScope = exports.parseTag = exports.parsePrototypeExpression = exports.parseDeleteLineExpression = exports.parseObjectLine = exports.parseTextLineStatement = exports.parseOuterStatementContent = exports.parseOuterStatement = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseObjectExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseExpression = exports.parseThrowStatement = exports.parseFinallyStatement = exports.parseCatchStatement = exports.parseTryStatement = exports.parseImportPath = exports.parseImportStatement = exports.parseForInStatement = exports.parseForInConditions = exports.parseConditionBlock = exports.parseForCoditions = exports.parseForStatement = exports.parseWhileStatement = exports.parseDoWhileStatement = exports.parseDefaultCaseStatement = exports.parseCaseStatement = exports.parseSwitchStatement = exports.parseIfStatement = exports.parseBlockStatement = exports.parseContinueStatement = exports.parseDeleteExpression = exports.parseReturnStatement = exports.parseBreakStatement = exports.parseStatement = exports.parsePropertyDeclaration = exports.parseVariableDeclaration = exports.parseFunctionDeclaration = exports.parseOperandIdentifier = exports.parseContextIdentifier = exports.parseAnyIdentifier = exports.parseRawIdentifier = exports.parseIdentifierScope = exports.parseIdentifier = exports.parseArrayItem = exports.parseArrayLiteral = exports.parseBooleanLiteral = exports.parseStringInclude = exports.parseStringLiteralItem = exports.parseStringLiteral = exports.parseNumberLiteral = exports.parseLiteral = exports.parseCommentBlock = exports.parseCommentLine = exports.parseKeywordOfType = exports.parseDebuggerKeyword = exports.parseKeyword = exports.parseUnaryOperatorPostfix = exports.parseUnaryOperatorPrefix = exports.parseBinaryOperator = exports.parseOperatorOfType = exports.parseOperator = exports.parseToken = exports.parseModuleContent = exports.parseModule = void 0;
 const CodeTokenType_1 = require("../shared/CodeTokenType");
 const IParsingError_1 = require("../shared/IParsingError");
 const KeywordType_1 = require("../ast/KeywordType");
@@ -2137,7 +2138,7 @@ exports.parseForCoditions = (state) => {
     let initStatementResult = exports.parseExpression(state, true);
     if (initStatementResult) {
         state = initStatementResult.state;
-        result = Object.assign({}, result, { init: initStatementResult.result });
+        result = Object.assign(Object.assign({}, result), { init: initStatementResult.result });
     }
     // skip comments and whitespaces
     state = exports.skipComments(state, true, true);
@@ -2158,7 +2159,7 @@ exports.parseForCoditions = (state) => {
     state = exports.skipComments(state, true, true);
     let testExpressionResult = exports.parseExpression(state, true);
     if (testExpressionResult) {
-        result = Object.assign({}, result, { test: testExpressionResult.result });
+        result = Object.assign(Object.assign({}, result), { test: testExpressionResult.result });
         state = testExpressionResult.state;
     }
     // parse everything until ; or )
@@ -2184,7 +2185,7 @@ exports.parseForCoditions = (state) => {
     let updateStatementResult = exports.parseExpression(state, true);
     if (updateStatementResult) {
         state = updateStatementResult.state;
-        result = Object.assign({}, result, { update: updateStatementResult.result });
+        result = Object.assign(Object.assign({}, result), { update: updateStatementResult.result });
     }
     // skip comments and whitespaces
     state = exports.skipComments(state, true, true);
@@ -2467,7 +2468,7 @@ exports.parseImportStatement = (state) => {
     // prepare result
     let result = astFactory_1.astFactory.importStatement(alias, aliasAst, importPathAst, start, exports.getCursorPosition(state));
     // add import statement to the imports registry
-    state = Object.assign({}, state, { imports: [...state.imports, result] });
+    state = Object.assign(Object.assign({}, state), { imports: [...state.imports, result] });
     return {
         result,
         state
@@ -3269,7 +3270,7 @@ exports.parseOuterStatement = (state) => {
         // check if statement is code block and if so, unwrap code from that block
         let codeBlock = astFactory_1.astFactory.asNode(statement, AstNodeType_1.AstNodeType.BlockStatement);
         if (codeBlock) {
-            codeBlock = Object.assign({}, codeBlock, { withoutBraces: true });
+            codeBlock = Object.assign(Object.assign({}, codeBlock), { withoutBraces: true });
             statement = codeBlock;
         }
     }
@@ -3671,7 +3672,7 @@ exports.addItemToArray = (source, item) => {
 };
 exports.addItemToHash = (source, key, item) => {
     source = source || {};
-    return Object.assign({}, source, { [key]: item });
+    return Object.assign(Object.assign({}, source), { [key]: item });
 };
 exports.getToken = (state, offset = 0) => {
     if (exports.isEndOfFile(state, offset)) {
@@ -3883,7 +3884,7 @@ exports.skipTokens = (state, tokensCount) => {
     if (state.tokens.length < cursor) {
         return undefined;
     }
-    state = Object.assign({}, state, { cursor: cursor });
+    state = Object.assign(Object.assign({}, state), { cursor: cursor });
     return state;
 };
 exports.addParsingError = (state, severity, message, start, end, code, source) => {
@@ -3900,7 +3901,7 @@ exports.addParsingError = (state, severity, message, start, end, code, source) =
         code,
         source
     };
-    state = Object.assign({}, state, { errors: [...state.errors, parsingError] });
+    state = Object.assign(Object.assign({}, state), { errors: [...state.errors, parsingError] });
     return state;
 };
 exports.addInvalidTokenError = (state, token) => {
@@ -3921,13 +3922,13 @@ exports.prepareTokens = (tokens) => {
                 ...result,
                 {
                     start: token.start,
-                    end: Object.assign({}, token.start, { symbol: token.start.symbol + 1, column: token.start.column + 1 }),
+                    end: Object.assign(Object.assign({}, token.start), { symbol: token.start.symbol + 1, column: token.start.column + 1 }),
                     length: 1,
                     type: CodeTokenType_1.CodeTokenType.Slash,
                     value: "/"
                 },
                 {
-                    start: Object.assign({}, token.start, { symbol: token.start.symbol + 1, column: token.start.column + 1 }),
+                    start: Object.assign(Object.assign({}, token.start), { symbol: token.start.symbol + 1, column: token.start.column + 1 }),
                     end: token.end,
                     length: 1,
                     type: CodeTokenType_1.CodeTokenType.Slash,
@@ -3941,13 +3942,13 @@ exports.prepareTokens = (tokens) => {
                 ...result,
                 {
                     start: token.start,
-                    end: Object.assign({}, token.start, { symbol: token.start.symbol + 1, column: token.start.column + 1 }),
+                    end: Object.assign(Object.assign({}, token.start), { symbol: token.start.symbol + 1, column: token.start.column + 1 }),
                     length: 1,
                     type: CodeTokenType_1.CodeTokenType.Slash,
                     value: "/"
                 },
                 {
-                    start: Object.assign({}, token.start, { symbol: token.start.symbol + 1, column: token.start.column + 1 }),
+                    start: Object.assign(Object.assign({}, token.start), { symbol: token.start.symbol + 1, column: token.start.column + 1 }),
                     end: token.end,
                     length: 1,
                     type: CodeTokenType_1.CodeTokenType.Star,
@@ -3961,13 +3962,13 @@ exports.prepareTokens = (tokens) => {
                 ...result,
                 {
                     start: token.start,
-                    end: Object.assign({}, token.start, { symbol: token.start.symbol + 1, column: token.start.column + 1 }),
+                    end: Object.assign(Object.assign({}, token.start), { symbol: token.start.symbol + 1, column: token.start.column + 1 }),
                     length: 1,
                     type: CodeTokenType_1.CodeTokenType.Star,
                     value: "*"
                 },
                 {
-                    start: Object.assign({}, token.start, { symbol: token.start.symbol + 1, column: token.start.column + 1 }),
+                    start: Object.assign(Object.assign({}, token.start), { symbol: token.start.symbol + 1, column: token.start.column + 1 }),
                     end: token.end,
                     length: 1,
                     type: CodeTokenType_1.CodeTokenType.Slash,

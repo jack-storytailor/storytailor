@@ -5,6 +5,6 @@ export interface ICodeToken {
 	type: CodeTokenType;
 	value?: string;
 	start: ISymbolPosition;
-  end: ISymbolPosition;
+	end: ISymbolPosition;
 	length: number;
 }

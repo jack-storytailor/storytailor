@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.astFactory = void 0;
 const AstNodeType_1 = require("./AstNodeType");
 exports.astFactory = {
     // general
@@ -7,7 +8,7 @@ exports.astFactory = {
         return {
             nodeType: AstNodeType_1.AstNodeType.Token,
             start: start,
-            end: Object.assign({}, start, { symbol: start.symbol + 1 }),
+            end: Object.assign(Object.assign({}, start), { symbol: start.symbol + 1 }),
             token: token
         };
     },

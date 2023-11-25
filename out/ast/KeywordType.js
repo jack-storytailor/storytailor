@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.KeywordType = void 0;
 var KeywordType;
 (function (KeywordType) {
     KeywordType["Import"] = "import";

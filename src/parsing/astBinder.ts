@@ -24,7 +24,7 @@ export const collectBindings = (request: ICollectBindingsRequest): ICollectBindi
     ast
   };
 
-  astUtils.forEachChild(ast, (node) => { visitNode(node, state)});
+  astUtils.forEachChild(ast, (node) => { visitNode(node, state) });
 
   // prepare result
   let result = {};
@@ -37,6 +37,6 @@ const visitNode = (node: IAstNode, state: ICollectState) => {
     return;
   }
 
-  console.log("node, start, end: ", node.nodeType, node.start, node.end);
+  // console.log("node, start, end: ", node.nodeType, node.start, node.end);
   astUtils.forEachChild(node, (node) => { visitNode(node, state); })
 }
