@@ -208,21 +208,24 @@ const compile = (request) => {
     state = (0, exports.writeEndline)(state);
     state = (0, exports.writeJsToken)(state, `Object.assign(module.exports, ${exports.compilerConfig.contextVarName});`);
     state = (0, exports.writeEndline)(state);
-    // prepare source maps
-    let sourceMapTokens = state.targetState.sourceMaps;
-    // generate source map text
-    let mapGenerator = new source_map_1.SourceMapGenerator({
-        file: request.sourceFileName,
-        // sourceRoot: request.sourceRoot
-    });
-    for (let smi = 0; smi < sourceMapTokens.length; smi++) {
-        const smToken = sourceMapTokens[smi];
-        mapGenerator.addMapping(smToken);
-    }
-    let sourceMaps = mapGenerator.toString();
     // prepare result
     let javascriptLines = state.targetState.javascript;
-    javascriptLines.push(`//# sourceMappingURL=${request.targetFileName}.map`);
+    let sourceMaps = undefined;
+    // prepare source maps
+    if (request.isEmitSourcemaps === true) {
+        let sourceMapTokens = state.targetState.sourceMaps;
+        // generate source map text
+        let mapGenerator = new source_map_1.SourceMapGenerator({
+            file: request.sourceFileName,
+            // sourceRoot: request.sourceRoot
+        });
+        for (let smi = 0; smi < sourceMapTokens.length; smi++) {
+            const smToken = sourceMapTokens[smi];
+            mapGenerator.addMapping(smToken);
+        }
+        sourceMaps = mapGenerator.toString();
+        javascriptLines.push(`//# sourceMappingURL=${request.targetFileName}.map`);
+    }
     let javascript = javascriptLines.join("\r\n");
     return {
         state,

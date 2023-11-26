@@ -54,6 +54,7 @@ export interface ICompileFileRequest {
   outputRoot: string;
   environmentPath?: string;
   ast: IAstNode[];
+  isEmitSourcemaps?: boolean;
 }
 
 export interface ICompileFileResult {
@@ -293,23 +294,27 @@ export const compile = (request: ICompileFileRequest): ICompileFileResult => {
   state = writeJsToken(state, `Object.assign(module.exports, ${compilerConfig.contextVarName});`);
   state = writeEndline(state);
 
-  // prepare source maps
-  let sourceMapTokens = state.targetState.sourceMaps;
-  // generate source map text
-  let mapGenerator = new SourceMapGenerator({
-    file: request.sourceFileName,
-    // sourceRoot: request.sourceRoot
-  });
-  for (let smi = 0; smi < sourceMapTokens.length; smi++) {
-    const smToken: ISourceMapToken = sourceMapTokens[smi];
-    mapGenerator.addMapping(smToken);
-  }
-  let sourceMaps: string = mapGenerator.toString();
-
-
   // prepare result
   let javascriptLines = state.targetState.javascript;
-  javascriptLines.push(`//# sourceMappingURL=${request.targetFileName}.map`);
+
+  let sourceMaps: string = undefined;
+  // prepare source maps
+  if (request.isEmitSourcemaps === true) {
+    let sourceMapTokens = state.targetState.sourceMaps;
+    // generate source map text
+    let mapGenerator = new SourceMapGenerator({
+      file: request.sourceFileName,
+      // sourceRoot: request.sourceRoot
+    });
+    for (let smi = 0; smi < sourceMapTokens.length; smi++) {
+      const smToken: ISourceMapToken = sourceMapTokens[smi];
+      mapGenerator.addMapping(smToken);
+    }
+    sourceMaps = mapGenerator.toString();
+
+    javascriptLines.push(`//# sourceMappingURL=${request.targetFileName}.map`);
+  }
+
   let javascript = javascriptLines.join("\r\n");
 
   return {

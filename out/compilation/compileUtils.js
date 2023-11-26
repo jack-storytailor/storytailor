@@ -107,7 +107,8 @@ const compileProject = (state) => {
                     outputRoot: config.javascriptOutputRoot,
                     sourceFileName: sourceFileName,
                     sourceRoot: config.sourceRoot,
-                    targetFileName: targetFileName
+                    targetFileName: targetFileName,
+                    isEmitSourcemaps: config.isEmitSourceMaps
                 });
                 if (compileResult) {
                     outputFileContent = compileResult.javascript;

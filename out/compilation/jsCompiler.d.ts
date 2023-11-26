@@ -42,6 +42,7 @@ export interface ICompileFileRequest {
     outputRoot: string;
     environmentPath?: string;
     ast: IAstNode[];
+    isEmitSourcemaps?: boolean;
 }
 export interface ICompileFileResult {
     request: ICompileFileRequest;
