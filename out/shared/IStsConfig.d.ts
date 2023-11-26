@@ -17,6 +17,7 @@ export interface IStsConfig {
      * If specified and true, compiler will create and write output javascript files
      */
     isEmitJavascript?: boolean;
+    isEmitSourceMaps?: boolean;
     environmentPath?: string;
     exclude?: string[];
     include?: string[];

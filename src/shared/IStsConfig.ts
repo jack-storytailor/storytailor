@@ -19,6 +19,8 @@ export interface IStsConfig {
    */
   isEmitJavascript?: boolean;
 
+  isEmitSourceMaps?: boolean;
+
   environmentPath?: string;
 
   exclude?: string[];

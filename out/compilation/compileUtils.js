@@ -79,6 +79,7 @@ const compileProject = (state) => {
             }
             // print compiled
             let outputFileContent = '';
+            let outputSourceMapFileContent = '';
             // parse sts2
             let parseResult = astParser.parseModule(tokens, sourceFileName);
             const targetFileName = jsFileNames && jsFileNames.length > i ? jsFileNames[i] : undefined;
@@ -110,6 +111,7 @@ const compileProject = (state) => {
                 });
                 if (compileResult) {
                     outputFileContent = compileResult.javascript;
+                    outputSourceMapFileContent = compileResult.sourceMaps;
                 }
             }
             // save javascript file if needed
@@ -123,7 +125,13 @@ const compileProject = (state) => {
                 try {
                     const outputDir = path.dirname(outputFileName);
                     fsUtils.mkDirByPathSync(outputDir);
+                    // print js file
                     fs.writeFileSync(outputFileName, outputFileContent);
+                    // now print the source maps
+                    if (config.isEmitSourceMaps === true && outputSourceMapFileContent) {
+                        const outputSourceMapFileName = `${outputFileName}.map`;
+                        fs.writeFileSync(outputSourceMapFileName, outputSourceMapFileContent);
+                    }
                 }
                 catch (error) {
                     console.timeEnd(sourceFileName);

@@ -121,6 +121,7 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
 
       // print compiled
       let outputFileContent: string = '';
+      let outputSourceMapFileContent: string = '';
       
       // parse sts2
       let parseResult = astParser.parseModule(tokens, sourceFileName);
@@ -157,6 +158,7 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
         });
         if (compileResult) {
           outputFileContent = compileResult.javascript;
+          outputSourceMapFileContent = compileResult.sourceMaps;
         }
       }
 
@@ -182,7 +184,15 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
           const outputDir = path.dirname(outputFileName);
           fsUtils.mkDirByPathSync(outputDir);
 
+          // print js file
           fs.writeFileSync(outputFileName, outputFileContent);
+
+          // now print the source maps
+          if (config.isEmitSourceMaps === true && outputSourceMapFileContent) {
+            const outputSourceMapFileName = `${outputFileName}.map`;
+            
+            fs.writeFileSync(outputSourceMapFileName, outputSourceMapFileContent);
+          }
         } catch (error) {
           console.timeEnd(sourceFileName)
           state = addErrorAndLog(

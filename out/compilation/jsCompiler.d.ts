@@ -1,5 +1,6 @@
 import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier } from "../ast/IAstNode";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
+import { IHash } from "../shared/IHash";
 export interface ISourceMapToken {
     generated: {
         line: number;
@@ -64,6 +65,7 @@ export declare const compilerConfig: {
     indentSize: number;
     textFieldName: string;
     defaultObject: string;
+    sourceMappableAstNodes: IHash<boolean>;
 };
 export declare const compileSingleNode: (ast: IAstNode) => string;
 export declare const compile: (request: ICompileFileRequest) => ICompileFileResult;
@@ -127,6 +129,7 @@ export declare const skipAst: (state: ICompilerState, count?: number) => ICompil
 export declare const getAst: (state: ICompilerState) => IAstNode;
 export declare const addJavascript: (state: ICompilerState, javascript: string[]) => ICompilerState;
 export declare const addSourceMaps: (state: ICompilerState, sourceMaps: ISourceMapToken[]) => ICompilerState;
+export declare const isNeedToLinkSourcemap: (astNode: IAstNode) => boolean;
 export declare const writeJavascript: (state: ICompilerState, javascript: string) => ICompilerState;
 export declare const writeEndline: (state: ICompilerState) => ICompilerState;
-export declare const writeJsToken: (state: ICompilerState, jsToken: string) => ICompilerState;
+export declare const writeJsToken: (state: ICompilerState, jsToken: string, astNode?: IAstNode, symbolPos?: ISymbolPosition) => ICompilerState;
