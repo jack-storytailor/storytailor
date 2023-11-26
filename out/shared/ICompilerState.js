@@ -5,4 +5,4 @@ var CompileStatus;
 (function (CompileStatus) {
     CompileStatus["Ok"] = "Ok";
     CompileStatus["Failed"] = "Failed";
-})(CompileStatus = exports.CompileStatus || (exports.CompileStatus = {}));
+})(CompileStatus || (exports.CompileStatus = CompileStatus = {}));

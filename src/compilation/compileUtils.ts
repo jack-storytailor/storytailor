@@ -10,7 +10,7 @@ import { ICompileRequest } from '../shared/ICompileRequest';
 import { ICompilerState, CompileStatus } from '../shared/ICompilerState';
 import { IDiagnostic, ParsingErrorType } from '../shared/IParsingError';
 import { ISymbolPosition } from '../shared/ISymbolPosition';
-import { collectBindings, ICollectBindingsRequest } from '../parsing/astBinder';
+// import { collectBindings, ICollectBindingsRequest } from '../parsing/astBinder';
 
 export const compile = (request: ICompileRequest): ICompilerState => {
   let state: ICompilerState = undefined;
@@ -76,12 +76,18 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
   let config = state.config;
   let sourceFileName: string = undefined;
 
+  console.time("all_files");
+  
   // for each file read file content, tokenize, parse and save as js/ts
   for (let i = 0; i < sourceFileNames.length; i++) {
     try {
       // check source file existence
       sourceFileName = sourceFileNames[i];
+
+      console.time(sourceFileName);
+
       if (!fs.existsSync(sourceFileName)) {
+        console.timeEnd(sourceFileName)
         state = addErrorAndLog(
           state,
           ParsingErrorType.Warning,
@@ -100,10 +106,11 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
       // tokenize source file
       let tokens = stsTokenizer.tokenizeCode(sourceFileContent);
       if (!tokens) {
+        console.timeEnd(sourceFileName)
         state = addErrorAndLog(
           state,
           ParsingErrorType.Warning,
-          `can't tokenize ${sourceFileName} file`,
+          `can't tokenize ${sourceFileName} file;`,
           undefined,
           undefined,
           1,
@@ -132,11 +139,11 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
           }
         }
 
-        // TEMP: Collect bindings
-        let collectBindingsRequest: ICollectBindingsRequest = {
-          ast: astModule
-        };
-        let collectBindingsResult = collectBindings(collectBindingsRequest);
+        // // TEMP: Collect bindings
+        // let collectBindingsRequest: ICollectBindingsRequest = {
+        //   ast: astModule
+        // };
+        // let collectBindingsResult = collectBindings(collectBindingsRequest);
         
 
         // compile ast
@@ -157,10 +164,11 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
       if (config.isEmitJavascript === true) {
         const outputFileName = jsFileNames && jsFileNames.length > i ? jsFileNames[i] : undefined;
         if (!outputFileName) {
+          console.timeEnd(sourceFileName)
           state = addErrorAndLog(
             state,
             ParsingErrorType.Error,
-            `can't create corresponding javascript file name for the file ${sourceFileName}`,
+            `can't create corresponding javascript file name for the file ${sourceFileName};`,
             undefined,
             undefined,
             1,
@@ -176,10 +184,11 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
 
           fs.writeFileSync(outputFileName, outputFileContent);
         } catch (error) {
+          console.timeEnd(sourceFileName)
           state = addErrorAndLog(
             state,
             ParsingErrorType.Error,
-            `can't save file ${outputFileName}. error ${error.message}; ${error}`,
+            `can't save file ${outputFileName}. error ${error.message}; ${error};`,
             undefined,
             undefined,
             1,
@@ -189,18 +198,24 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
       }
 
     } catch (error) {
+      console.timeEnd(sourceFileName)
       state = addErrorAndLog(
         state,
         ParsingErrorType.Error,
-        `error while compiling ${sourceFileName}. error ${error.message}; ${error}`,
+        `error while compiling ${sourceFileName}. error ${error.message}; ${error};`,
         undefined,
         undefined,
         1,
         sourceFileName
       );
+
+      continue;
     }
+
+    console.timeEnd(sourceFileName)
   }
 
+  console.timeEnd("all_files");
   return state;
 }
 

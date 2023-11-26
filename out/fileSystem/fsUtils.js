@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRelativeFileName = exports.filterFileNames = exports.getFileNamesAndFilter = exports.getFileNames = exports.copyDirectory = exports.mkDirByPathSync = void 0;
 const fs = require("fs");
 const path = require("path");
-exports.mkDirByPathSync = (targetDir, { isRelativeToScript = false } = {}) => {
+const mkDirByPathSync = (targetDir, { isRelativeToScript = false } = {}) => {
     const sep = path.sep;
     const initDir = path.isAbsolute(targetDir) ? sep : '';
     const baseDir = isRelativeToScript ? __dirname : '.';
@@ -32,7 +32,8 @@ exports.mkDirByPathSync = (targetDir, { isRelativeToScript = false } = {}) => {
         return curDir;
     }, initDir);
 };
-exports.copyDirectory = (fromPath, toPath, excludePattern, includePattern) => {
+exports.mkDirByPathSync = mkDirByPathSync;
+const copyDirectory = (fromPath, toPath, excludePattern, includePattern) => {
     if (!fs.existsSync(fromPath)) {
         console.log('directory ' + toPath + ' does not exists');
         return;
@@ -59,7 +60,7 @@ exports.copyDirectory = (fromPath, toPath, excludePattern, includePattern) => {
     }
     if (!fs.existsSync(toPath)) {
         console.log('directory ' + toPath + ' does not exists. creating it');
-        exports.mkDirByPathSync(toPath);
+        (0, exports.mkDirByPathSync)(toPath);
     }
     let itemNames = fs.readdirSync(fromPath);
     if (!itemNames || itemNames.length <= 0) {
@@ -70,13 +71,14 @@ exports.copyDirectory = (fromPath, toPath, excludePattern, includePattern) => {
         let subitemPath = fromPath + '/' + subitem;
         let targetSubitemPath = toPath + '/' + subitem;
         if (fs.statSync(subitemPath).isDirectory()) {
-            exports.copyDirectory(subitemPath, targetSubitemPath);
+            (0, exports.copyDirectory)(subitemPath, targetSubitemPath);
             return;
         }
         fs.writeFileSync(targetSubitemPath, fs.readFileSync(subitemPath));
     });
 };
-exports.getFileNames = (dirPath, isRecoursive) => {
+exports.copyDirectory = copyDirectory;
+const getFileNames = (dirPath, isRecoursive) => {
     if (!fs.existsSync(dirPath)) {
         return undefined;
     }
@@ -91,7 +93,7 @@ exports.getFileNames = (dirPath, isRecoursive) => {
         if (fs.statSync(fullPath).isDirectory()) {
             // read dir with it's subitems
             if (isRecoursive) {
-                let subitems = exports.getFileNames(fullPath, isRecoursive);
+                let subitems = (0, exports.getFileNames)(fullPath, isRecoursive);
                 if (subitems) {
                     files = [
                         ...files,
@@ -110,22 +112,24 @@ exports.getFileNames = (dirPath, isRecoursive) => {
     });
     return files;
 };
-exports.getFileNamesAndFilter = (rootPath, isRecoursive, include, exclude) => {
-    let unfilteredFileNames = exports.getFileNames(rootPath, isRecoursive);
+exports.getFileNames = getFileNames;
+const getFileNamesAndFilter = (rootPath, isRecoursive, include, exclude) => {
+    let unfilteredFileNames = (0, exports.getFileNames)(rootPath, isRecoursive);
     if (!unfilteredFileNames) {
         return undefined;
     }
-    let filteredFileNames = exports.filterFileNames(unfilteredFileNames, rootPath, include, exclude);
+    let filteredFileNames = (0, exports.filterFileNames)(unfilteredFileNames, rootPath, include, exclude);
     return filteredFileNames;
 };
-exports.filterFileNames = (fileNames, rootDirPath, include, exclude) => {
+exports.getFileNamesAndFilter = getFileNamesAndFilter;
+const filterFileNames = (fileNames, rootDirPath, include, exclude) => {
     if (!fileNames || !rootDirPath) {
         return fileNames;
     }
     if (!include && !exclude) {
         return fileNames;
     }
-    let relativeFileNames = fileNames.map((fileName) => exports.getRelativeFileName(fileName, rootDirPath));
+    let relativeFileNames = fileNames.map((fileName) => (0, exports.getRelativeFileName)(fileName, rootDirPath));
     if (include) {
         relativeFileNames = relativeFileNames.filter((fileName) => {
             let isIncluded = include.some((pattern) => pattern instanceof RegExp && pattern.test(fileName));
@@ -144,7 +148,8 @@ exports.filterFileNames = (fileNames, rootDirPath, include, exclude) => {
     });
     return result;
 };
-exports.getRelativeFileName = (filePath, relativeTo) => {
+exports.filterFileNames = filterFileNames;
+const getRelativeFileName = (filePath, relativeTo) => {
     if (!filePath || !relativeTo) {
         return filePath;
     }
@@ -156,3 +161,4 @@ exports.getRelativeFileName = (filePath, relativeTo) => {
     let result = path.normalize(relativeToRoot + '/' + path.basename(filePath));
     return result;
 };
+exports.getRelativeFileName = getRelativeFileName;

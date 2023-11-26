@@ -24,4 +24,4 @@ var OperatorType;
     OperatorType["AndAnd"] = "AndAnd";
     OperatorType["SingleOr"] = "SingleOr";
     OperatorType["SingleAnd"] = "SingleAnd";
-})(OperatorType = exports.OperatorType || (exports.OperatorType = {}));
+})(OperatorType || (exports.OperatorType = OperatorType = {}));

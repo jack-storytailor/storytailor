@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.collectBindings = void 0;
 const astUtils_1 = require("../ast/astUtils");
-exports.collectBindings = (request) => {
+const collectBindings = (request) => {
     if (!request || !request.ast) {
         return undefined;
     }
@@ -15,6 +15,7 @@ exports.collectBindings = (request) => {
     let result = {};
     return result;
 };
+exports.collectBindings = collectBindings;
 const visitNode = (node, state) => {
     if (!node || !state) {
         console.log("visit node returns without params");

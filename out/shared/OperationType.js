@@ -47,4 +47,4 @@ var OperationType;
     OperationType["LessOrEquals"] = "LessOrEquals";
     // : //var: signature
     OperationType["Signature"] = "Signature";
-})(OperationType = exports.OperationType || (exports.OperationType = {}));
+})(OperationType || (exports.OperationType = OperationType = {}));

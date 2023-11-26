@@ -68,4 +68,4 @@ var AstNodeType;
     AstNodeType["DeleteLineExpression"] = "DeleteLineExpression";
     AstNodeType["Scope"] = "Scope";
     AstNodeType["Tag"] = "Tag";
-})(AstNodeType = exports.AstNodeType || (exports.AstNodeType = {}));
+})(AstNodeType || (exports.AstNodeType = AstNodeType = {}));

@@ -35,4 +35,4 @@ var KeywordType;
     KeywordType["Throw"] = "throw";
     KeywordType["Debugger"] = "debugger";
     KeywordType["Delete"] = "delete";
-})(KeywordType = exports.KeywordType || (exports.KeywordType = {}));
+})(KeywordType || (exports.KeywordType = KeywordType = {}));

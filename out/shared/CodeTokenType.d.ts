@@ -73,4 +73,4 @@ export declare enum CodeTokenType {
     CommentBlockOpen = "CommentBlockOpen",
     CommentBlockClose = "CommentBlockClose"
 }
-export declare type CodeTokenTypeSequence = CodeTokenType[];
+export type CodeTokenTypeSequence = CodeTokenType[];

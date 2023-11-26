@@ -95,4 +95,4 @@ var CodeTokenType;
     CodeTokenType["CommentBlockOpen"] = "CommentBlockOpen";
     // */
     CodeTokenType["CommentBlockClose"] = "CommentBlockClose";
-})(CodeTokenType = exports.CodeTokenType || (exports.CodeTokenType = {}));
+})(CodeTokenType || (exports.CodeTokenType = CodeTokenType = {}));

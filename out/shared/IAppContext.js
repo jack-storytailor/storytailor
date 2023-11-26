@@ -8,14 +8,14 @@ var AppContextItemType;
     AppContextItemType["value"] = "value";
     AppContextItemType["array"] = "array";
     AppContextItemType["import"] = "import";
-})(AppContextItemType = exports.AppContextItemType || (exports.AppContextItemType = {}));
+})(AppContextItemType || (exports.AppContextItemType = AppContextItemType = {}));
 var AppContextValueType;
 (function (AppContextValueType) {
     AppContextValueType["any"] = "any";
     AppContextValueType["string"] = "string";
     AppContextValueType["number"] = "number";
     AppContextValueType["boolean"] = "boolean";
-})(AppContextValueType = exports.AppContextValueType || (exports.AppContextValueType = {}));
+})(AppContextValueType || (exports.AppContextValueType = AppContextValueType = {}));
 exports.appContextFactory = {
     createAppContext: (modules) => {
         return {

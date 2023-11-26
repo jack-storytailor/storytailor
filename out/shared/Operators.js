@@ -17,4 +17,4 @@ var Operators;
     Operators["is"] = "==";
     Operators["strongIs"] = "===";
     Operators["or"] = "||";
-})(Operators = exports.Operators || (exports.Operators = {}));
+})(Operators || (exports.Operators = Operators = {}));

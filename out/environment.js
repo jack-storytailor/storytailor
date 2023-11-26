@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.clearText = exports.subitemsToString = exports.getSerializer = exports.testFunction = exports.objectToString = void 0;
-exports.objectToString = (obj, separator, indent) => {
+const objectToString = (obj, separator, indent) => {
     if (!obj) {
         return '';
     }
@@ -33,7 +33,7 @@ exports.objectToString = (obj, separator, indent) => {
                 if (field) {
                     subitems = [
                         ...subitems,
-                        indentStr + '* ' + key + '\n' + exports.objectToString(field, separator, indent + 1)
+                        indentStr + '* ' + key + '\n' + (0, exports.objectToString)(field, separator, indent + 1)
                     ];
                 }
             }
@@ -43,21 +43,24 @@ exports.objectToString = (obj, separator, indent) => {
     }
     return obj.toString();
 };
-exports.testFunction = (param1, param2) => {
-    return `param1: ${exports.objectToString(param1)}, param2: ${exports.objectToString(param2)}`;
+exports.objectToString = objectToString;
+const testFunction = (param1, param2) => {
+    return `param1: ${(0, exports.objectToString)(param1)}, param2: ${(0, exports.objectToString)(param2)}`;
 };
-exports.getSerializer = () => {
+exports.testFunction = testFunction;
+const getSerializer = () => {
     return {
         serialize: (obj, separator) => {
-            return exports.objectToString(obj, separator);
+            return (0, exports.objectToString)(obj, separator);
         }
     };
 };
-exports.subitemsToString = (obj, separator, headerTag, headerAttr, contentTag, contentAttr) => {
+exports.getSerializer = getSerializer;
+const subitemsToString = (obj, separator, headerTag, headerAttr, contentTag, contentAttr) => {
     if (!obj) {
         return undefined;
     }
-    let serializer = exports.getSerializer();
+    let serializer = (0, exports.getSerializer)();
     let headerPrefix = '';
     let headerPostfix = '';
     if (headerTag) {
@@ -84,9 +87,11 @@ exports.subitemsToString = (obj, separator, headerTag, headerAttr, contentTag, c
     let resultText = result.join(separator);
     return resultText;
 };
-exports.clearText = (context) => {
+exports.subitemsToString = subitemsToString;
+const clearText = (context) => {
     if (!context || !context.__text) {
         return context;
     }
     return Object.assign(Object.assign({}, context), { __text: [] });
 };
+exports.clearText = clearText;

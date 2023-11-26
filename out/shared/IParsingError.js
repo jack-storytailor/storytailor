@@ -7,4 +7,4 @@ var ParsingErrorType;
     ParsingErrorType[ParsingErrorType["Info"] = 2] = "Info";
     ParsingErrorType[ParsingErrorType["Warning"] = 1] = "Warning";
     ParsingErrorType[ParsingErrorType["Error"] = 0] = "Error";
-})(ParsingErrorType = exports.ParsingErrorType || (exports.ParsingErrorType = {}));
+})(ParsingErrorType || (exports.ParsingErrorType = ParsingErrorType = {}));

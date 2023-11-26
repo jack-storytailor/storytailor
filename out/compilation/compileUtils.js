@@ -11,14 +11,14 @@ const astParser = require("../parsing/astParser");
 const jsCompiler = require("../compilation/jsCompiler");
 const ICompilerState_1 = require("../shared/ICompilerState");
 const IParsingError_1 = require("../shared/IParsingError");
-const astBinder_1 = require("../parsing/astBinder");
-exports.compile = (request) => {
+// import { collectBindings, ICollectBindingsRequest } from '../parsing/astBinder';
+const compile = (request) => {
     let state = undefined;
     try {
         console.log(`storytailor compilation started`, request);
-        state = exports.createCompilerState(request);
+        state = (0, exports.createCompilerState)(request);
         // compile storytailor
-        state = exports.compileProject(state);
+        state = (0, exports.compileProject)(state);
         console.log('storytailor compilation finished with status ', state.status);
         // execute compiled program to serialize requested module
         if (request.output) {
@@ -44,7 +44,8 @@ exports.compile = (request) => {
     }
     return state;
 };
-exports.compileProject = (state) => {
+exports.compile = compile;
+const compileProject = (state) => {
     if (!state) {
         return undefined;
     }
@@ -55,12 +56,15 @@ exports.compileProject = (state) => {
     let jsFileNames = state.javascriptFileNames;
     let config = state.config;
     let sourceFileName = undefined;
+    console.time("all_files");
     // for each file read file content, tokenize, parse and save as js/ts
     for (let i = 0; i < sourceFileNames.length; i++) {
         try {
             // check source file existence
             sourceFileName = sourceFileNames[i];
+            console.time(sourceFileName);
             if (!fs.existsSync(sourceFileName)) {
+                console.timeEnd(sourceFileName);
                 state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Warning, `file ${sourceFileName} doesn't exists`, undefined, undefined, 1, sourceFileName);
                 continue;
             }
@@ -69,7 +73,8 @@ exports.compileProject = (state) => {
             // tokenize source file
             let tokens = stsTokenizer_1.stsTokenizer.tokenizeCode(sourceFileContent);
             if (!tokens) {
-                state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Warning, `can't tokenize ${sourceFileName} file`, undefined, undefined, 1, sourceFileName);
+                console.timeEnd(sourceFileName);
+                state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Warning, `can't tokenize ${sourceFileName} file;`, undefined, undefined, 1, sourceFileName);
                 continue;
             }
             // print compiled
@@ -89,11 +94,11 @@ exports.compileProject = (state) => {
                         state = addDiagnostic(state, diagnostic);
                     }
                 }
-                // TEMP: Collect bindings
-                let collectBindingsRequest = {
-                    ast: astModule
-                };
-                let collectBindingsResult = astBinder_1.collectBindings(collectBindingsRequest);
+                // // TEMP: Collect bindings
+                // let collectBindingsRequest: ICollectBindingsRequest = {
+                //   ast: astModule
+                // };
+                // let collectBindingsResult = collectBindings(collectBindingsRequest);
                 // compile ast
                 let compileResult = jsCompiler.compile({
                     ast: [astModule],
@@ -111,7 +116,8 @@ exports.compileProject = (state) => {
             if (config.isEmitJavascript === true) {
                 const outputFileName = jsFileNames && jsFileNames.length > i ? jsFileNames[i] : undefined;
                 if (!outputFileName) {
-                    state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Error, `can't create corresponding javascript file name for the file ${sourceFileName}`, undefined, undefined, 1, sourceFileName);
+                    console.timeEnd(sourceFileName);
+                    state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Error, `can't create corresponding javascript file name for the file ${sourceFileName};`, undefined, undefined, 1, sourceFileName);
                     continue;
                 }
                 try {
@@ -120,17 +126,23 @@ exports.compileProject = (state) => {
                     fs.writeFileSync(outputFileName, outputFileContent);
                 }
                 catch (error) {
-                    state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Error, `can't save file ${outputFileName}. error ${error.message}; ${error}`, undefined, undefined, 1, sourceFileName);
+                    console.timeEnd(sourceFileName);
+                    state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Error, `can't save file ${outputFileName}. error ${error.message}; ${error};`, undefined, undefined, 1, sourceFileName);
                 }
             }
         }
         catch (error) {
-            state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Error, `error while compiling ${sourceFileName}. error ${error.message}; ${error}`, undefined, undefined, 1, sourceFileName);
+            console.timeEnd(sourceFileName);
+            state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Error, `error while compiling ${sourceFileName}. error ${error.message}; ${error};`, undefined, undefined, 1, sourceFileName);
+            continue;
         }
+        console.timeEnd(sourceFileName);
     }
+    console.timeEnd("all_files");
     return state;
 };
-exports.createCompilerState = (request) => {
+exports.compileProject = compileProject;
+const createCompilerState = (request) => {
     if (!request) {
         return undefined;
     }
@@ -179,13 +191,14 @@ exports.createCompilerState = (request) => {
         javascriptFileNames });
     return state;
 };
+exports.createCompilerState = createCompilerState;
 /**
  * configPath
  * -f filePath
  * -ts tsconfigPath
  * -o sourceFile outFile
  */
-exports.parseCompileRequest = (args) => {
+const parseCompileRequest = (args) => {
     console.log('starting parsing compile request. args: ', args);
     if (!args || args.length === 0) {
         return undefined;
@@ -232,6 +245,7 @@ exports.parseCompileRequest = (args) => {
     console.log('parsing compile request done. request: ', request);
     return request;
 };
+exports.parseCompileRequest = parseCompileRequest;
 const addError = (state, severity, message, start, end, code, source) => {
     if (!state) {
         return undefined;

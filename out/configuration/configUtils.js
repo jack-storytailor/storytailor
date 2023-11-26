@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadConfig2 = exports.loadConfig = void 0;
 const fs = require("fs");
 const path = require("path");
-exports.loadConfig = (configPath) => {
+const loadConfig = (configPath) => {
     if (!fs.existsSync(configPath)) {
         console.error(`can't find config file ${configPath}`);
         return undefined;
@@ -42,7 +42,8 @@ exports.loadConfig = (configPath) => {
     }
     return undefined;
 };
-exports.loadConfig2 = (configPath) => {
+exports.loadConfig = loadConfig;
+const loadConfig2 = (configPath) => {
     let errors = [];
     let isSuccess = false;
     let config = undefined;
@@ -110,3 +111,4 @@ exports.loadConfig2 = (configPath) => {
     };
     return result;
 };
+exports.loadConfig2 = loadConfig2;

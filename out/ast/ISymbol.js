@@ -6,4 +6,4 @@ var SymbolType;
     SymbolType["Primitive"] = "Primitive";
     SymbolType["Object"] = "Object";
     SymbolType["Function"] = "Function";
-})(SymbolType = exports.SymbolType || (exports.SymbolType = {}));
+})(SymbolType || (exports.SymbolType = SymbolType = {}));

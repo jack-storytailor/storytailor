@@ -66,7 +66,7 @@ export const stsTokenizer = {
 		if (!tokenValue) {
 			//token type is fallbackTokenType
 			tokenLength = searchIndex;
-			tokenValue = state.sourceCode.substring(state.globalCursor, tokenLength) || '';
+			tokenValue = state.sourceCode.substring(state.globalCursor, state.globalCursor + tokenLength) || '';
 			tokenType = fallbackTokenType;
 		}
 
