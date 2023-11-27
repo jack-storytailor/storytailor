@@ -1018,7 +1018,9 @@ export const parseArrayLiteral = (state: IParserState): IParseResult<IAstArray> 
     (state) => parseTokenSequence(state, [CodeTokenType.BracketOpen]),
     (state) => parseStatement(state, true),
     (state) => parseTokenSequence(state, [CodeTokenType.BracketClose]),
-    (state) => skipComments(state, true, true)
+    (state) => skipComments(state, true, true),
+    undefined,
+    (state) => parseTokenSequence(state, [CodeTokenType.Comma])
   );
   if (!scopeResult) {
     return undefined;

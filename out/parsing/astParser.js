@@ -837,7 +837,7 @@ const parseArrayLiteral = (state) => {
         return undefined;
     }
     // parse array scope
-    let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BracketOpen]), (state) => (0, exports.parseStatement)(state, true), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BracketClose]), (state) => (0, exports.skipComments)(state, true, true));
+    let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BracketOpen]), (state) => (0, exports.parseStatement)(state, true), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BracketClose]), (state) => (0, exports.skipComments)(state, true, true), undefined, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Comma]));
     if (!scopeResult) {
         return undefined;
     }
