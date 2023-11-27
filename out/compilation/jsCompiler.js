@@ -1374,6 +1374,22 @@ const compileImportStatement = (node, state) => {
     }
     // write )
     state = (0, exports.writeJsToken)(state, `)`);
+    // if it's import in, add one more line
+    if (ast.importInContext) {
+        // endline
+        state = (0, exports.writeJsToken)(state, `;`);
+        state = (0, exports.writeEndline)(state);
+        // __context = { ...[identifier], ...__context };
+        // __context = { ...
+        state = (0, exports.writeJsToken)(state, `${exports.compilerConfig.contextVarName} = { ...`);
+        // identifier
+        const identResult = (0, exports.compileAstNode)(ast.identifier, state);
+        if (identResult) {
+            state = identResult.state;
+        }
+        // , ...__context };
+        state = (0, exports.writeJsToken)(state, `, ...${exports.compilerConfig.contextVarName} }`);
+    }
     return {
         state,
         result: ast

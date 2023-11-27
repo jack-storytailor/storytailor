@@ -2435,6 +2435,7 @@ const parseImportStatement = (state) => {
     }
     let start = (0, exports.getCursorPosition)(state);
     // import [variable] as [alias] from [path]$
+    // import in [variable] as [alias] from [path]$
     // parse import
     let keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Import]);
     if (!keywordResult) {
@@ -2442,6 +2443,14 @@ const parseImportStatement = (state) => {
     }
     state = keywordResult.state;
     state = (0, exports.skipComments)(state, true);
+    // check if there is a 'in' variable next to the 'import': import in * as varname from "path"
+    let isImportInContext = false;
+    let inKeywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.In]);
+    if (inKeywordResult) {
+        isImportInContext = true;
+        state = inKeywordResult.state;
+        state = (0, exports.skipComments)(state, true);
+    }
     // parse variable until $, as, from, operator
     let variableStart = (0, exports.getCursorPosition)(state);
     let variableEnd = Object.assign({}, variableStart);
@@ -2514,7 +2523,7 @@ const parseImportStatement = (state) => {
         state = (0, exports.addParsingError)(state, IParsingError_1.ParsingErrorType.Error, "only spaces, comments or endline allowed after import path", excessTextStart, (0, exports.getCursorPosition)(state));
     }
     // prepare result
-    let result = astFactory_1.astFactory.importStatement(alias, aliasAst, importPathAst, start, (0, exports.getCursorPosition)(state));
+    let result = astFactory_1.astFactory.importStatement(alias, aliasAst, isImportInContext, importPathAst, start, (0, exports.getCursorPosition)(state));
     // add import statement to the imports registry
     state = Object.assign(Object.assign({}, state), { imports: [...state.imports, result] });
     return {

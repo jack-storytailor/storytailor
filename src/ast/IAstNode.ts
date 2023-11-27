@@ -141,6 +141,7 @@ export interface IAstImportStatement extends IAstNode {
   identifier: IAstNode;
   alias: IAstNode;
   path: IAstNode;
+  importInContext: boolean;
 }
 export interface IAstTryStatement extends IAstNode {
   body: IAstNode;

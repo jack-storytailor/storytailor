@@ -39,7 +39,7 @@ export declare const astFactory: {
     doWhileStatement: (condition: IAstNode, body: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstDoWhileStatement;
     forStatement: (init: IAstNode, test: IAstNode, update: IAstNode, body: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstForStatement;
     forInStatement: (left: IAstNode, right: IAstNode, body: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstForInStatement;
-    importStatement: (alias: IAstNode, identifier: IAstNode, path: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstImportStatement;
+    importStatement: (alias: IAstNode, identifier: IAstNode, importInContext: boolean, path: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstImportStatement;
     tryStatement: (body: IAstNode, catchClause: IAstNode, finallyBlock: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstTryStatement;
     catchStatement: (body: IAstNode, varDeclaration: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstCatchStatement;
     finallyStatement: (body: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstFinallyStatement;

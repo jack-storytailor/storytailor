@@ -2995,6 +2995,7 @@ export const parseImportStatement = (state: IParserState): IParseResult<IAstImpo
   let start = getCursorPosition(state);
   
   // import [variable] as [alias] from [path]$
+  // import in [variable] as [alias] from [path]$
 
   // parse import
   let keywordResult = parseKeywordOfType(state, [KeywordType.Import]);
@@ -3003,6 +3004,15 @@ export const parseImportStatement = (state: IParserState): IParseResult<IAstImpo
   }
   state = keywordResult.state;
   state = skipComments(state, true);
+
+  // check if there is a 'in' variable next to the 'import': import in * as varname from "path"
+  let isImportInContext: boolean = false;
+  let inKeywordResult = parseKeywordOfType(state, [KeywordType.In]);
+  if (inKeywordResult){
+    isImportInContext = true;
+    state = inKeywordResult.state;
+    state = skipComments(state, true);
+  }
 
   // parse variable until $, as, from, operator
   let variableStart: ISymbolPosition = getCursorPosition(state);
@@ -3120,6 +3130,7 @@ export const parseImportStatement = (state: IParserState): IParseResult<IAstImpo
   let result = astFactory.importStatement(
     alias,
     aliasAst,
+    isImportInContext,
     importPathAst,
     start,
     getCursorPosition(state)

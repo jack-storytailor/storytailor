@@ -1626,6 +1626,27 @@ export const compileImportStatement = (node: IAstNode, state: ICompilerState): I
     // write )
     state = writeJsToken(state, `)`);
 
+    // if it's import in, add one more line
+    if (ast.importInContext) {
+        // endline
+        state = writeJsToken(state, `;`);
+        state = writeEndline(state);
+
+        // __context = { ...[identifier], ...__context };
+
+        // __context = { ...
+        state = writeJsToken(state, `${compilerConfig.contextVarName} = { ...`);
+
+        // identifier
+        const identResult = compileAstNode(ast.identifier, state);
+        if (identResult) {
+            state = identResult.state;
+        }
+
+        // , ...__context };
+        state = writeJsToken(state, `, ...${compilerConfig.contextVarName} }`);
+    }
+
     return {
         state,
         result: ast

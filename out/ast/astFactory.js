@@ -303,14 +303,15 @@ exports.astFactory = {
             body
         };
     },
-    importStatement: (alias, identifier, path, start, end) => {
+    importStatement: (alias, identifier, importInContext, path, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.ImportStatement,
             start,
             end,
             alias,
             path,
-            identifier
+            identifier,
+            importInContext
         };
     },
     tryStatement: (body, catchClause, finallyBlock, start, end) => {

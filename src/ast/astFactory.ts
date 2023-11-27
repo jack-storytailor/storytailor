@@ -376,14 +376,15 @@ export const astFactory = {
       body
     }
   },
-  importStatement: (alias: IAstNode, identifier: IAstNode, path: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstImportStatement => {
+  importStatement: (alias: IAstNode, identifier: IAstNode, importInContext: boolean, path: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstImportStatement => {
     return {
       nodeType: AstNodeType.ImportStatement,
       start, 
       end,
       alias,
       path,
-      identifier
+      identifier,
+      importInContext
     }
   },
   tryStatement: (body: IAstNode, catchClause: IAstNode, finallyBlock: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstTryStatement => {
