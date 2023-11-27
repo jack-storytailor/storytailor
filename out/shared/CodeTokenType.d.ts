@@ -2,6 +2,7 @@ export declare enum CodeTokenType {
     Endline = "Endline",
     Endfile = "Endfile",
     Space = "Space",
+    Tab = "Tab",
     /**: */
     Colon = "Colon",
     /**; */

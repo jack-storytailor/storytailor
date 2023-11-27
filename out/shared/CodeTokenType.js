@@ -9,6 +9,8 @@ var CodeTokenType;
     CodeTokenType["Endfile"] = "Endfile";
     // \s
     CodeTokenType["Space"] = "Space";
+    // \t
+    CodeTokenType["Tab"] = "Tab";
     /**: */
     CodeTokenType["Colon"] = "Colon";
     /**; */

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseTryStatement = exports.parseImportPath = exports.parseImportStatement = exports.parseForInStatement = exports.parseForInConditions = exports.parseConditionBlock = exports.parseForCoditions = exports.parseForStatement = exports.parseWhileStatement = exports.parseDoWhileStatement = exports.parseDefaultCaseStatement = exports.parseCaseStatement = exports.parseSwitchStatement = exports.parseIfStatement = exports.parseBlockStatement = exports.parseContinueStatement = exports.parseDeleteExpression = exports.parseReturnStatement = exports.parseBreakStatement = exports.parseStatement = exports.parsePropertyDeclaration = exports.parseVariableDeclaration = exports.parseFunctionDeclaration = exports.parseOperandIdentifier = exports.parseContextIdentifier = exports.parseAnyIdentifier = exports.parseRawIdentifier = exports.parseIdentifierScope = exports.parseIdentifier = exports.parseArrayItem = exports.parseArrayLiteral = exports.parseBooleanLiteral = exports.parseStringInclude = exports.parseStringLiteralItem = exports.parseStringLiteral = exports.parseNumberLiteral = exports.parseLiteral = exports.parseCommentBlock = exports.parseCommentLine = exports.parseKeywordOfType = exports.parseDebuggerKeyword = exports.parseKeyword = exports.parseUnaryOperatorPostfix = exports.parseUnaryOperatorPrefix = exports.parseBinaryOperator = exports.parseOperatorOfType = exports.parseOperator = exports.parseToken = exports.parseModuleContent = exports.parseModule = void 0;
-exports.prepareTokens = exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isEndOfFile = exports.readTokensAsString = exports.readWhitespace = exports.readString = exports.parseErrorTokens = exports.parseScope = exports.parseTag = exports.parsePrototypeExpression = exports.parseDeleteLineExpression = exports.parseObjectLine = exports.parseTextLineStatement = exports.parseOuterStatementContent = exports.parseOuterStatement = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseObjectExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseExpression = exports.parseThrowStatement = exports.parseFinallyStatement = exports.parseCatchStatement = void 0;
+exports.prepareTokens = exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isEndOfFile = exports.readTokensAsString = exports.calcIndentFromWhitespace = exports.readWhitespace = exports.readString = exports.parseErrorTokens = exports.parseScope = exports.parseTag = exports.parsePrototypeExpression = exports.parseDeleteLineExpression = exports.parseObjectLine = exports.parseTextLineStatement = exports.parseOuterStatementContent = exports.parseOuterStatement = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseObjectExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseExpression = exports.parseThrowStatement = exports.parseFinallyStatement = exports.parseCatchStatement = void 0;
 const CodeTokenType_1 = require("../shared/CodeTokenType");
 const IParsingError_1 = require("../shared/IParsingError");
 const KeywordType_1 = require("../ast/KeywordType");
@@ -3325,8 +3325,7 @@ const parseOuterStatement = (state) => {
     let indent = 0;
     let whitespaceResult = (0, exports.readWhitespace)(state);
     if (whitespaceResult) {
-        let whitespace = whitespaceResult.result || "";
-        indent = whitespace.length;
+        indent = (0, exports.calcIndentFromWhitespace)(whitespaceResult.result);
         state = whitespaceResult.state;
     }
     // check open tokens
@@ -3405,8 +3404,8 @@ const parseTextLineStatement = (state) => {
     // check indent
     let indent = 0;
     let whitespaceResult = (0, exports.readWhitespace)(state);
-    if (whitespaceResult && whitespaceResult.result) {
-        indent = Math.trunc(whitespaceResult.result.length);
+    if (whitespaceResult) {
+        indent = (0, exports.calcIndentFromWhitespace)(whitespaceResult.result); //Math.trunc(whitespaceResult.result.length);
         state = whitespaceResult.state;
     }
     // parse text line as string literal content
@@ -3725,9 +3724,19 @@ const readString = (state, breakTokens, trimString = false) => {
 };
 exports.readString = readString;
 const readWhitespace = (state) => {
-    return (0, exports.readTokensAsString)(state, [CodeTokenType_1.CodeTokenType.Space]);
+    let result = (0, exports.readTokensAsString)(state, [CodeTokenType_1.CodeTokenType.Space, CodeTokenType_1.CodeTokenType.Tab]);
+    return result;
 };
 exports.readWhitespace = readWhitespace;
+const calcIndentFromWhitespace = (whitespace) => {
+    if (!whitespace) {
+        return 0;
+    }
+    whitespace = whitespace.replace(/\t/g, "  ");
+    const result = Math.trunc(whitespace.length / 2);
+    return result;
+};
+exports.calcIndentFromWhitespace = calcIndentFromWhitespace;
 const readTokensAsString = (state, tokenTypes) => {
     let value;
     let nextToken;

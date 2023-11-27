@@ -112,6 +112,7 @@ export declare const parseScope: (state: IParserState, openFilter: (stat: IParse
 export declare const parseErrorTokens: (state: IParserState, filter: (state: IParserState) => boolean) => IParserState;
 export declare const readString: (state: IParserState, breakTokens: CodeTokenType[], trimString?: boolean) => IParseResult<string>;
 export declare const readWhitespace: (state: IParserState) => IParseResult<string>;
+export declare const calcIndentFromWhitespace: (whitespace: string) => number;
 export declare const readTokensAsString: (state: IParserState, tokenTypes: CodeTokenType[]) => IParseResult<string>;
 export declare const isEndOfFile: (state: IParserState, offset?: number) => boolean;
 export declare const addItemToArray: <T = any>(source: T[], item: T) => T[];

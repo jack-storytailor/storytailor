@@ -4127,8 +4127,7 @@ export const parseOuterStatement = (state: IParserState): IParseResult<IAstOuter
   let indent = 0;
   let whitespaceResult = readWhitespace(state);
   if (whitespaceResult) {
-    let whitespace = whitespaceResult.result || "";
-    indent = whitespace.length;
+    indent = calcIndentFromWhitespace(whitespaceResult.result);
     state = whitespaceResult.state;
   }
 
@@ -4230,8 +4229,8 @@ export const parseTextLineStatement = (state: IParserState): IParseResult<IAstTe
   // check indent
   let indent = 0;
   let whitespaceResult = readWhitespace(state);
-  if (whitespaceResult && whitespaceResult.result) {
-    indent = Math.trunc(whitespaceResult.result.length);
+  if (whitespaceResult) {
+    indent = calcIndentFromWhitespace(whitespaceResult.result); //Math.trunc(whitespaceResult.result.length);
     state = whitespaceResult.state;
   }
 
@@ -4653,8 +4652,19 @@ export const readString = (state: IParserState, breakTokens: CodeTokenType[], tr
   }
 }
 
-export const readWhitespace = (state: IParserState) => {
-  return readTokensAsString(state, [CodeTokenType.Space]);
+export const readWhitespace = (state: IParserState): IParseResult<string> => {
+  let result = readTokensAsString(state, [CodeTokenType.Space, CodeTokenType.Tab]);
+  return result;
+}
+
+export const calcIndentFromWhitespace = (whitespace: string): number => {
+  if (!whitespace) {
+    return 0;
+  }
+
+  whitespace = whitespace.replace(/\t/g, "  ");
+  const result = Math.trunc(whitespace.length / 2);
+  return result;
 }
 
 export const readTokensAsString = (state: IParserState, tokenTypes: CodeTokenType[]): IParseResult<string> => {

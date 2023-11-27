@@ -5,6 +5,8 @@ export enum CodeTokenType {
 	Endfile = 'Endfile',
 	// \s
 	Space = 'Space',
+	// \t
+	Tab = 'Tab',
 	/**: */
 	Colon = 'Colon',
 	/**; */

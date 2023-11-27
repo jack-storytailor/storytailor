@@ -22,6 +22,10 @@ const separators: ITokenConfig[] = [
 	},
 
 	{
+		type: CodeTokenType.Tab,
+		pattern: '\\t',
+	},
+	{
 		type: CodeTokenType.Space,
 		pattern: '\\s',
 	},

@@ -9,6 +9,10 @@ const separators = [
         pattern: '\\r?\\n',
     },
     {
+        type: CodeTokenType_1.CodeTokenType.Tab,
+        pattern: '\\t',
+    },
+    {
         type: CodeTokenType_1.CodeTokenType.Space,
         pattern: '\\s',
     },
