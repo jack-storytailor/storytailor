@@ -4663,7 +4663,7 @@ export const calcIndentFromWhitespace = (whitespace: string): number => {
   }
 
   whitespace = whitespace.replace(/\t/g, "  ");
-  const result = Math.trunc(whitespace.length / 2);
+  const result = Math.trunc(whitespace.length);
   return result;
 }
 
