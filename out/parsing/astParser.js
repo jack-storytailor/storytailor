@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseTryStatement = exports.parseImportPath = exports.parseImportStatement = exports.parseForInStatement = exports.parseForInConditions = exports.parseConditionBlock = exports.parseForCoditions = exports.parseForStatement = exports.parseWhileStatement = exports.parseDoWhileStatement = exports.parseDefaultCaseStatement = exports.parseCaseStatement = exports.parseSwitchStatement = exports.parseIfStatement = exports.parseBlockStatement = exports.parseContinueStatement = exports.parseDeleteExpression = exports.parseReturnStatement = exports.parseBreakStatement = exports.parseStatement = exports.parsePropertyDeclaration = exports.parseVariableDeclaration = exports.parseFunctionDeclaration = exports.parseOperandIdentifier = exports.parseContextIdentifier = exports.parseAnyIdentifier = exports.parseRawIdentifier = exports.parseIdentifierScope = exports.parseIdentifier = exports.parseArrayItem = exports.parseArrayLiteral = exports.parseBooleanLiteral = exports.parseStringInclude = exports.parseStringLiteralItem = exports.parseStringLiteral = exports.parseNumberLiteral = exports.parseLiteral = exports.parseCommentBlock = exports.parseCommentLine = exports.parseKeywordOfType = exports.parseDebuggerKeyword = exports.parseKeyword = exports.parseUnaryOperatorPostfix = exports.parseUnaryOperatorPrefix = exports.parseBinaryOperator = exports.parseOperatorOfType = exports.parseOperator = exports.parseToken = exports.parseModuleContent = exports.parseModule = void 0;
-exports.prepareTokens = exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isEndOfFile = exports.readTokensAsString = exports.calcIndentFromWhitespace = exports.readWhitespace = exports.readString = exports.parseErrorTokens = exports.parseScope = exports.parseTag = exports.parsePrototypeExpression = exports.parseDeleteLineExpression = exports.parseObjectLine = exports.parseTextLineStatement = exports.parseOuterStatementContent = exports.parseOuterStatement = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseObjectExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseExpression = exports.parseThrowStatement = exports.parseFinallyStatement = exports.parseCatchStatement = void 0;
+exports.parseImportPath = exports.parseImportStatement = exports.parseForInStatement = exports.parseForInConditions = exports.parseConditionBlock = exports.parseForCoditions = exports.parseForStatement = exports.parseWhileStatement = exports.parseDoWhileStatement = exports.parseDefaultCaseStatement = exports.parseCaseStatement = exports.parseSwitchStatement = exports.parseIfStatement = exports.parseBlockStatement = exports.parseContinueStatement = exports.parseDeleteExpression = exports.parseReturnStatement = exports.parseBreakStatement = exports.parseStatement = exports.parsePropertyDeclaration = exports.parseVariableDeclaration = exports.parseFunctionDeclaration = exports.parseOperandIdentifier = exports.parseContextIdentifier = exports.parseAnyIdentifier = exports.parseRawIdentifier = exports.parseIdentifierScope = exports.parseIdentifier = exports.parseArrayItem = exports.parseArrayLiteral = exports.parseBooleanLiteral = exports.parseStringInclude = exports.parseStringLiteralItem = exports.parseStringLiteral = exports.parseNumberLiteral = exports.parseLiteral = exports.parseCommentBlock = exports.parseCommentLine = exports.parseKeywordOfType = exports.parseDebuggerKeyword = exports.parseKeyword = exports.parseUnaryOperatorPostfix = exports.parseUnaryOperatorPrefix = exports.parseBinaryOperator = exports.parseOperatorOfType = exports.parseOperator = exports.parseToken = exports.parseModuleContent = exports.parseModule = exports.defaultParserConfig = void 0;
+exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isEndOfFile = exports.readTokensAsString = exports.calcIndentFromWhitespace = exports.readWhitespace = exports.readString = exports.parseErrorTokens = exports.parseScope = exports.parseTag = exports.parsePrototypeExpression = exports.parseDeleteLineExpression = exports.parseObjectLine = exports.parseTextLineStatement = exports.parseOuterStatementContent = exports.parseOuterStatement = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseObjectExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseExpression = exports.parseThrowStatement = exports.parseFinallyStatement = exports.parseCatchStatement = exports.parseTryStatement = void 0;
+exports.prepareTokens = void 0;
 const CodeTokenType_1 = require("../shared/CodeTokenType");
 const IParsingError_1 = require("../shared/IParsingError");
 const KeywordType_1 = require("../ast/KeywordType");
@@ -44,9 +45,25 @@ const separators = [
     CodeTokenType_1.CodeTokenType.BracketClose,
     CodeTokenType_1.CodeTokenType.Comma
 ];
+exports.defaultParserConfig = {
+    indentSize: 2
+};
+let parserConfig = exports.defaultParserConfig;
+let indentWhitespaceString = "  ";
 // && operator doesn't work in if (condition) statement
 // general
-const parseModule = (tokens, modulePath) => {
+const parseModule = (tokens, modulePath, config) => {
+    // prepare config
+    if (config) {
+        parserConfig = Object.assign({}, config);
+        if (!parserConfig.indentSize) {
+            parserConfig.indentSize = exports.defaultParserConfig.indentSize;
+        }
+        if (!parserConfig.indentSize) {
+            parserConfig.indentSize = 2;
+        }
+        indentWhitespaceString = " ".repeat(parserConfig.indentSize);
+    }
     // prepare tokens
     tokens = (0, exports.prepareTokens)(tokens);
     if (!tokens) {
@@ -3732,7 +3749,7 @@ const calcIndentFromWhitespace = (whitespace) => {
     if (!whitespace) {
         return 0;
     }
-    whitespace = whitespace.replace(/\t/g, "  ");
+    whitespace = whitespace.replace(/\t/g, indentWhitespaceString);
     const result = Math.trunc(whitespace.length);
     return result;
 };

@@ -25,7 +25,11 @@ export interface IParseResult<TResult = any> {
     state: IParserState;
     result: TResult;
 }
-export declare const parseModule: (tokens: ICodeToken[], modulePath: string) => IParseResult<IAstModule>;
+export interface IParserConfig {
+    indentSize: number;
+}
+export declare const defaultParserConfig: IParserConfig;
+export declare const parseModule: (tokens: ICodeToken[], modulePath: string, config: IParserConfig) => IParseResult<IAstModule>;
 export declare const parseModuleContent: (state: IParserState) => IParseResult<IAstNode>;
 export declare const parseToken: (state: IParserState) => IParseResult<IAstToken>;
 export declare const parseOperator: (state: IParserState) => IParseResult<IAstOperator>;

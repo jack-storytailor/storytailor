@@ -18,6 +18,7 @@ export interface IStsConfig {
      */
     isEmitJavascript?: boolean;
     isEmitSourceMaps?: boolean;
+    indentSize?: number;
     environmentPath?: string;
     exclude?: string[];
     include?: string[];

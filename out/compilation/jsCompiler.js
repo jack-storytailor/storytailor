@@ -176,6 +176,13 @@ const compile = (request) => {
         sourceState,
         targetState
     };
+    // prepare ident size
+    if (request.indentSize) {
+        exports.compilerConfig.indentSize = request.indentSize;
+    }
+    if (!exports.compilerConfig.indentSize) {
+        exports.compilerConfig.indentSize = 2;
+    }
     // write module header
     // env
     let environmentPath = getEnvPath(request);

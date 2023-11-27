@@ -122,9 +122,12 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
       // print compiled
       let outputFileContent: string = '';
       let outputSourceMapFileContent: string = '';
-      
-      // parse sts2
-      let parseResult = astParser.parseModule(tokens, sourceFileName);
+
+      // parse sts
+      let parserConfig: astParser.IParserConfig = {
+        indentSize: config.indentSize
+      };
+      let parseResult = astParser.parseModule(tokens, sourceFileName, parserConfig);
       const targetFileName = jsFileNames && jsFileNames.length > i ? jsFileNames[i] : undefined;
       if (parseResult) {
         let astModule = parseResult.result;
@@ -155,7 +158,8 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
           sourceFileName: sourceFileName,
           sourceRoot: config.sourceRoot,
           targetFileName: targetFileName,
-          isEmitSourcemaps: config.isEmitSourceMaps
+          isEmitSourcemaps: config.isEmitSourceMaps,
+          indentSize: config.indentSize
         });
         if (compileResult) {
           outputFileContent = compileResult.javascript;

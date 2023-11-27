@@ -21,6 +21,8 @@ export interface IStsConfig {
 
   isEmitSourceMaps?: boolean;
 
+  indentSize?: number;
+
   environmentPath?: string;
 
   exclude?: string[];

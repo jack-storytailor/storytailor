@@ -70,10 +70,35 @@ export interface IParseResult<TResult = any> {
   result: TResult;
 }
 
+export interface IParserConfig {
+  indentSize: number;
+}
+
+export const defaultParserConfig: IParserConfig = {
+  indentSize: 2
+}
+
+let parserConfig: IParserConfig = defaultParserConfig;
+let indentWhitespaceString: string = "  "; 
+
+
 // && operator doesn't work in if (condition) statement
 
 // general
-export const parseModule = (tokens: ICodeToken[], modulePath: string): IParseResult<IAstModule> => {
+export const parseModule = (tokens: ICodeToken[], modulePath: string, config: IParserConfig): IParseResult<IAstModule> => {
+  // prepare config
+  if (config) {
+    parserConfig = { ...config };
+    if (!parserConfig.indentSize) {
+      parserConfig.indentSize = defaultParserConfig.indentSize;
+    }
+    if (!parserConfig.indentSize) {
+      parserConfig.indentSize = 2;
+    }
+
+    indentWhitespaceString = " ".repeat(parserConfig.indentSize);
+  }
+
   // prepare tokens
   tokens = prepareTokens(tokens);
 
@@ -4662,7 +4687,7 @@ export const calcIndentFromWhitespace = (whitespace: string): number => {
     return 0;
   }
 
-  whitespace = whitespace.replace(/\t/g, "  ");
+  whitespace = whitespace.replace(/\t/g, indentWhitespaceString);
   const result = Math.trunc(whitespace.length);
   return result;
 }

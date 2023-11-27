@@ -43,6 +43,7 @@ export interface ICompileFileRequest {
     environmentPath?: string;
     ast: IAstNode[];
     isEmitSourcemaps?: boolean;
+    indentSize: number;
 }
 export interface ICompileFileResult {
     request: ICompileFileRequest;

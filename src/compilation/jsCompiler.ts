@@ -7,7 +7,6 @@ import { VariableDeclarationKind } from "../ast/VariableDeclarationKind";
 import { ICodeToken } from "../shared/ICodeToken";
 import * as path from 'path';
 import { IHash } from "../shared/IHash";
-import { request } from "http";
 
 export interface ISourceMapToken {
     generated: {
@@ -55,6 +54,7 @@ export interface ICompileFileRequest {
     environmentPath?: string;
     ast: IAstNode[];
     isEmitSourcemaps?: boolean;
+    indentSize: number;
 }
 
 export interface ICompileFileResult {
@@ -255,6 +255,14 @@ export const compile = (request: ICompileFileRequest): ICompileFileResult => {
         sourceState,
         targetState
     };
+
+    // prepare ident size
+    if (request.indentSize) {
+        compilerConfig.indentSize = request.indentSize;
+    }
+    if (!compilerConfig.indentSize) {
+        compilerConfig.indentSize = 2;
+    }
 
     // write module header
     // env
