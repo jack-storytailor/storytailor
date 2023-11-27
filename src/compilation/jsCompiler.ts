@@ -633,7 +633,7 @@ export const compileAstNode = (ast: IAstNode, state: ICompilerState): ICompileRe
   }
 
   // default value is just a type of node
-  state = writeJsToken(state, ast.nodeType, ast);
+  state = writeJsToken(state, ast.nodeType);
   return {
     state,
     result: ast
@@ -797,7 +797,7 @@ export const compileDeleteLine = (node: IAstNode, state: ICompilerState): ICompi
   let objectNode: IAstNode = ast.object;
   if (objectNode) {
     // write delete
-    state = writeJsToken(state, `delete `, ast);
+    state = writeJsToken(state, `delete `);
 
     // check indent and scope
     let sourceState = state.sourceState;
@@ -915,7 +915,7 @@ export const compileNumber = (node: IAstNode, state: ICompilerState): ICompileRe
     return undefined;
   }
 
-  state = writeJsToken(state, ast.value.toString(), ast);
+  state = writeJsToken(state, ast.value.toString());
   return {
     state,
     result: ast
@@ -927,7 +927,7 @@ export const compileBoolean = (node: IAstNode, state: ICompilerState): ICompileR
     return undefined;
   }
 
-  state = writeJsToken(state, ast.value.toString(), ast);
+  state = writeJsToken(state, ast.value.toString());
   return {
     state,
     result: ast
@@ -939,7 +939,7 @@ export const compileIdentifier = (node: IAstNode, state: ICompilerState): ICompi
     return undefined;
   }
 
-  state = writeJsToken(state, ast.value, ast);
+  state = writeJsToken(state, ast.value);
 
   return {
     state,
@@ -1197,7 +1197,7 @@ export const compileFuncDeclaration = (node: IAstNode, state: ICompilerState): I
   }
 
   // write function (
-  state = writeJsToken(state, `function (`, ast);
+  state = writeJsToken(state, `function (`);
 
   // write all the params
   let params = ast.args;
@@ -1271,7 +1271,7 @@ export const compileReturnStatement = (node: IAstNode, state: ICompilerState): I
   }
 
   // write return
-  state = writeJsToken(state, `return `, node);
+  state = writeJsToken(state, `return `);
   // write return value if any
   let valResult = compileAstNode(ast.value, state);
   if (valResult) {
@@ -1290,7 +1290,7 @@ export const compileDeleteExpression = (node: IAstNode, state: ICompilerState): 
   }
 
   // write delete
-  state = writeJsToken(state, `delete `, node);
+  state = writeJsToken(state, `delete `);
   // write delete value if any
   let valResult = compileAstNode(ast.expression, state);
   if (valResult) {
@@ -1309,7 +1309,7 @@ export const compileBreakStatement = (node: IAstNode, state: ICompilerState): IC
   }
 
   // write break
-  state = writeJsToken(state, `break`, node);
+  state = writeJsToken(state, `break`);
 
   return {
     state,
@@ -1323,7 +1323,7 @@ export const compileContinueStatement = (node: IAstNode, state: ICompilerState):
   }
 
   // write break
-  state = writeJsToken(state, `continue`, node);
+  state = writeJsToken(state, `continue`);
 
   return {
     state,
@@ -1337,7 +1337,7 @@ export const compileIfStatement = (node: IAstNode, state: ICompilerState): IComp
   }
 
   // write if (
-  state = writeJsToken(state, `if (`, ast);
+  state = writeJsToken(state, `if (`);
   // write condition
   let conditionResult = compileAstNode(ast.condition, state);
   if (conditionResult) {
@@ -1376,7 +1376,7 @@ export const compileWhileStatement = (node: IAstNode, state: ICompilerState): IC
   }
 
   // write while (
-  state = writeJsToken(state, `while (`, ast);
+  state = writeJsToken(state, `while (`);
   // write condition
   let conditionResult = compileAstNode(ast.condition, state);
   if (conditionResult) {
@@ -1405,7 +1405,7 @@ export const compileDoWhileStatement = (node: IAstNode, state: ICompilerState): 
   }
 
   // write do
-  state = writeJsToken(state, `do `, ast);
+  state = writeJsToken(state, `do `);
 
   // write body
   let bodyResult = compileAstNode(ast.body, state);
@@ -1414,7 +1414,7 @@ export const compileDoWhileStatement = (node: IAstNode, state: ICompilerState): 
   }
 
   // write while (
-  state = writeJsToken(state, ` while (`)
+  state = writeJsToken(state, ` while (`);
 
   // write condition
   let conditionResult = compileAstNode(ast.condition, state);
@@ -1438,7 +1438,7 @@ export const compileSwitchStatement = (node: IAstNode, state: ICompilerState): I
   }
 
   // write while (
-  state = writeJsToken(state, `switch (`, ast);
+  state = writeJsToken(state, `switch (`);
   // write condition
   let conditionResult = compileAstNode(ast.condition, state);
   if (conditionResult) {
@@ -1573,7 +1573,7 @@ export const compileImportStatement = (node: IAstNode, state: ICompilerState): I
 
   // write require('
   // state = writeJsToken(state, `require('${ast.path}')`);
-  state = writeJsToken(state, `require(`, ast);
+  state = writeJsToken(state, `require(`);
 
   // write import path
   let pathResult = compileAstNode(ast.path, state);
@@ -1627,7 +1627,7 @@ export const compileForStatement = (node: IAstNode, state: ICompilerState): ICom
   }
 
   // for (
-  state = writeJsToken(state, `for (`, ast);
+  state = writeJsToken(state, `for (`);
   // write init 
   let initResult = compileAstNode(ast.init, state);
   if (initResult) {
@@ -1667,7 +1667,7 @@ export const compileForInStatement = (node: IAstNode, state: ICompilerState): IC
   }
 
   // for (
-  state = writeJsToken(state, `for (`, ast);
+  state = writeJsToken(state, `for (`);
   // write left
   let leftResult = compileAstNode(ast.left, state);
   if (leftResult) {
@@ -1702,7 +1702,7 @@ export const compileArrayLiteral = (node: IAstNode, state: ICompilerState): ICom
   }
 
   // [
-  state = writeJsToken(state, `[`, ast);
+  state = writeJsToken(state, `[`);
   // write items
   let items = ast.value;
   if (items && items.length > 0) {
@@ -1808,7 +1808,7 @@ export const compileKeyword = (node: IAstNode, state: ICompilerState): ICompileR
     return undefined;
   }
 
-  state = writeJsToken(state, ast.keywordType, ast);
+  state = writeJsToken(state, ast.keywordType);
 
   return {
     state,
@@ -1891,7 +1891,7 @@ export const compileTryStatement = (node: IAstNode, state: ICompilerState): ICom
   }
 
   // write try
-  state = writeJsToken(state, `try `, ast);
+  state = writeJsToken(state, `try `);
   // write body 
   let bodyResult = compileAstNode(ast.body, state);
   if (bodyResult) {
@@ -1925,7 +1925,7 @@ export const compileCatchStatement = (node: IAstNode, state: ICompilerState): IC
   }
 
   // write catch
-  state = writeJsToken(state, `catch `, ast);
+  state = writeJsToken(state, `catch `);
   // write error declaration if any
   if (ast.varDeclaration) {
     state = writeJsToken(state, `(`);
@@ -1953,7 +1953,7 @@ export const compileFinallyStatement = (node: IAstNode, state: ICompilerState): 
   }
 
   // write catch
-  state = writeJsToken(state, `finally `, ast);
+  state = writeJsToken(state, `finally `);
   // write body 
   let bodyResult = compileAstNode(ast.body, state);
   if (bodyResult) {
@@ -1971,7 +1971,7 @@ export const compileDebuggerKeyword = (node: IAstNode, state: ICompilerState): I
     return undefined;
   }
 
-  state = writeJsToken(state, ast.keywordType, ast);
+  state = writeJsToken(state, ast.keywordType);
 
   return {
     state,
@@ -1985,7 +1985,7 @@ export const compileThrowStatement = (node: IAstNode, state: ICompilerState): IC
   }
 
   // write throw
-  state = writeJsToken(state, `throw `, ast);
+  state = writeJsToken(state, `throw `);
 
   // write expression
   let exprResult = compileAstNode(ast.expression, state);
@@ -2005,7 +2005,7 @@ export const compileNewExpression = (node: IAstNode, state: ICompilerState): ICo
   }
 
   // write throw
-  state = writeJsToken(state, `new `, ast);
+  state = writeJsToken(state, `new `);
 
   // write expression
   let exprResult = compileAstNode(ast.expression, state);
@@ -2038,7 +2038,7 @@ export const compileToken = (node: IAstNode, state: ICompilerState): ICompileRes
     return undefined;
   }
 
-  state = writeJsToken(state, ast.token.value || '', ast);
+  state = writeJsToken(state, ast.token.value || '');
   return {
     state,
     result: ast
@@ -2052,7 +2052,7 @@ export const compileTokenSequence = (node: IAstNode, state: ICompilerState): ICo
 
   for (let i = 0; i < ast.tokens.length; i++) {
     const token: ICodeToken = ast.tokens[i];
-    state = writeJsToken(state, token.value || '', i === 0 ? ast : undefined);
+    state = writeJsToken(state, token.value || '');
   }
 
   return {
@@ -2066,7 +2066,7 @@ export const compileOperator = (node: IAstNode, state: ICompilerState): ICompile
     return undefined;
   }
 
-  state = writeJsToken(state, ast.value || '', ast);
+  state = writeJsToken(state, ast.value || '');
   return {
     state,
     result: ast
@@ -2079,7 +2079,7 @@ export const compileStringLiteral = (node: IAstNode, state: ICompilerState): ICo
   }
 
   // open `
-  state = writeJsToken(state, '`', ast);
+  state = writeJsToken(state, '`');
 
   let content = ast.value;
   for (let i = 0; i < content.length; i++) {
@@ -2261,6 +2261,76 @@ export const addSourceMaps = (state: ICompilerState, sourceMaps: ISourceMapToken
   return state;
 }
 
+export const addSourceMap = (state: ICompilerState, sourceMap: ISourceMapToken): ICompilerState => {
+  if (!state || !sourceMap) {
+    return state;
+  }
+
+  let targetState: ITargetState = {
+    ...state.targetState,
+    sourceMaps: [...state.targetState.sourceMaps, sourceMap]
+  };
+
+  state = {
+    ...state,
+    targetState
+  }
+
+  return state;
+}
+
+export const addSourceMapAtCurrentPlace = (state: ICompilerState, tokenName?: string, astNode?: IAstNode, symbolPos?: ISymbolPosition): ICompilerState => {
+  if (!state) {
+    return state;
+  }
+
+  if (!astNode && !symbolPos) {
+    return state;
+  }
+
+  let targetState = state.targetState;
+  let cursor = targetState.cursor;
+
+  let sourceFileName = state.sourceState.fileName;
+  let sourceMapToken: ISourceMapToken = undefined;
+  if (astNode)// && isNeedToLinkSourcemap(astNode)) {
+  {
+    sourceMapToken = {
+      generated: {
+        line: cursor.line + 1 /* line number in generated JS */,
+        column: cursor.column /* column number in generated JS */
+      },
+      original: {
+        line:  astNode.start.line + 1 /* line number in StoryTailor source */,
+        column: astNode.start.column/* column number in StoryTailor source */
+      },
+      source: sourceFileName/* name of the StoryTailor source file */,
+      name: tokenName
+    };
+  }
+  else if (symbolPos)
+  {
+    sourceMapToken = {
+      generated: {
+        line: cursor.line + 1 /* line number in generated JS */,
+        column: cursor.column /* column number in generated JS */
+      },
+      original: {
+        line:  symbolPos.line + 1 /* line number in StoryTailor source */,
+        column: symbolPos.column/* column number in StoryTailor source */
+      },
+      source: sourceFileName/* name of the StoryTailor source file */,
+      name: tokenName
+    };
+  }
+
+  if (sourceMapToken) {
+    state = addSourceMap(state, sourceMapToken);
+  }
+
+  return state;
+}
+
 export const isNeedToLinkSourcemap = (astNode: IAstNode) : boolean => {
   if (!astNode) {
     return false;
@@ -2301,7 +2371,7 @@ export const writeJavascript = (state: ICompilerState, javascript: string): ICom
 export const writeEndline = (state: ICompilerState): ICompilerState => {
   return writeJavascript(state, compilerConfig.endlineSymbol);
 }
-export const writeJsToken = (state: ICompilerState, jsToken: string, astNode?: IAstNode, symbolPos?: ISymbolPosition): ICompilerState => {
+export const writeJsToken = (state: ICompilerState, jsToken: string): ICompilerState => {
   if (!state || !jsToken || jsToken.length === 0) {
     return state;
   }
@@ -2367,42 +2437,6 @@ export const writeJsToken = (state: ICompilerState, jsToken: string, astNode?: I
     cursor,
     javascript
   };
-
-  let sourceFileName = state.sourceState.fileName;
-  if (sourceFileName) {
-    if (astNode)// && isNeedToLinkSourcemap(astNode)) {
-    {
-      const sourceMapToken = {
-        generated: {
-          line: jsLine + 1 /* line number in generated JS */,
-          column: jsColumn /* column number in generated JS */
-        },
-        original: {
-          line:  astNode.start.line + 1 /* line number in StoryTailor source */,
-          column: astNode.start.column/* column number in StoryTailor source */
-        },
-        source: sourceFileName/* name of the StoryTailor source file */,
-        name: astNode.nodeType === AstNodeType.Identifier ? jsToken : undefined
-      };
-      state.targetState.sourceMaps.push(sourceMapToken);
-    }
-    else if (symbolPos)
-    {
-      const sourceMapToken = {
-        generated: {
-          line: jsLine + 1 /* line number in generated JS */,
-          column: jsColumn /* column number in generated JS */
-        },
-        original: {
-          line:  symbolPos.line + 1 /* line number in StoryTailor source */,
-          column: symbolPos.column/* column number in StoryTailor source */
-        },
-        source: sourceFileName/* name of the StoryTailor source file */,
-        name: jsToken
-      };
-      state.targetState.sourceMaps.push(sourceMapToken);
-    }
-  }
 
   // update state
   state = {

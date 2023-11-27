@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.compileNewExpression = exports.compileThrowStatement = exports.compileDebuggerKeyword = exports.compileFinallyStatement = exports.compileCatchStatement = exports.compileTryStatement = exports.compileIndexerExpression = exports.compileConditionalExpression = exports.compileKeyword = exports.compileUpdateExpression = exports.compileObjectExpression = exports.compileArrayLiteral = exports.compileForInStatement = exports.compileForStatement = exports.compilePropertyDeclaration = exports.compileImportStatement = exports.compileParenExpression = exports.compileCaseStatement = exports.compileSwitchStatement = exports.compileDoWhileStatement = exports.compileWhileStatement = exports.compileIfStatement = exports.compileContinueStatement = exports.compileBreakStatement = exports.compileDeleteExpression = exports.compileReturnStatement = exports.compileProgram = exports.compileFuncDeclaration = exports.compileVarDeclaration = exports.compileCallExpression = exports.compileStringInclude = exports.compileMemberExpression = exports.compileBinaryExpression = exports.compileContextIdentifier = exports.compileRawIdentifier = exports.compileIdentifierScope = exports.compileIdentifier = exports.compileBoolean = exports.compileNumber = exports.compileTextLine = exports.compileStatement = exports.compileDeleteLine = exports.compileObjectLine = exports.compileBlockStatement = exports.compileOuterStatement = exports.compileAstModule = exports.compileAstNode = exports.compile = exports.compileSingleNode = exports.compilerConfig = void 0;
-exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.isNeedToLinkSourcemap = exports.addSourceMaps = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = void 0;
+exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.isNeedToLinkSourcemap = exports.addSourceMapAtCurrentPlace = exports.addSourceMap = exports.addSourceMaps = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = void 0;
 const source_map_1 = require("source-map");
 const AstNodeType_1 = require("../ast/AstNodeType");
 const astFactory_1 = require("../ast/astFactory");
@@ -492,7 +492,7 @@ const compileAstNode = (ast, state) => {
         return debuggerResult;
     }
     // default value is just a type of node
-    state = (0, exports.writeJsToken)(state, ast.nodeType, ast);
+    state = (0, exports.writeJsToken)(state, ast.nodeType);
     return {
         state,
         result: ast
@@ -637,7 +637,7 @@ const compileDeleteLine = (node, state) => {
     let objectNode = ast.object;
     if (objectNode) {
         // write delete
-        state = (0, exports.writeJsToken)(state, `delete `, ast);
+        state = (0, exports.writeJsToken)(state, `delete `);
         // check indent and scope
         let sourceState = state.sourceState;
         let myIndent = sourceState.indent;
@@ -741,7 +741,7 @@ const compileNumber = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
-    state = (0, exports.writeJsToken)(state, ast.value.toString(), ast);
+    state = (0, exports.writeJsToken)(state, ast.value.toString());
     return {
         state,
         result: ast
@@ -753,7 +753,7 @@ const compileBoolean = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
-    state = (0, exports.writeJsToken)(state, ast.value.toString(), ast);
+    state = (0, exports.writeJsToken)(state, ast.value.toString());
     return {
         state,
         result: ast
@@ -765,7 +765,7 @@ const compileIdentifier = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
-    state = (0, exports.writeJsToken)(state, ast.value, ast);
+    state = (0, exports.writeJsToken)(state, ast.value);
     return {
         state,
         result: ast
@@ -995,7 +995,7 @@ const compileFuncDeclaration = (node, state) => {
         return undefined;
     }
     // write function (
-    state = (0, exports.writeJsToken)(state, `function (`, ast);
+    state = (0, exports.writeJsToken)(state, `function (`);
     // write all the params
     let params = ast.args;
     if (params && params.length > 0) {
@@ -1060,7 +1060,7 @@ const compileReturnStatement = (node, state) => {
         return undefined;
     }
     // write return
-    state = (0, exports.writeJsToken)(state, `return `, node);
+    state = (0, exports.writeJsToken)(state, `return `);
     // write return value if any
     let valResult = (0, exports.compileAstNode)(ast.value, state);
     if (valResult) {
@@ -1078,7 +1078,7 @@ const compileDeleteExpression = (node, state) => {
         return undefined;
     }
     // write delete
-    state = (0, exports.writeJsToken)(state, `delete `, node);
+    state = (0, exports.writeJsToken)(state, `delete `);
     // write delete value if any
     let valResult = (0, exports.compileAstNode)(ast.expression, state);
     if (valResult) {
@@ -1096,7 +1096,7 @@ const compileBreakStatement = (node, state) => {
         return undefined;
     }
     // write break
-    state = (0, exports.writeJsToken)(state, `break`, node);
+    state = (0, exports.writeJsToken)(state, `break`);
     return {
         state,
         result: ast
@@ -1109,7 +1109,7 @@ const compileContinueStatement = (node, state) => {
         return undefined;
     }
     // write break
-    state = (0, exports.writeJsToken)(state, `continue`, node);
+    state = (0, exports.writeJsToken)(state, `continue`);
     return {
         state,
         result: ast
@@ -1122,7 +1122,7 @@ const compileIfStatement = (node, state) => {
         return undefined;
     }
     // write if (
-    state = (0, exports.writeJsToken)(state, `if (`, ast);
+    state = (0, exports.writeJsToken)(state, `if (`);
     // write condition
     let conditionResult = (0, exports.compileAstNode)(ast.condition, state);
     if (conditionResult) {
@@ -1156,7 +1156,7 @@ const compileWhileStatement = (node, state) => {
         return undefined;
     }
     // write while (
-    state = (0, exports.writeJsToken)(state, `while (`, ast);
+    state = (0, exports.writeJsToken)(state, `while (`);
     // write condition
     let conditionResult = (0, exports.compileAstNode)(ast.condition, state);
     if (conditionResult) {
@@ -1182,7 +1182,7 @@ const compileDoWhileStatement = (node, state) => {
         return undefined;
     }
     // write do
-    state = (0, exports.writeJsToken)(state, `do `, ast);
+    state = (0, exports.writeJsToken)(state, `do `);
     // write body
     let bodyResult = (0, exports.compileAstNode)(ast.body, state);
     if (bodyResult) {
@@ -1210,7 +1210,7 @@ const compileSwitchStatement = (node, state) => {
         return undefined;
     }
     // write while (
-    state = (0, exports.writeJsToken)(state, `switch (`, ast);
+    state = (0, exports.writeJsToken)(state, `switch (`);
     // write condition
     let conditionResult = (0, exports.compileAstNode)(ast.condition, state);
     if (conditionResult) {
@@ -1326,7 +1326,7 @@ const compileImportStatement = (node, state) => {
     state = (0, exports.writeJsToken)(state, ` = `);
     // write require('
     // state = writeJsToken(state, `require('${ast.path}')`);
-    state = (0, exports.writeJsToken)(state, `require(`, ast);
+    state = (0, exports.writeJsToken)(state, `require(`);
     // write import path
     let pathResult = (0, exports.compileAstNode)(ast.path, state);
     if (pathResult) {
@@ -1374,7 +1374,7 @@ const compileForStatement = (node, state) => {
         return undefined;
     }
     // for (
-    state = (0, exports.writeJsToken)(state, `for (`, ast);
+    state = (0, exports.writeJsToken)(state, `for (`);
     // write init 
     let initResult = (0, exports.compileAstNode)(ast.init, state);
     if (initResult) {
@@ -1413,7 +1413,7 @@ const compileForInStatement = (node, state) => {
         return undefined;
     }
     // for (
-    state = (0, exports.writeJsToken)(state, `for (`, ast);
+    state = (0, exports.writeJsToken)(state, `for (`);
     // write left
     let leftResult = (0, exports.compileAstNode)(ast.left, state);
     if (leftResult) {
@@ -1447,7 +1447,7 @@ const compileArrayLiteral = (node, state) => {
         return undefined;
     }
     // [
-    state = (0, exports.writeJsToken)(state, `[`, ast);
+    state = (0, exports.writeJsToken)(state, `[`);
     // write items
     let items = ast.value;
     if (items && items.length > 0) {
@@ -1546,7 +1546,7 @@ const compileKeyword = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
-    state = (0, exports.writeJsToken)(state, ast.keywordType, ast);
+    state = (0, exports.writeJsToken)(state, ast.keywordType);
     return {
         state,
         result: ast
@@ -1618,7 +1618,7 @@ const compileTryStatement = (node, state) => {
         return undefined;
     }
     // write try
-    state = (0, exports.writeJsToken)(state, `try `, ast);
+    state = (0, exports.writeJsToken)(state, `try `);
     // write body 
     let bodyResult = (0, exports.compileAstNode)(ast.body, state);
     if (bodyResult) {
@@ -1649,7 +1649,7 @@ const compileCatchStatement = (node, state) => {
         return undefined;
     }
     // write catch
-    state = (0, exports.writeJsToken)(state, `catch `, ast);
+    state = (0, exports.writeJsToken)(state, `catch `);
     // write error declaration if any
     if (ast.varDeclaration) {
         state = (0, exports.writeJsToken)(state, `(`);
@@ -1676,7 +1676,7 @@ const compileFinallyStatement = (node, state) => {
         return undefined;
     }
     // write catch
-    state = (0, exports.writeJsToken)(state, `finally `, ast);
+    state = (0, exports.writeJsToken)(state, `finally `);
     // write body 
     let bodyResult = (0, exports.compileAstNode)(ast.body, state);
     if (bodyResult) {
@@ -1693,7 +1693,7 @@ const compileDebuggerKeyword = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
-    state = (0, exports.writeJsToken)(state, ast.keywordType, ast);
+    state = (0, exports.writeJsToken)(state, ast.keywordType);
     return {
         state,
         result: ast
@@ -1706,7 +1706,7 @@ const compileThrowStatement = (node, state) => {
         return undefined;
     }
     // write throw
-    state = (0, exports.writeJsToken)(state, `throw `, ast);
+    state = (0, exports.writeJsToken)(state, `throw `);
     // write expression
     let exprResult = (0, exports.compileAstNode)(ast.expression, state);
     if (exprResult) {
@@ -1724,7 +1724,7 @@ const compileNewExpression = (node, state) => {
         return undefined;
     }
     // write throw
-    state = (0, exports.writeJsToken)(state, `new `, ast);
+    state = (0, exports.writeJsToken)(state, `new `);
     // write expression
     let exprResult = (0, exports.compileAstNode)(ast.expression, state);
     if (exprResult) {
@@ -1751,7 +1751,7 @@ const compileToken = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
-    state = (0, exports.writeJsToken)(state, ast.token.value || '', ast);
+    state = (0, exports.writeJsToken)(state, ast.token.value || '');
     return {
         state,
         result: ast
@@ -1765,7 +1765,7 @@ const compileTokenSequence = (node, state) => {
     }
     for (let i = 0; i < ast.tokens.length; i++) {
         const token = ast.tokens[i];
-        state = (0, exports.writeJsToken)(state, token.value || '', i === 0 ? ast : undefined);
+        state = (0, exports.writeJsToken)(state, token.value || '');
     }
     return {
         state,
@@ -1778,7 +1778,7 @@ const compileOperator = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
-    state = (0, exports.writeJsToken)(state, ast.value || '', ast);
+    state = (0, exports.writeJsToken)(state, ast.value || '');
     return {
         state,
         result: ast
@@ -1791,7 +1791,7 @@ const compileStringLiteral = (node, state) => {
         return undefined;
     }
     // open `
-    state = (0, exports.writeJsToken)(state, '`', ast);
+    state = (0, exports.writeJsToken)(state, '`');
     let content = ast.value;
     for (let i = 0; i < content.length; i++) {
         const contentItem = content[i];
@@ -1919,6 +1919,61 @@ const addSourceMaps = (state, sourceMaps) => {
     return state;
 };
 exports.addSourceMaps = addSourceMaps;
+const addSourceMap = (state, sourceMap) => {
+    if (!state || !sourceMap) {
+        return state;
+    }
+    let targetState = Object.assign(Object.assign({}, state.targetState), { sourceMaps: [...state.targetState.sourceMaps, sourceMap] });
+    state = Object.assign(Object.assign({}, state), { targetState });
+    return state;
+};
+exports.addSourceMap = addSourceMap;
+const addSourceMapAtCurrentPlace = (state, tokenName, astNode, symbolPos) => {
+    if (!state) {
+        return state;
+    }
+    if (!astNode && !symbolPos) {
+        return state;
+    }
+    let targetState = state.targetState;
+    let cursor = targetState.cursor;
+    let sourceFileName = state.sourceState.fileName;
+    let sourceMapToken = undefined;
+    if (astNode) // && isNeedToLinkSourcemap(astNode)) {
+     {
+        sourceMapToken = {
+            generated: {
+                line: cursor.line + 1 /* line number in generated JS */,
+                column: cursor.column /* column number in generated JS */
+            },
+            original: {
+                line: astNode.start.line + 1 /* line number in StoryTailor source */,
+                column: astNode.start.column /* column number in StoryTailor source */
+            },
+            source: sourceFileName /* name of the StoryTailor source file */,
+            name: tokenName
+        };
+    }
+    else if (symbolPos) {
+        sourceMapToken = {
+            generated: {
+                line: cursor.line + 1 /* line number in generated JS */,
+                column: cursor.column /* column number in generated JS */
+            },
+            original: {
+                line: symbolPos.line + 1 /* line number in StoryTailor source */,
+                column: symbolPos.column /* column number in StoryTailor source */
+            },
+            source: sourceFileName /* name of the StoryTailor source file */,
+            name: tokenName
+        };
+    }
+    if (sourceMapToken) {
+        state = (0, exports.addSourceMap)(state, sourceMapToken);
+    }
+    return state;
+};
+exports.addSourceMapAtCurrentPlace = addSourceMapAtCurrentPlace;
 const isNeedToLinkSourcemap = (astNode) => {
     if (!astNode) {
         return false;
@@ -1955,7 +2010,7 @@ const writeEndline = (state) => {
     return (0, exports.writeJavascript)(state, exports.compilerConfig.endlineSymbol);
 };
 exports.writeEndline = writeEndline;
-const writeJsToken = (state, jsToken, astNode, symbolPos) => {
+const writeJsToken = (state, jsToken) => {
     if (!state || !jsToken || jsToken.length === 0) {
         return state;
     }
@@ -1993,40 +2048,6 @@ const writeJsToken = (state, jsToken, astNode, symbolPos) => {
     javascript[jsLine] = lastLine;
     targetState = Object.assign(Object.assign({}, targetState), { cursor,
         javascript });
-    let sourceFileName = state.sourceState.fileName;
-    if (sourceFileName) {
-        if (astNode) // && isNeedToLinkSourcemap(astNode)) {
-         {
-            const sourceMapToken = {
-                generated: {
-                    line: jsLine + 1 /* line number in generated JS */,
-                    column: jsColumn /* column number in generated JS */
-                },
-                original: {
-                    line: astNode.start.line + 1 /* line number in StoryTailor source */,
-                    column: astNode.start.column /* column number in StoryTailor source */
-                },
-                source: sourceFileName /* name of the StoryTailor source file */,
-                name: astNode.nodeType === AstNodeType_1.AstNodeType.Identifier ? jsToken : undefined
-            };
-            state.targetState.sourceMaps.push(sourceMapToken);
-        }
-        else if (symbolPos) {
-            const sourceMapToken = {
-                generated: {
-                    line: jsLine + 1 /* line number in generated JS */,
-                    column: jsColumn /* column number in generated JS */
-                },
-                original: {
-                    line: symbolPos.line + 1 /* line number in StoryTailor source */,
-                    column: symbolPos.column /* column number in StoryTailor source */
-                },
-                source: sourceFileName /* name of the StoryTailor source file */,
-                name: jsToken
-            };
-            state.targetState.sourceMaps.push(sourceMapToken);
-        }
-    }
     // update state
     state = Object.assign(Object.assign({}, state), { targetState });
     return state;
