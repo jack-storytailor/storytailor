@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.compileNewExpression = exports.compileThrowStatement = exports.compileDebuggerKeyword = exports.compileFinallyStatement = exports.compileCatchStatement = exports.compileTryStatement = exports.compileIndexerExpression = exports.compileConditionalExpression = exports.compileKeyword = exports.compileUpdateExpression = exports.compileObjectExpression = exports.compileArrayLiteral = exports.compileForInStatement = exports.compileForStatement = exports.compilePropertyDeclaration = exports.compileImportStatement = exports.compileParenExpression = exports.compileCaseStatement = exports.compileSwitchStatement = exports.compileDoWhileStatement = exports.compileWhileStatement = exports.compileIfStatement = exports.compileContinueStatement = exports.compileBreakStatement = exports.compileDeleteExpression = exports.compileReturnStatement = exports.compileProgram = exports.compileFuncDeclaration = exports.compileVarDeclaration = exports.compileCallExpression = exports.compileStringInclude = exports.compileMemberExpression = exports.compileBinaryExpression = exports.compileContextIdentifier = exports.compileRawIdentifier = exports.compileIdentifierScope = exports.compileIdentifier = exports.compileBoolean = exports.compileNumber = exports.compileTextLine = exports.compileStatement = exports.compileDeleteLine = exports.compileObjectLine = exports.compileBlockStatement = exports.compileOuterStatement = exports.compileAstModule = exports.compileAstNode = exports.compile = exports.compileSingleNode = exports.compilerConfig = void 0;
-exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.isNeedToLinkSourcemap = exports.addSourceMapAtCurrentPlace = exports.addSourceMap = exports.addSourceMaps = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = void 0;
+exports.toStringSafe = exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.isNeedToLinkSourcemap = exports.addSourceMapAtCurrentPlace = exports.addSourceMap = exports.addSourceMaps = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = void 0;
 const source_map_1 = require("source-map");
 const AstNodeType_1 = require("../ast/AstNodeType");
 const astFactory_1 = require("../ast/astFactory");
@@ -603,9 +603,10 @@ const compileObjectLine = (node, state) => {
         state = (0, exports.setIndentScope)([...parentScope, scopeItem], state);
     }
     // write indent scope
-    state = (0, exports.writeIndentScope)(state.sourceState.indentScope, state);
+    state = (0, exports.writeIndentScope)(state.sourceState.indentScope, state, ast.start);
     // compile init value if any
     if (initValue) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, "=", initValue.start, 1);
         state = (0, exports.writeJsToken)(state, " = ");
         // write init value
         let initValResult = (0, exports.compileAstNode)(initValue, state);
@@ -648,7 +649,7 @@ const compileDeleteLine = (node, state) => {
         let parentScope = (0, exports.getParentScope)(myIndent, state);
         scopeToWrite = [...parentScope, scopeItem];
         // write indent scope
-        state = (0, exports.writeIndentScope)(scopeToWrite, state);
+        state = (0, exports.writeIndentScope)(scopeToWrite, state, objectNode.start);
     }
     return {
         state,
@@ -697,6 +698,7 @@ const compileTextLine = (node, state) => {
         whitespace = whitespace + ' ';
     }
     // write indent scope
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeIndentScope)(parentScope, state);
     // write [text]
     state = (0, exports.writeJsToken)(state, `['${exports.compilerConfig.textFieldName}']`);
@@ -741,6 +743,7 @@ const compileNumber = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, (0, exports.toStringSafe)(ast.value), ast.start);
     state = (0, exports.writeJsToken)(state, ast.value.toString());
     return {
         state,
@@ -753,6 +756,7 @@ const compileBoolean = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, (0, exports.toStringSafe)(ast.value), ast.start);
     state = (0, exports.writeJsToken)(state, ast.value.toString());
     return {
         state,
@@ -799,6 +803,10 @@ const compileRawIdentifier = (node, state) => {
     let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.RawIdentifier);
     if (!ast || !state) {
         return undefined;
+    }
+    var identifier = astFactory_1.astFactory.asNode(ast.value, AstNodeType_1.AstNodeType.Identifier);
+    if (identifier) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, identifier.value, identifier.start, 1);
     }
     let compileResult = (0, exports.compileAstNode)(ast.value, state);
     if (compileResult) {
@@ -922,6 +930,12 @@ const compileCallExpression = (node, state) => {
         return undefined;
     }
     // callee
+    if (ast.calee) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.calee.start);
+    }
+    else {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
+    }
     let calleeResult = (0, exports.compileAstNode)(ast.calee, state);
     if (calleeResult) {
         state = calleeResult.state;
@@ -966,8 +980,13 @@ const compileVarDeclaration = (node, state) => {
         prefix = "let";
     }
     // write prefix
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `${prefix} `);
     // write varname
+    let identifier = astFactory_1.astFactory.asNode(ast.identifier, AstNodeType_1.AstNodeType.Identifier);
+    if (identifier) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, identifier.value, ast.identifier.start);
+    }
     let varnameResult = (0, exports.compileAstNode)(ast.identifier, state);
     if (varnameResult) {
         state = varnameResult.state;
@@ -995,6 +1014,7 @@ const compileFuncDeclaration = (node, state) => {
         return undefined;
     }
     // write function (
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `function (`);
     // write all the params
     let params = ast.args;
@@ -1031,6 +1051,7 @@ const compileProgram = (node, state) => {
         return undefined;
     }
     // write {
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `{`);
     state = (0, exports.writeEndline)(state);
     let content = ast.content;
@@ -1047,6 +1068,7 @@ const compileProgram = (node, state) => {
         }
     }
     // write }
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.end);
     state = (0, exports.writeJsToken)(state, `}`);
     return {
         state,
@@ -1060,6 +1082,7 @@ const compileReturnStatement = (node, state) => {
         return undefined;
     }
     // write return
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `return `);
     // write return value if any
     let valResult = (0, exports.compileAstNode)(ast.value, state);
@@ -1078,6 +1101,7 @@ const compileDeleteExpression = (node, state) => {
         return undefined;
     }
     // write delete
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `delete `);
     // write delete value if any
     let valResult = (0, exports.compileAstNode)(ast.expression, state);
@@ -1096,6 +1120,7 @@ const compileBreakStatement = (node, state) => {
         return undefined;
     }
     // write break
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `break`);
     return {
         state,
@@ -1109,6 +1134,7 @@ const compileContinueStatement = (node, state) => {
         return undefined;
     }
     // write break
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `continue`);
     return {
         state,
@@ -1122,6 +1148,7 @@ const compileIfStatement = (node, state) => {
         return undefined;
     }
     // write if (
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `if (`);
     // write condition
     let conditionResult = (0, exports.compileAstNode)(ast.condition, state);
@@ -1137,6 +1164,7 @@ const compileIfStatement = (node, state) => {
     }
     // write else if any
     if (ast.elseValue) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.elseValue.start, 1);
         state = (0, exports.writeJsToken)(state, ` else `);
         let elseResult = (0, exports.compileAstNode)(ast.elseValue, state);
         if (elseResult) {
@@ -1156,6 +1184,7 @@ const compileWhileStatement = (node, state) => {
         return undefined;
     }
     // write while (
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `while (`);
     // write condition
     let conditionResult = (0, exports.compileAstNode)(ast.condition, state);
@@ -1182,6 +1211,7 @@ const compileDoWhileStatement = (node, state) => {
         return undefined;
     }
     // write do
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `do `);
     // write body
     let bodyResult = (0, exports.compileAstNode)(ast.body, state);
@@ -1189,6 +1219,9 @@ const compileDoWhileStatement = (node, state) => {
         state = bodyResult.state;
     }
     // write while (
+    if (ast.condition) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.condition.start);
+    }
     state = (0, exports.writeJsToken)(state, ` while (`);
     // write condition
     let conditionResult = (0, exports.compileAstNode)(ast.condition, state);
@@ -1210,6 +1243,7 @@ const compileSwitchStatement = (node, state) => {
         return undefined;
     }
     // write while (
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `switch (`);
     // write condition
     let conditionResult = (0, exports.compileAstNode)(ast.condition, state);
@@ -1252,11 +1286,13 @@ const compileCaseStatement = (node, state) => {
     let isDefaultCase = ast.condition === undefined;
     if (isDefaultCase === true) {
         // default case
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
         state = (0, exports.writeJsToken)(state, `default `);
     }
     else {
         // not a default case
         // write case
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
         state = (0, exports.writeJsToken)(state, `case `);
         // write condition
         let conditionResult = (0, exports.compileAstNode)(ast.condition, state);
@@ -1318,6 +1354,10 @@ const compileImportStatement = (node, state) => {
         return undefined;
     }
     // write identifier
+    let identifier = astFactory_1.astFactory.asNode(ast.identifier, AstNodeType_1.AstNodeType.Identifier);
+    if (identifier) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, identifier.value, identifier.start);
+    }
     let identifierResult = (0, exports.compileAstNode)(ast.identifier, state);
     if (identifierResult) {
         state = identifierResult.state;
@@ -1325,7 +1365,7 @@ const compileImportStatement = (node, state) => {
     // write = 
     state = (0, exports.writeJsToken)(state, ` = `);
     // write require('
-    // state = writeJsToken(state, `require('${ast.path}')`);
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `require(`);
     // write import path
     let pathResult = (0, exports.compileAstNode)(ast.path, state);
@@ -1374,6 +1414,7 @@ const compileForStatement = (node, state) => {
         return undefined;
     }
     // for (
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `for (`);
     // write init 
     let initResult = (0, exports.compileAstNode)(ast.init, state);
@@ -1413,6 +1454,7 @@ const compileForInStatement = (node, state) => {
         return undefined;
     }
     // for (
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `for (`);
     // write left
     let leftResult = (0, exports.compileAstNode)(ast.left, state);
@@ -1422,6 +1464,9 @@ const compileForInStatement = (node, state) => {
     // write in
     state = (0, exports.writeJsToken)(state, ` in `);
     // write right
+    if (ast.right) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.right.start);
+    }
     let rightResult = (0, exports.compileAstNode)(ast.right, state);
     if (rightResult) {
         state = rightResult.state;
@@ -1447,6 +1492,7 @@ const compileArrayLiteral = (node, state) => {
         return undefined;
     }
     // [
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `[`);
     // write items
     let items = ast.value;
@@ -1481,6 +1527,7 @@ const compileObjectExpression = (node, state) => {
         return undefined;
     }
     // {
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `{`);
     // write properties
     let props = ast.properties;
@@ -1516,6 +1563,9 @@ const compileUpdateExpression = (node, state) => {
     }
     if (ast.prefix === true) {
         // write operator
+        if (ast.operator) {
+            state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.operator.start);
+        }
         let operatorResult = (0, exports.compileAstNode)(ast.operator, state);
         if (operatorResult) {
             state = operatorResult.state;
@@ -1546,6 +1596,7 @@ const compileKeyword = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, ast.keywordType);
     return {
         state,
@@ -1566,6 +1617,9 @@ const compileConditionalExpression = (node, state) => {
     // ?
     state = (0, exports.writeJsToken)(state, ` ? `);
     // then
+    if (ast.whenTrue) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.whenTrue.start);
+    }
     let thenResult = (0, exports.compileAstNode)(ast.whenTrue, state);
     if (thenResult) {
         state = thenResult.state;
@@ -1573,6 +1627,9 @@ const compileConditionalExpression = (node, state) => {
     // :
     state = (0, exports.writeJsToken)(state, ` : `);
     // else
+    if (ast.whenFalse) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.whenFalse.start);
+    }
     let elseResult = (0, exports.compileAstNode)(ast.whenFalse, state);
     if (elseResult) {
         state = elseResult.state;
@@ -1592,6 +1649,9 @@ const compileIndexerExpression = (node, state) => {
     let member = ast.member;
     if (member) {
         // write obj
+        if (member.object) {
+            state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, member.object.start);
+        }
         let objResult = (0, exports.compileAstNode)(member.object, state);
         if (objResult) {
             state = objResult.state;
@@ -1618,6 +1678,7 @@ const compileTryStatement = (node, state) => {
         return undefined;
     }
     // write try
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `try `);
     // write body 
     let bodyResult = (0, exports.compileAstNode)(ast.body, state);
@@ -1649,6 +1710,7 @@ const compileCatchStatement = (node, state) => {
         return undefined;
     }
     // write catch
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `catch `);
     // write error declaration if any
     if (ast.varDeclaration) {
@@ -1676,6 +1738,7 @@ const compileFinallyStatement = (node, state) => {
         return undefined;
     }
     // write catch
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `finally `);
     // write body 
     let bodyResult = (0, exports.compileAstNode)(ast.body, state);
@@ -1693,6 +1756,7 @@ const compileDebuggerKeyword = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, ast.keywordType);
     return {
         state,
@@ -1706,6 +1770,7 @@ const compileThrowStatement = (node, state) => {
         return undefined;
     }
     // write throw
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `throw `);
     // write expression
     let exprResult = (0, exports.compileAstNode)(ast.expression, state);
@@ -1724,6 +1789,7 @@ const compileNewExpression = (node, state) => {
         return undefined;
     }
     // write throw
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `new `);
     // write expression
     let exprResult = (0, exports.compileAstNode)(ast.expression, state);
@@ -1736,16 +1802,6 @@ const compileNewExpression = (node, state) => {
     };
 };
 exports.compileNewExpression = compileNewExpression;
-// export const compile = (node: IAstNode, state: ICompilerState): ICompileResult<IAst> => {
-//   let ast = astFactory.asNode<IAst>(node, AstNodeType.);
-//   if (!ast || !state) {
-//     return undefined;
-//   }
-//   return {
-//     state,
-//     result: ast
-//   }  
-// }
 const compileToken = (node, state) => {
     let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.Token);
     if (!ast || !state) {
@@ -1778,6 +1834,7 @@ const compileOperator = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, ast.value || '');
     return {
         state,
@@ -1808,9 +1865,12 @@ const compileStringLiteral = (node, state) => {
     };
 };
 exports.compileStringLiteral = compileStringLiteral;
-const writeIndentScope = (indentScope, state) => {
+const writeIndentScope = (indentScope, state, astPos) => {
     if (!state) {
         return undefined;
+    }
+    if (astPos) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, astPos);
     }
     // context['
     state = (0, exports.writeJsToken)(state, `${exports.compilerConfig.contextVarName}`);
@@ -1928,41 +1988,28 @@ const addSourceMap = (state, sourceMap) => {
     return state;
 };
 exports.addSourceMap = addSourceMap;
-const addSourceMapAtCurrentPlace = (state, tokenName, astNode, symbolPos) => {
+const addSourceMapAtCurrentPlace = (state, tokenName, symbolPos, jsLineOffset, stsLineOffset) => {
     if (!state) {
         return state;
     }
-    if (!astNode && !symbolPos) {
+    if (!symbolPos) {
         return state;
     }
     let targetState = state.targetState;
     let cursor = targetState.cursor;
     let sourceFileName = state.sourceState.fileName;
     let sourceMapToken = undefined;
-    if (astNode) // && isNeedToLinkSourcemap(astNode)) {
-     {
+    let jsOffset = jsLineOffset ? jsLineOffset : 0;
+    let stsOffset = stsLineOffset ? stsLineOffset : 0;
+    if (symbolPos) {
         sourceMapToken = {
             generated: {
                 line: cursor.line + 1 /* line number in generated JS */,
-                column: cursor.column /* column number in generated JS */
-            },
-            original: {
-                line: astNode.start.line + 1 /* line number in StoryTailor source */,
-                column: astNode.start.column /* column number in StoryTailor source */
-            },
-            source: sourceFileName /* name of the StoryTailor source file */,
-            name: tokenName
-        };
-    }
-    else if (symbolPos) {
-        sourceMapToken = {
-            generated: {
-                line: cursor.line + 1 /* line number in generated JS */,
-                column: cursor.column /* column number in generated JS */
+                column: cursor.column + jsOffset /* column number in generated JS */
             },
             original: {
                 line: symbolPos.line + 1 /* line number in StoryTailor source */,
-                column: symbolPos.column /* column number in StoryTailor source */
+                column: symbolPos.column + stsOffset /* column number in StoryTailor source */
             },
             source: sourceFileName /* name of the StoryTailor source file */,
             name: tokenName
@@ -2043,7 +2090,6 @@ const writeJsToken = (state, jsToken) => {
     else {
         javascript = [lastLine];
     }
-    let jsColumn = lastLine ? lastLine.length : 0;
     lastLine = lastLine + jsToken;
     javascript[jsLine] = lastLine;
     targetState = Object.assign(Object.assign({}, targetState), { cursor,
@@ -2053,3 +2099,10 @@ const writeJsToken = (state, jsToken) => {
     return state;
 };
 exports.writeJsToken = writeJsToken;
+const toStringSafe = (value) => {
+    if (!value) {
+        return undefined;
+    }
+    return value.toString();
+};
+exports.toStringSafe = toStringSafe;
