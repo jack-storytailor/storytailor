@@ -1,4 +1,4 @@
-export declare const objectToString: (obj: any, separator?: string, indent?: number) => any;
+export declare const objectToString: (obj: any, separator?: string) => any;
 export declare const testFunction: (param1: any, param2: any) => string;
 export declare const getSerializer: () => {
     serialize: (obj: any, separator: any) => any;

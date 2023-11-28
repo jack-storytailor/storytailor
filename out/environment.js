@@ -1,12 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.clearText = exports.subitemsToString = exports.getSerializer = exports.testFunction = exports.objectToString = void 0;
-const objectToString = (obj, separator, indent) => {
-    if (obj !== false && !obj) {
+const objectToString = (obj, separator) => {
+    if (obj === undefined || obj === null) {
         return '';
-    }
-    if (!indent) {
-        indent = 0;
     }
     separator = separator || '';
     if (obj.__text instanceof Array) {
@@ -18,28 +15,7 @@ const objectToString = (obj, separator, indent) => {
         return result;
     }
     if (obj instanceof Object) {
-        return undefined;
-        let subitems = [];
-        let indentStr = '';
-        for (let i = 0; i < indent; i++) {
-            indentStr += '  ';
-        }
-        if (indent > 3) {
-            return obj.toString();
-        }
-        for (const key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                const field = obj[key];
-                if (field) {
-                    subitems = [
-                        ...subitems,
-                        indentStr + '* ' + key + '\n' + (0, exports.objectToString)(field, separator, indent + 1)
-                    ];
-                }
-            }
-        }
-        let result = subitems.join('\n');
-        return result;
+        return '';
     }
     return obj.toString();
 };
