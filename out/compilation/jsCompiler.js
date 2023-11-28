@@ -709,16 +709,18 @@ const compileTextLine = (node, state) => {
     state = (0, exports.writeIndentScope)(parentScope, state);
     // write [text]
     state = (0, exports.writeJsToken)(state, `['${exports.compilerConfig.textFieldName}']`);
-    // write = 
-    state = (0, exports.writeJsToken)(state, ` = `);
-    // write = [...
-    state = (0, exports.writeJsToken)(state, `[...`);
-    // write indent scope
-    state = (0, exports.writeIndentScope)(parentScope, state);
-    // write [text]
-    state = (0, exports.writeJsToken)(state, `['${exports.compilerConfig.textFieldName}']`);
-    // write , 
-    state = (0, exports.writeJsToken)(state, `, `);
+    // write .push(
+    state = (0, exports.writeJsToken)(state, `.push(`);
+    // // write = 
+    // state = writeJsToken(state, ` = `);
+    // // write = [...
+    // state = writeJsToken(state, `[...`);
+    // // write indent scope
+    // state = writeIndentScope(parentScope, state);
+    // // write [text]
+    // state = writeJsToken(state, `['${compilerConfig.textFieldName}']`)
+    // // write , 
+    // state = writeJsToken(state, `, `);
     // write open `
     state = (0, exports.writeJsToken)(state, '`');
     // write whitespace
@@ -732,12 +734,15 @@ const compileTextLine = (node, state) => {
             state = compileItemResult.state;
         }
     }
-    // write close `
-    state = (0, exports.writeJsToken)(state, '`');
-    // write ]
-    state = (0, exports.writeJsToken)(state, `]`);
-    // write ;
-    state = (0, exports.writeJsToken)(state, ';');
+    // write `);
+    state = (0, exports.writeJsToken)(state, '`);');
+    // // write close `
+    // state = writeJsToken(state, '`');
+    // // write ]
+    // state = writeJsToken(state, `]`);
+    // // write ;
+    // state = writeJsToken(state, ';');
+    // write endline
     state = (0, exports.writeEndline)(state);
     return {
         state,
