@@ -4,6 +4,8 @@ export enum OperatorType {
   TripleEquals = "TripleEquals",
   NotEqualsEquals = "NotEqualsEquals",
   NotEquals = "NotEquals",
+  PlusEquals = "PlusEquals",
+  MinusEquals = "MinusEquals",
   Plus = "Plus",
   PlusPlus = "PlusPlus",
   Minus = "Minus",

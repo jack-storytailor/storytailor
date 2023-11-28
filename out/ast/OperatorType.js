@@ -8,6 +8,8 @@ var OperatorType;
     OperatorType["TripleEquals"] = "TripleEquals";
     OperatorType["NotEqualsEquals"] = "NotEqualsEquals";
     OperatorType["NotEquals"] = "NotEquals";
+    OperatorType["PlusEquals"] = "PlusEquals";
+    OperatorType["MinusEquals"] = "MinusEquals";
     OperatorType["Plus"] = "Plus";
     OperatorType["PlusPlus"] = "PlusPlus";
     OperatorType["Minus"] = "Minus";

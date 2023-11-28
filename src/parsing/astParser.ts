@@ -251,6 +251,38 @@ export const parseOperator = (state: IParserState): IParseResult<IAstOperator> =
     }
   }
 
+  // PlusEquals = "PlusEquals",
+  sequence = [CodeTokenType.Plus, CodeTokenType.Equals];
+  operatorType = OperatorType.PlusEquals;
+
+  if (checkTokenSequence(state, sequence)) {
+    state = skipTokens(state, sequence.length);
+    let end = getCursorPosition(state);
+    let opText = `+=`;
+    let result = astFactory.operator(operatorType, opText, start, end);
+    
+    return {
+      state,
+      result
+    }
+  }
+
+  // MinusEquals = "MinusEquals",
+  sequence = [CodeTokenType.Minus, CodeTokenType.Equals];
+  operatorType = OperatorType.MinusEquals;
+
+  if (checkTokenSequence(state, sequence)) {
+    state = skipTokens(state, sequence.length);
+    let end = getCursorPosition(state);
+    let opText = `-=`;
+    let result = astFactory.operator(operatorType, opText, start, end);
+    
+    return {
+      state,
+      result
+    }
+  }
+
   // PlusPlus = "PlusPlus",
   sequence = [CodeTokenType.Plus, CodeTokenType.Plus];
   operatorType = OperatorType.PlusPlus;
@@ -595,14 +627,16 @@ export const parseOperatorOfType = (state: IParserState, operatorTypes: Operator
 }
 export const parseBinaryOperator = (state: IParserState): IParseResult<IAstOperator> => {
   return parseOperatorOfType(state, [
-    OperatorType.Greater,
     OperatorType.GreaterOrEquals,
-    OperatorType.Less,
+    OperatorType.Greater,
     OperatorType.LessOrEquals,
+    OperatorType.Less,
+	OperatorType.PlusEquals,
+	OperatorType.MinusEquals,
     OperatorType.Minus,
     OperatorType.Multiply,
-    OperatorType.NotEquals,
     OperatorType.NotEqualsEquals,
+    OperatorType.NotEquals,
     OperatorType.Plus,
     OperatorType.Divide,
     OperatorType.TripleEquals,

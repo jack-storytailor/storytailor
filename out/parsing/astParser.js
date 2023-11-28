@@ -192,6 +192,32 @@ const parseOperator = (state) => {
             result
         };
     }
+    // PlusEquals = "PlusEquals",
+    sequence = [CodeTokenType_1.CodeTokenType.Plus, CodeTokenType_1.CodeTokenType.Equals];
+    operatorType = OperatorType_1.OperatorType.PlusEquals;
+    if ((0, exports.checkTokenSequence)(state, sequence)) {
+        state = (0, exports.skipTokens)(state, sequence.length);
+        let end = (0, exports.getCursorPosition)(state);
+        let opText = `+=`;
+        let result = astFactory_1.astFactory.operator(operatorType, opText, start, end);
+        return {
+            state,
+            result
+        };
+    }
+    // MinusEquals = "MinusEquals",
+    sequence = [CodeTokenType_1.CodeTokenType.Minus, CodeTokenType_1.CodeTokenType.Equals];
+    operatorType = OperatorType_1.OperatorType.MinusEquals;
+    if ((0, exports.checkTokenSequence)(state, sequence)) {
+        state = (0, exports.skipTokens)(state, sequence.length);
+        let end = (0, exports.getCursorPosition)(state);
+        let opText = `-=`;
+        let result = astFactory_1.astFactory.operator(operatorType, opText, start, end);
+        return {
+            state,
+            result
+        };
+    }
     // PlusPlus = "PlusPlus",
     sequence = [CodeTokenType_1.CodeTokenType.Plus, CodeTokenType_1.CodeTokenType.Plus];
     operatorType = OperatorType_1.OperatorType.PlusPlus;
@@ -475,14 +501,16 @@ const parseOperatorOfType = (state, operatorTypes) => {
 exports.parseOperatorOfType = parseOperatorOfType;
 const parseBinaryOperator = (state) => {
     return (0, exports.parseOperatorOfType)(state, [
-        OperatorType_1.OperatorType.Greater,
         OperatorType_1.OperatorType.GreaterOrEquals,
-        OperatorType_1.OperatorType.Less,
+        OperatorType_1.OperatorType.Greater,
         OperatorType_1.OperatorType.LessOrEquals,
+        OperatorType_1.OperatorType.Less,
+        OperatorType_1.OperatorType.PlusEquals,
+        OperatorType_1.OperatorType.MinusEquals,
         OperatorType_1.OperatorType.Minus,
         OperatorType_1.OperatorType.Multiply,
-        OperatorType_1.OperatorType.NotEquals,
         OperatorType_1.OperatorType.NotEqualsEquals,
+        OperatorType_1.OperatorType.NotEquals,
         OperatorType_1.OperatorType.Plus,
         OperatorType_1.OperatorType.Divide,
         OperatorType_1.OperatorType.TripleEquals,
