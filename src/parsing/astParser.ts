@@ -1904,7 +1904,6 @@ export const parseBlockStatement = (state: IParserState): IParseResult<IAstBlock
         break;
       }
 
-
       return state;
     }
   );
@@ -4225,11 +4224,6 @@ export const parseOuterStatement = (state: IParserState): IParseResult<IAstOuter
   state = parseErrorTokens(state, (stat) => !getTokenOfType(stat, [CodeTokenType.Endline]));
 
   // skip endline
-  if (getTokenOfType(state, [CodeTokenType.Endline])) {
-    state = skipTokens(state, 1);
-  }
-
-  // skip extra endline if any
   if (getTokenOfType(state, [CodeTokenType.Endline])) {
     state = skipTokens(state, 1);
   }

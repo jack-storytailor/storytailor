@@ -3402,10 +3402,6 @@ const parseOuterStatement = (state) => {
     if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Endline])) {
         state = (0, exports.skipTokens)(state, 1);
     }
-    // skip extra endline if any
-    if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Endline])) {
-        state = (0, exports.skipTokens)(state, 1);
-    }
     // prepare result
     let end = (0, exports.getCursorPosition)(state);
     let result = astFactory_1.astFactory.outerStatement(indent, statement, start, end);
