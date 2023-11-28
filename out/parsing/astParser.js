@@ -3875,8 +3875,8 @@ const skipCommentBlock = (state) => {
 exports.skipCommentBlock = skipCommentBlock;
 const skipWhitespace = (state, multiline = false) => {
     const tokenTypes = multiline
-        ? [CodeTokenType_1.CodeTokenType.Space, CodeTokenType_1.CodeTokenType.Endline]
-        : [CodeTokenType_1.CodeTokenType.Space];
+        ? [CodeTokenType_1.CodeTokenType.Space, CodeTokenType_1.CodeTokenType.Tab, CodeTokenType_1.CodeTokenType.Endline]
+        : [CodeTokenType_1.CodeTokenType.Space, CodeTokenType_1.CodeTokenType.Tab];
     return (0, exports.skipTokensOfType)(state, tokenTypes);
 };
 exports.skipWhitespace = skipWhitespace;

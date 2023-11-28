@@ -4830,8 +4830,8 @@ export const skipCommentBlock = (state: IParserState): IParserState => {
 
 export const skipWhitespace = (state: IParserState, multiline: boolean = false): IParserState => {
   const tokenTypes = multiline
-    ? [CodeTokenType.Space, CodeTokenType.Endline]
-    : [CodeTokenType.Space];
+    ? [CodeTokenType.Space, CodeTokenType.Tab, CodeTokenType.Endline]
+    : [CodeTokenType.Space, CodeTokenType.Tab];
   return skipTokensOfType(state, tokenTypes);
 }
 export const skipTokenOfType = (state: IParserState, tokenTypes: CodeTokenType[]): IParserState => {
