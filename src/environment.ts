@@ -1,5 +1,5 @@
 export const objectToString = (obj: any, separator?: string, indent?: number) => {
-  if (obj !== !obj) {
+  if (obj !== false && !obj) {
     return '';
   }
 
