@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.clearText = exports.subitemsToString = exports.getSerializer = exports.testFunction = exports.objectToString = void 0;
 const objectToString = (obj, separator, indent) => {
-    if (!obj) {
+    if (obj !== !obj) {
         return '';
     }
     if (!indent) {
