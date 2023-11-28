@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.compileNewExpression = exports.compileThrowStatement = exports.compileDebuggerKeyword = exports.compileFinallyStatement = exports.compileCatchStatement = exports.compileTryStatement = exports.compileIndexerExpression = exports.compileConditionalExpression = exports.compileKeyword = exports.compileUpdateExpression = exports.compileObjectExpression = exports.compileArrayLiteral = exports.compileForInStatement = exports.compileForStatement = exports.compilePropertyDeclaration = exports.compileImportStatement = exports.compileParenExpression = exports.compileCaseStatement = exports.compileSwitchStatement = exports.compileDoWhileStatement = exports.compileWhileStatement = exports.compileIfStatement = exports.compileContinueStatement = exports.compileBreakStatement = exports.compileDeleteExpression = exports.compileReturnStatement = exports.compileProgram = exports.compileFuncDeclaration = exports.compileVarDeclaration = exports.compileCallExpression = exports.compileStringInclude = exports.compileMemberExpression = exports.compileBinaryExpression = exports.compileContextIdentifier = exports.compileRawIdentifier = exports.compileIdentifierScope = exports.compileIdentifier = exports.compileBoolean = exports.compileNumber = exports.compileTextLine = exports.compileStatement = exports.compileDeleteLine = exports.compileObjectLine = exports.compileBlockStatement = exports.compileOuterStatement = exports.compileAstModule = exports.compileAstNode = exports.compile = exports.compileSingleNode = exports.compilerConfig = void 0;
-exports.toStringSafe = exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.isNeedToLinkSourcemap = exports.addSourceMapAtCurrentPlace = exports.addSourceMap = exports.addSourceMaps = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = void 0;
+exports.compileThrowStatement = exports.compileDebuggerKeyword = exports.compileFinallyStatement = exports.compileCatchStatement = exports.compileTryStatement = exports.compileIndexerExpression = exports.compileConditionalExpression = exports.compileKeyword = exports.compileUpdateExpression = exports.compileObjectExpression = exports.compileArrayLiteral = exports.compileForInStatement = exports.compileForStatement = exports.compilePropertyDeclaration = exports.compileImportStatement = exports.compileParenExpression = exports.compileCaseStatement = exports.compileSwitchStatement = exports.compileDoWhileStatement = exports.compileWhileStatement = exports.compileIfStatement = exports.compileContinueStatement = exports.compileBreakStatement = exports.compileTypeofExpression = exports.compileDeleteExpression = exports.compileReturnStatement = exports.compileProgram = exports.compileFuncDeclaration = exports.compileVarDeclaration = exports.compileCallExpression = exports.compileStringInclude = exports.compileMemberExpression = exports.compileBinaryExpression = exports.compileContextIdentifier = exports.compileRawIdentifier = exports.compileIdentifierScope = exports.compileIdentifier = exports.compileBoolean = exports.compileNumber = exports.compileTextLine = exports.compileStatement = exports.compileDeleteLine = exports.compileObjectLine = exports.compileBlockStatement = exports.compileOuterStatement = exports.compileAstModule = exports.compileAstNode = exports.compile = exports.compileSingleNode = exports.compilerConfig = void 0;
+exports.toStringSafe = exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.isNeedToLinkSourcemap = exports.addSourceMapAtCurrentPlace = exports.addSourceMap = exports.addSourceMaps = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = exports.compileNewExpression = void 0;
 const source_map_1 = require("source-map");
 const AstNodeType_1 = require("../ast/AstNodeType");
 const astFactory_1 = require("../ast/astFactory");
@@ -312,6 +312,11 @@ const compileAstNode = (ast, state) => {
     let deleteResult = (0, exports.compileDeleteExpression)(ast, state);
     if (deleteResult) {
         return deleteResult;
+    }
+    // typeof expression
+    let typeofResult = (0, exports.compileTypeofExpression)(ast, state);
+    if (typeofResult) {
+        return typeofResult;
     }
     // delete line expression
     let deleteLineResult = (0, exports.compileDeleteLine)(ast, state);
@@ -711,16 +716,6 @@ const compileTextLine = (node, state) => {
     state = (0, exports.writeJsToken)(state, `['${exports.compilerConfig.textFieldName}']`);
     // write .push(
     state = (0, exports.writeJsToken)(state, `.push(`);
-    // // write = 
-    // state = writeJsToken(state, ` = `);
-    // // write = [...
-    // state = writeJsToken(state, `[...`);
-    // // write indent scope
-    // state = writeIndentScope(parentScope, state);
-    // // write [text]
-    // state = writeJsToken(state, `['${compilerConfig.textFieldName}']`)
-    // // write , 
-    // state = writeJsToken(state, `, `);
     // write open `
     state = (0, exports.writeJsToken)(state, '`');
     // write whitespace
@@ -736,12 +731,6 @@ const compileTextLine = (node, state) => {
     }
     // write `);
     state = (0, exports.writeJsToken)(state, '`);');
-    // // write close `
-    // state = writeJsToken(state, '`');
-    // // write ]
-    // state = writeJsToken(state, `]`);
-    // // write ;
-    // state = writeJsToken(state, ';');
     // write endline
     state = (0, exports.writeEndline)(state);
     return {
@@ -1126,6 +1115,25 @@ const compileDeleteExpression = (node, state) => {
     };
 };
 exports.compileDeleteExpression = compileDeleteExpression;
+const compileTypeofExpression = (node, state) => {
+    let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.TypeofExpression);
+    if (!ast || !state) {
+        return undefined;
+    }
+    // write typeof
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
+    state = (0, exports.writeJsToken)(state, `typeof `);
+    // write delete value if any
+    let valResult = (0, exports.compileAstNode)(ast.expression, state);
+    if (valResult) {
+        state = valResult.state;
+    }
+    return {
+        state,
+        result: ast
+    };
+};
+exports.compileTypeofExpression = compileTypeofExpression;
 const compileBreakStatement = (node, state) => {
     let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.BreakStatement);
     if (!ast || !state) {

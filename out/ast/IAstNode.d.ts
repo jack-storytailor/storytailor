@@ -194,6 +194,9 @@ export interface IAstNewExpression extends IAstNode {
 export interface IAstDeleteExpression extends IAstNode {
     expression: IAstNode;
 }
+export interface IAstTypeofExpression extends IAstNode {
+    expression: IAstNode;
+}
 export interface IAstOuterStatement extends IAstNode {
     indent: number;
     statement: IAstNode;

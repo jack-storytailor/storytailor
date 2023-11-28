@@ -60,7 +60,8 @@ import {
   IAstDeleteExpression, 
   IAstDeleteLineExpression, 
   IAstContextIdentifier, 
-  IAstTag 
+  IAstTag, 
+  IAstTypeofExpression
 } from "./IAstNode";
 import { KeywordType } from "./KeywordType";
 import { OperatorType } from "./OperatorType";
@@ -531,6 +532,14 @@ export const astFactory = {
       end,
       expression
     }
+  },
+  typeofExpression: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstTypeofExpression => {
+	return {
+		nodeType: AstNodeType.TypeofExpression,
+		start,
+		end,
+		expression
+	}
   },
 
   // storytailor-specific

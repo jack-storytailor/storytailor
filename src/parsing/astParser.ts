@@ -6,7 +6,7 @@ import { ParsingErrorType, IDiagnostic } from "../shared/IParsingError";
 import { KeywordType } from "../ast/KeywordType";
 import { VariableDeclarationKind } from "../ast/VariableDeclarationKind";
 import { OperatorType } from "../ast/OperatorType";
-import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstStringIncludeStatement, IAstBoolean, IAstArray, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionDeclaration, IAstProgram, IAstVariableDeclaration, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier } from "../ast/IAstNode";
+import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstStringIncludeStatement, IAstBoolean, IAstArray, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionDeclaration, IAstProgram, IAstVariableDeclaration, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression } from "../ast/IAstNode";
 import { astFactory } from "../ast/astFactory";
 import { AstNodeType } from '../ast/AstNodeType';
 import { ISymbol } from "../ast/ISymbol";
@@ -1837,7 +1837,38 @@ export const parseDeleteExpression = (state: IParserState, isMultiline: boolean)
     state
   }
 }
-export const parseContinueStatement = (state: IParserState): IParseResult<IAstContinueStatement> => {
+export const parseTypeofExpression = (state: IParserState, isMultiline: boolean): IParseResult<IAstTypeofExpression> => {
+	if (isEndOfFile(state)) {
+	  return undefined;
+	}
+  
+	let start = getCursorPosition(state);
+	// parse return keyword
+	let keywordResult = parseKeywordOfType(state, [KeywordType.Typeof]);
+	if (!keywordResult) {
+	  return undefined;
+	}
+	state = keywordResult.state;
+	// skip comments and whitespace
+	state = skipComments(state, true, isMultiline);
+  
+	// parse expression of delete
+	let expression: IAstNode = undefined;
+	let expressionResult = parseExpression(state, isMultiline);
+	if (expressionResult) {
+	  expression = expressionResult.result;
+	  state = expressionResult.state;
+	}
+  
+	let end = getCursorPosition(state);
+	let result = astFactory.typeofExpression(expression, start, end);
+	
+	return {
+	  result,
+	  state
+	}
+  }
+  export const parseContinueStatement = (state: IParserState): IParseResult<IAstContinueStatement> => {
   if (isEndOfFile(state)) {
     return undefined;
   }
@@ -3489,6 +3520,12 @@ export const parseExpression = (state: IParserState, isMultiline: boolean): IPar
   let deleteResult = parseDeleteExpression(state, isMultiline);
   if (deleteResult) {
     return deleteResult;
+  }
+
+  // typeof expression
+  let typeofResult = parseTypeofExpression(state, isMultiline);
+  if (typeofResult) {
+	return typeofResult;
   }
 
   // prefix

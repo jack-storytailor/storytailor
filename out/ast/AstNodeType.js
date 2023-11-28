@@ -59,6 +59,7 @@ var AstNodeType;
     AstNodeType["ConditionalExpression"] = "ConditionalExpression";
     AstNodeType["NewExpression"] = "NewExpression";
     AstNodeType["DeleteExpression"] = "DeleteExpression";
+    AstNodeType["TypeofExpression"] = "TypeofExpression";
     // storytailor-specific
     AstNodeType["OuterStatement"] = "OuterStatement";
     AstNodeType["TextLineStatement"] = "TextLineStatement";

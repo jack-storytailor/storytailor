@@ -30,5 +30,6 @@ export enum KeywordType {
   Finally = "finally",
   Throw = "throw",
   Debugger = "debugger",
-  Delete = "delete"
+  Delete = "delete",
+  Typeof = "typeof"
 }

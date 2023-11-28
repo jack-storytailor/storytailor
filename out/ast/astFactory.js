@@ -457,6 +457,14 @@ exports.astFactory = {
             expression
         };
     },
+    typeofExpression: (expression, start, end) => {
+        return {
+            nodeType: AstNodeType_1.AstNodeType.TypeofExpression,
+            start,
+            end,
+            expression
+        };
+    },
     // storytailor-specific
     outerStatement: (indent, statement, start, end) => {
         return {
