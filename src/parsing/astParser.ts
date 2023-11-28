@@ -1568,6 +1568,14 @@ export const parsePropertyDeclaration = (state: IParserState): IParseResult<IAst
 			// skip comments and whitespace
 			state = skipComments(state, true, true);
 
+			let functionResult = parseFunctionDeclaration(state, true);
+			if (functionResult) {
+				state = functionResult.state;
+				initValue = functionResult.result;
+				finalState = state;
+				break;
+			}
+
 			// parse expression
 			let expressionResult = parseExpression(state, true);
 			if (expressionResult) {
@@ -3774,7 +3782,7 @@ export const parseObjectExpression = (state: IParserState): IParseResult<IAstObj
 		else {
 			// if no property parsed
 			// parse expression
-			let expressionResult = parseExpression(state, true);
+			let expressionResult = parseStatement(state, true);
 			if (expressionResult) {
 				state = expressionResult.state,
 					properties = [

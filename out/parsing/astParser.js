@@ -1303,6 +1303,13 @@ const parsePropertyDeclaration = (state) => {
             state = (0, exports.skipTokens)(state, 1);
             // skip comments and whitespace
             state = (0, exports.skipComments)(state, true, true);
+            let functionResult = (0, exports.parseFunctionDeclaration)(state, true);
+            if (functionResult) {
+                state = functionResult.state;
+                initValue = functionResult.result;
+                finalState = state;
+                break;
+            }
             // parse expression
             let expressionResult = (0, exports.parseExpression)(state, true);
             if (expressionResult) {
@@ -3043,7 +3050,7 @@ const parseObjectExpression = (state) => {
         else {
             // if no property parsed
             // parse expression
-            let expressionResult = (0, exports.parseExpression)(state, true);
+            let expressionResult = (0, exports.parseStatement)(state, true);
             if (expressionResult) {
                 state = expressionResult.state,
                     properties = [
