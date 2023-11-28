@@ -88,7 +88,7 @@ export declare const parseForInConditions: (state: IParserState) => IParseResult
 }>;
 export declare const parseForInStatement: (state: IParserState, isMultiline: boolean) => IParseResult<IAstForInStatement>;
 export declare const parseImportStatement: (state: IParserState) => IParseResult<IAstImportStatement>;
-export declare const parseImportPath: (state: IParserState) => IParseResult<IAstString>;
+export declare const parseImportPath: (state: IParserState) => IParseResult<IAstNode>;
 export declare const parseTryStatement: (state: IParserState, isMultiline: boolean) => IParseResult<IAstTryStatement>;
 export declare const parseCatchStatement: (state: IParserState, isMultiline: boolean) => IParseResult<IAstCatchStatement>;
 export declare const parseFinallyStatement: (state: IParserState, isMultiline: boolean) => IParseResult<IAstFinallyStatement>;

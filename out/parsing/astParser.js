@@ -1631,12 +1631,12 @@ const parseIfStatement = (state, isMultiline) => {
     state = ifResult.state;
     finalState = state;
     // prepare break tokens that will break the statement
-    let breakTokens = isMultiline ? [CodeTokenType_1.CodeTokenType.Endline] : [];
+    let breakTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     breakTokens = [...breakTokens, CodeTokenType_1.CodeTokenType.Semicolon];
     // parse until break tokens
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // parse condition
-        let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseExpression)(state, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]));
+        let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseExpression)(state, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, isMultiline));
         if (conditionScopeResult) {
             state = conditionScopeResult.state;
             finalState = state;
@@ -1738,12 +1738,12 @@ const parseSwitchStatement = (state, isMultiline) => {
     state = switchResult.state;
     finalState = state;
     // prepare break tokens that will break the statement
-    let breakTokens = isMultiline ? [CodeTokenType_1.CodeTokenType.Endline] : [];
+    let breakTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     breakTokens = [...breakTokens, CodeTokenType_1.CodeTokenType.Semicolon];
     // parse until break tokens
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // parse condition
-        let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseExpression)(state, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]));
+        let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseExpression)(state, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, isMultiline));
         if (conditionScopeResult) {
             state = conditionScopeResult.state;
             finalState = state;
@@ -1782,7 +1782,7 @@ const parseSwitchStatement = (state, isMultiline) => {
                 return defaultCaseResult;
             }
             return undefined;
-        }, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]));
+        }, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => (0, exports.skipComments)(state, true, isMultiline));
         if (bodyResult) {
             state = bodyResult.state;
             finalState = bodyResult.state;
@@ -2000,7 +2000,7 @@ const parseDoWhileStatement = (state, isMultiline) => {
     state = doResult.state;
     finalState = state;
     // prepare break tokens that will break the statement
-    let breakTokens = isMultiline ? [CodeTokenType_1.CodeTokenType.Endline] : [];
+    let breakTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     breakTokens = [...breakTokens, CodeTokenType_1.CodeTokenType.Semicolon];
     // parse until break tokens
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
@@ -2049,7 +2049,7 @@ const parseDoWhileStatement = (state, isMultiline) => {
                 break;
             }
             // parse condition
-            let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseExpression)(state, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]));
+            let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseExpression)(state, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, isMultiline));
             if (conditionScopeResult) {
                 state = conditionScopeResult.state;
                 finalState = state;
@@ -2094,7 +2094,7 @@ const parseWhileStatement = (state, isMultiline) => {
     let condEnd = (0, exports.getCursorPosition)(state);
     let codeBlockStart = (0, exports.getCursorPosition)(state);
     // prepare break tokens that will break the statement
-    let breakTokens = isMultiline ? [CodeTokenType_1.CodeTokenType.Endline] : [];
+    let breakTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     breakTokens = [...breakTokens, CodeTokenType_1.CodeTokenType.Semicolon];
     // parse until break tokens
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
@@ -2176,7 +2176,7 @@ const parseForStatement = (state, isMultiline) => {
     state = forResult.state;
     finalState = state;
     // prepare break tokens that will break the statement
-    let breakTokens = isMultiline ? [CodeTokenType_1.CodeTokenType.Endline] : [];
+    let breakTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     breakTokens = [...breakTokens, CodeTokenType_1.CodeTokenType.Semicolon];
     // parse until break tokens
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
@@ -2609,11 +2609,15 @@ const parseImportPath = (state) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
+    let expressionResult = (0, exports.parseExpression)(state, false);
+    if (expressionResult) {
+        return expressionResult;
+    }
     let stringResult = (0, exports.parseStringLiteral)(state);
     if (stringResult) {
         return stringResult;
     }
-    let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Prime]), (state) => (0, exports.parseStringLiteralItem)(state), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Prime]));
+    let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Prime]), (state) => (0, exports.parseStringLiteralItem)(state, true), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Prime]));
     if (!scopeResult) {
         return undefined;
     }
@@ -3685,7 +3689,16 @@ const parseScope = (state, openFilter, itemFilter, closeFilter, skipOptional, br
     // parse items
     let items = [];
     let finalState = state;
-    while (!(0, exports.isEndOfFile)(state) && !closeFilter(state) && !breakFilter(state) && !breakFilter(state)) {
+    while (!(0, exports.isEndOfFile)(state) && !closeFilter(state) && !breakFilter(state)) {
+        // skip optional symbols
+        if (skipOptional) {
+            let prevState = state;
+            state = skipOptional(state) || state;
+            finalState = state;
+            if (prevState.cursor < state.cursor) {
+                continue;
+            }
+        }
         // parse item
         let itemResult = itemFilter(state);
         if (itemResult) {

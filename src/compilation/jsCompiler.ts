@@ -1021,14 +1021,14 @@ export const compileContextIdentifier = (node: IAstNode, state: ICompilerState):
     // this is not raw identifier, so add context before it
     state = writeJsToken(state, `${compilerConfig.contextVarName}`);
     // ['
-    state = writeJsToken(state, `['`);
+    state = writeJsToken(state, `[\``);
     // write identifier
     var compileValResult = compileAstNode(ast.value, state);
     if (compileValResult) {
         state = compileValResult.state;
     }
     //']
-    state = writeJsToken(state, `']`);
+    state = writeJsToken(state, `\`]`);
 
     return {
         state,
@@ -2243,7 +2243,7 @@ export const writeIndentScope = (indentScope: IIndentScopeItem[], state: ICompil
 
     for (let i = 0; i < indentScope.length; i++) {
         const indentItem = indentScope[i];
-        state = writeJsToken(state, "['");
+        state = writeJsToken(state, "[\`");
 
         // compile indent identifier
         let itemResult = compileAstNode(indentItem.identifier, state);
@@ -2251,7 +2251,7 @@ export const writeIndentScope = (indentScope: IIndentScopeItem[], state: ICompil
             state = itemResult.state;
         }
 
-        state = writeJsToken(state, "']");
+        state = writeJsToken(state, "\`]");
     }
 
     // done
@@ -2417,18 +2417,18 @@ export const getIdentifierFullName = (node: IAstIdentifier, indentScope: IIndent
 
     for (let i = 0; i < indentScope.length; i++) {
         const indentItem = indentScope[i];
-        result.push('[\'');
+        result.push('[\`');
 
 		let identifier = getIdentifierFromNode(indentItem.identifier, state);
 		if (identifier) {
 			result.push(identifier.value);
 		}
 
-		result.push('\']');
+		result.push('\`]');
     }
 
 	if (node) {
-		result.push(`['${node.value}']`);
+		result.push(`[\`${node.value}\`]`);
 	}
 
 	return result.join('');

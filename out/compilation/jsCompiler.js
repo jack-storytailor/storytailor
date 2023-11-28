@@ -839,14 +839,14 @@ const compileContextIdentifier = (node, state) => {
     // this is not raw identifier, so add context before it
     state = (0, exports.writeJsToken)(state, `${exports.compilerConfig.contextVarName}`);
     // ['
-    state = (0, exports.writeJsToken)(state, `['`);
+    state = (0, exports.writeJsToken)(state, `[\``);
     // write identifier
     var compileValResult = (0, exports.compileAstNode)(ast.value, state);
     if (compileValResult) {
         state = compileValResult.state;
     }
     //']
-    state = (0, exports.writeJsToken)(state, `']`);
+    state = (0, exports.writeJsToken)(state, `\`]`);
     return {
         state,
         result: ast
@@ -1937,13 +1937,13 @@ const writeIndentScope = (indentScope, state, astPos) => {
     state = (0, exports.writeJsToken)(state, `${exports.compilerConfig.contextVarName}`);
     for (let i = 0; i < indentScope.length; i++) {
         const indentItem = indentScope[i];
-        state = (0, exports.writeJsToken)(state, "['");
+        state = (0, exports.writeJsToken)(state, "[\`");
         // compile indent identifier
         let itemResult = (0, exports.compileAstNode)(indentItem.identifier, state);
         if (itemResult) {
             state = itemResult.state;
         }
-        state = (0, exports.writeJsToken)(state, "']");
+        state = (0, exports.writeJsToken)(state, "\`]");
     }
     // done
     return state;
@@ -2064,15 +2064,15 @@ const getIdentifierFullName = (node, indentScope, state) => {
     let result = [exports.compilerConfig.contextVarName];
     for (let i = 0; i < indentScope.length; i++) {
         const indentItem = indentScope[i];
-        result.push('[\'');
+        result.push('[\`');
         let identifier = (0, exports.getIdentifierFromNode)(indentItem.identifier, state);
         if (identifier) {
             result.push(identifier.value);
         }
-        result.push('\']');
+        result.push('\`]');
     }
     if (node) {
-        result.push(`['${node.value}']`);
+        result.push(`[\`${node.value}\`]`);
     }
     return result.join('');
 };
