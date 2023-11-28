@@ -2122,7 +2122,11 @@ export const compileToken = (node: IAstNode, state: ICompilerState): ICompileRes
         return undefined;
     }
 
-    state = writeJsToken(state, ast.token.value || '');
+	let value = ast.token.value;
+	if (value === "`") {
+		value = "\\`";
+	}
+    state = writeJsToken(state, value || '');
     return {
         state,
         result: ast

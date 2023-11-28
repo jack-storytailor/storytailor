@@ -1830,7 +1830,11 @@ const compileToken = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
-    state = (0, exports.writeJsToken)(state, ast.token.value || '');
+    let value = ast.token.value;
+    if (value === "`") {
+        value = "\\`";
+    }
+    state = (0, exports.writeJsToken)(state, value || '');
     return {
         state,
         result: ast
