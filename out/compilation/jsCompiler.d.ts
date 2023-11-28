@@ -131,6 +131,8 @@ export declare const setIndentScope: (scope: IIndentScopeItem[], state: ICompile
 export declare const skipAst: (state: ICompilerState, count?: number) => ICompilerState;
 export declare const getAst: (state: ICompilerState) => IAstNode;
 export declare const addJavascript: (state: ICompilerState, javascript: string[]) => ICompilerState;
+export declare const getIdentifierFromNode: (node: IAstNode, state: ICompilerState) => IAstIdentifier;
+export declare const getIdentifierFullName: (node: IAstIdentifier, indentScope: IIndentScopeItem[], state: ICompilerState) => string;
 export declare const addSourceMaps: (state: ICompilerState, sourceMaps: ISourceMapToken[]) => ICompilerState;
 export declare const addSourceMap: (state: ICompilerState, sourceMap: ISourceMapToken) => ICompilerState;
 export declare const addSourceMapAtCurrentPlace: (state: ICompilerState, tokenName?: string, symbolPos?: ISymbolPosition, jsLineOffset?: number, stsLineOffset?: number) => ICompilerState;

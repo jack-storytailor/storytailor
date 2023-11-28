@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.compileThrowStatement = exports.compileDebuggerKeyword = exports.compileFinallyStatement = exports.compileCatchStatement = exports.compileTryStatement = exports.compileIndexerExpression = exports.compileConditionalExpression = exports.compileKeyword = exports.compileUpdateExpression = exports.compileObjectExpression = exports.compileArrayLiteral = exports.compileForInStatement = exports.compileForStatement = exports.compilePropertyDeclaration = exports.compileImportStatement = exports.compileParenExpression = exports.compileCaseStatement = exports.compileSwitchStatement = exports.compileDoWhileStatement = exports.compileWhileStatement = exports.compileIfStatement = exports.compileContinueStatement = exports.compileBreakStatement = exports.compileTypeofExpression = exports.compileDeleteExpression = exports.compileReturnStatement = exports.compileProgram = exports.compileFuncDeclaration = exports.compileVarDeclaration = exports.compileCallExpression = exports.compileStringInclude = exports.compileMemberExpression = exports.compileBinaryExpression = exports.compileContextIdentifier = exports.compileRawIdentifier = exports.compileIdentifierScope = exports.compileIdentifier = exports.compileBoolean = exports.compileNumber = exports.compileTextLine = exports.compileStatement = exports.compileDeleteLine = exports.compileObjectLine = exports.compileBlockStatement = exports.compileOuterStatement = exports.compileAstModule = exports.compileAstNode = exports.compile = exports.compileSingleNode = exports.compilerConfig = void 0;
-exports.toStringSafe = exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.isNeedToLinkSourcemap = exports.addSourceMapAtCurrentPlace = exports.addSourceMap = exports.addSourceMaps = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = exports.compileNewExpression = void 0;
+exports.toStringSafe = exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.isNeedToLinkSourcemap = exports.addSourceMapAtCurrentPlace = exports.addSourceMap = exports.addSourceMaps = exports.getIdentifierFullName = exports.getIdentifierFromNode = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = exports.compileNewExpression = void 0;
 const source_map_1 = require("source-map");
 const AstNodeType_1 = require("../ast/AstNodeType");
 const astFactory_1 = require("../ast/astFactory");
@@ -524,8 +524,8 @@ const compileAstModule = (node, state) => {
             let compileResult = (0, exports.compileAstNode)(contentNode, state);
             if (compileResult) {
                 state = compileResult.state;
-                state = (0, exports.writeJsToken)(state, `;`);
-                state = (0, exports.writeEndline)(state);
+                // state = writeJsToken(state, `;`);
+                // state = writeEndline(state);
             }
         }
     }
@@ -615,7 +615,13 @@ const compileObjectLine = (node, state) => {
         state = (0, exports.setIndentScope)([...parentScope, scopeItem], state);
     }
     // write indent scope
-    state = (0, exports.writeIndentScope)(state.sourceState.indentScope, state, ast.start);
+    let identifier = (0, exports.getIdentifierFromNode)(objectNode, state);
+    let identifierName = (0, exports.getIdentifierFullName)(identifier, parentScope, state);
+    if (identifier) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, identifierName, identifier.start);
+    }
+    // state = writeIndentScope(state.sourceState.indentScope, state, ast.start);
+    state = (0, exports.writeIndentScope)(state.sourceState.indentScope, state);
     // compile init value if any
     if (initValue) {
         state = (0, exports.addSourceMapAtCurrentPlace)(state, "=", initValue.start, 1);
@@ -635,6 +641,9 @@ const compileObjectLine = (node, state) => {
         // || {}
         state = (0, exports.writeJsToken)(state, ` || ${exports.compilerConfig.defaultObject}`);
     }
+    // add ; and endline
+    state = (0, exports.writeJsToken)(state, ";");
+    state = (0, exports.writeEndline)(state);
     return {
         state,
         result: ast
@@ -663,6 +672,9 @@ const compileDeleteLine = (node, state) => {
         // write indent scope
         state = (0, exports.writeIndentScope)(scopeToWrite, state, objectNode.start);
     }
+    // add ; and endline
+    state = (0, exports.writeJsToken)(state, ";");
+    state = (0, exports.writeEndline)(state);
     return {
         state,
         result: ast
@@ -845,6 +857,10 @@ const compileBinaryExpression = (node, state) => {
     let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.BinaryExpression);
     if (!ast || !state) {
         return undefined;
+    }
+    let leftIdentifier = (0, exports.getIdentifierFromNode)(ast.left, state);
+    if (leftIdentifier) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, leftIdentifier.value, leftIdentifier.start);
     }
     // left operand
     let leftResult = (0, exports.compileAstNode)(ast.left, state);
@@ -1394,7 +1410,7 @@ const compileImportStatement = (node, state) => {
     }
     // write )
     state = (0, exports.writeJsToken)(state, `)`);
-    // if it's import in, add one more line
+    // if it's "import in", add one more line
     if (ast.importInContext) {
         // endline
         state = (0, exports.writeJsToken)(state, `;`);
@@ -1410,6 +1426,9 @@ const compileImportStatement = (node, state) => {
         // , ...__context };
         state = (0, exports.writeJsToken)(state, `, ...${exports.compilerConfig.contextVarName} }`);
     }
+    // add ; and endline 
+    state = (0, exports.writeJsToken)(state, ";");
+    state = (0, exports.writeEndline)(state);
     return {
         state,
         result: ast
@@ -1887,6 +1906,8 @@ const compileStringLiteral = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
+    // add sourcemap
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     // open `
     state = (0, exports.writeJsToken)(state, '`');
     let content = ast.value;
@@ -2010,6 +2031,52 @@ const addJavascript = (state, javascript) => {
     return state;
 };
 exports.addJavascript = addJavascript;
+const getIdentifierFromNode = (node, state) => {
+    if (!node) {
+        return undefined;
+    }
+    let identifier = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.Identifier);
+    if (identifier) {
+        return identifier;
+    }
+    let rawIdentifier = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.RawIdentifier);
+    if (rawIdentifier) {
+        identifier = astFactory_1.astFactory.asNode(rawIdentifier.value, AstNodeType_1.AstNodeType.Identifier);
+        if (identifier) {
+            return identifier;
+        }
+    }
+    let contextIdentifier = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.ContextIdentifier);
+    if (contextIdentifier) {
+        identifier = (0, exports.getIdentifierFromNode)(contextIdentifier.value, state);
+        if (identifier) {
+            return identifier;
+        }
+    }
+    return undefined;
+};
+exports.getIdentifierFromNode = getIdentifierFromNode;
+const getIdentifierFullName = (node, indentScope, state) => {
+    if (!indentScope) {
+        return undefined;
+    }
+    // context['
+    let result = [exports.compilerConfig.contextVarName];
+    for (let i = 0; i < indentScope.length; i++) {
+        const indentItem = indentScope[i];
+        result.push('[\'');
+        let identifier = (0, exports.getIdentifierFromNode)(indentItem.identifier, state);
+        if (identifier) {
+            result.push(identifier.value);
+        }
+        result.push('\']');
+    }
+    if (node) {
+        result.push(`['${node.value}']`);
+    }
+    return result.join('');
+};
+exports.getIdentifierFullName = getIdentifierFullName;
 const addSourceMaps = (state, sourceMaps) => {
     if (!state || !sourceMaps) {
         return state;

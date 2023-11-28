@@ -667,8 +667,8 @@ export const compileAstModule = (node: IAstNode, state: ICompilerState): ICompil
             let compileResult = compileAstNode(contentNode, state);
             if (compileResult) {
                 state = compileResult.state;
-                state = writeJsToken(state, `;`);
-                state = writeEndline(state);
+                // state = writeJsToken(state, `;`);
+                // state = writeEndline(state);
             }
         }
     }
@@ -773,7 +773,13 @@ export const compileObjectLine = (node: IAstNode, state: ICompilerState): ICompi
     }
 
     // write indent scope
-    state = writeIndentScope(state.sourceState.indentScope, state, ast.start);
+	let identifier = getIdentifierFromNode(objectNode, state);
+	let identifierName = getIdentifierFullName(identifier, parentScope, state);
+	if (identifier) {
+		state = addSourceMapAtCurrentPlace(state, identifierName, identifier.start);
+	}
+    // state = writeIndentScope(state.sourceState.indentScope, state, ast.start);
+    state = writeIndentScope(state.sourceState.indentScope, state);
 
     // compile init value if any
     if (initValue) {
@@ -796,6 +802,10 @@ export const compileObjectLine = (node: IAstNode, state: ICompilerState): ICompi
         // || {}
         state = writeJsToken(state, ` || ${compilerConfig.defaultObject}`);
     }
+
+	// add ; and endline
+	state = writeJsToken(state, ";");
+	state = writeEndline(state);
 
     return {
         state,
@@ -828,6 +838,10 @@ export const compileDeleteLine = (node: IAstNode, state: ICompilerState): ICompi
         // write indent scope
         state = writeIndentScope(scopeToWrite, state, objectNode.start);
     }
+
+	// add ; and endline
+	state = writeJsToken(state, ";");
+	state = writeEndline(state);
 
     return {
         state,
@@ -1026,6 +1040,11 @@ export const compileBinaryExpression = (node: IAstNode, state: ICompilerState): 
     if (!ast || !state) {
         return undefined;
     }
+
+	let leftIdentifier = getIdentifierFromNode(ast.left, state);
+	if (leftIdentifier) {
+		state = addSourceMapAtCurrentPlace(state, leftIdentifier.value, leftIdentifier.start);
+	}
 
     // left operand
     let leftResult = compileAstNode(ast.left, state);
@@ -1649,7 +1668,7 @@ export const compileImportStatement = (node: IAstNode, state: ICompilerState): I
     // write )
     state = writeJsToken(state, `)`);
 
-    // if it's import in, add one more line
+    // if it's "import in", add one more line
     if (ast.importInContext) {
         // endline
         state = writeJsToken(state, `;`);
@@ -1669,6 +1688,10 @@ export const compileImportStatement = (node: IAstNode, state: ICompilerState): I
         // , ...__context };
         state = writeJsToken(state, `, ...${compilerConfig.contextVarName} }`);
     }
+
+	// add ; and endline 
+	state = writeJsToken(state, ";");
+	state = writeEndline(state);
 
     return {
         state,
@@ -2182,6 +2205,9 @@ export const compileStringLiteral = (node: IAstNode, state: ICompilerState): ICo
         return undefined;
     }
 
+	// add sourcemap
+	state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
+
     // open `
     state = writeJsToken(state, '`');
 
@@ -2350,6 +2376,62 @@ export const addJavascript = (state: ICompilerState, javascript: string[]): ICom
     }
 
     return state;
+}
+
+export const getIdentifierFromNode = (node: IAstNode, state: ICompilerState): IAstIdentifier => {
+	if (!node) {
+		return undefined;
+	}
+
+	let identifier = astFactory.asNode<IAstIdentifier>(node, AstNodeType.Identifier);
+	if (identifier) {
+		return identifier;
+	}
+
+	let rawIdentifier = astFactory.asNode<IAstRawIdentifier>(node, AstNodeType.RawIdentifier);
+	if (rawIdentifier) {
+		identifier = astFactory.asNode<IAstIdentifier>(rawIdentifier.value, AstNodeType.Identifier);
+		if (identifier) {
+			return identifier;
+		}
+	}
+
+	let contextIdentifier = astFactory.asNode<IAstContextIdentifier>(node, AstNodeType.ContextIdentifier);
+	if (contextIdentifier){
+		identifier = getIdentifierFromNode(contextIdentifier.value, state);
+		if (identifier) {
+			return identifier;
+		}
+	}
+
+	return undefined;
+}
+
+export const getIdentifierFullName = (node: IAstIdentifier, indentScope: IIndentScopeItem[], state: ICompilerState): string => {
+	if (!indentScope) {
+		return undefined;
+	}
+
+    // context['
+	let result = [compilerConfig.contextVarName];
+
+    for (let i = 0; i < indentScope.length; i++) {
+        const indentItem = indentScope[i];
+        result.push('[\'');
+
+		let identifier = getIdentifierFromNode(indentItem.identifier, state);
+		if (identifier) {
+			result.push(identifier.value);
+		}
+
+		result.push('\']');
+    }
+
+	if (node) {
+		result.push(`['${node.value}']`);
+	}
+
+	return result.join('');
 }
 
 export const addSourceMaps = (state: ICompilerState, sourceMaps: ISourceMapToken[]): ICompilerState => {
