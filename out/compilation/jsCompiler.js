@@ -1500,8 +1500,7 @@ const compileForStatement = (node, state) => {
         state = updateResult.state;
     }
     // )
-    state = (0, exports.writeJsToken)(state, `)`);
-    state = (0, exports.writeEndline)(state);
+    state = (0, exports.writeJsToken)(state, `) `);
     // write body
     let bodyResult = (0, exports.compileAstNode)(ast.body, state);
     if (bodyResult) {
@@ -1538,8 +1537,7 @@ const compileForInStatement = (node, state) => {
         state = rightResult.state;
     }
     // )
-    state = (0, exports.writeJsToken)(state, `)`);
-    state = (0, exports.writeEndline)(state);
+    state = (0, exports.writeJsToken)(state, `) `);
     // write body
     let bodyResult = (0, exports.compileAstNode)(ast.body, state);
     if (bodyResult) {

@@ -1770,8 +1770,7 @@ export const compileForStatement = (node: IAstNode, state: ICompilerState): ICom
         state = updateResult.state;
     }
     // )
-    state = writeJsToken(state, `)`);
-    state = writeEndline(state);
+    state = writeJsToken(state, `) `);
     // write body
     let bodyResult = compileAstNode(ast.body, state);
     if (bodyResult) {
@@ -1809,8 +1808,7 @@ export const compileForInStatement = (node: IAstNode, state: ICompilerState): IC
         state = rightResult.state;
     }
     // )
-    state = writeJsToken(state, `)`);
-    state = writeEndline(state);
+    state = writeJsToken(state, `) `);
     // write body
     let bodyResult = compileAstNode(ast.body, state);
     if (bodyResult) {
