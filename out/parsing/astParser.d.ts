@@ -60,6 +60,8 @@ export declare const parseContextIdentifier: (state: IParserState) => IParseResu
  */
 export declare const parseOperandIdentifier: (state: IParserState) => IParseResult<IAstNode>;
 export declare const parseFunctionDeclaration: (state: IParserState, isMultiline: boolean) => IParseResult<IAstFunctionDeclaration>;
+export declare const parseSimpleFunctionDeclaration: (state: IParserState, isMultiline: boolean) => IParseResult<IAstFunctionDeclaration>;
+export declare const parseLambdaFunctionDeclaration: (state: IParserState, isMultiline: boolean) => IParseResult<IAstFunctionDeclaration>;
 export declare const parseVariableDeclaration: (state: IParserState, isMultiline: boolean) => IParseResult<IAstVariableDeclaration>;
 export declare const parsePropertyDeclaration: (state: IParserState) => IParseResult<IAstPropertyDeclaration>;
 export declare const parseStatement: (state: IParserState, isMultiline: boolean) => IParseResult<IAstNode>;

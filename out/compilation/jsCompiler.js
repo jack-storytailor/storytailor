@@ -1032,7 +1032,10 @@ const compileFuncDeclaration = (node, state) => {
     }
     // write function (
     state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
-    state = (0, exports.writeJsToken)(state, `function (`);
+    if (!ast.isLambda) {
+        state = (0, exports.writeJsToken)(state, `function`);
+    }
+    state = (0, exports.writeJsToken)(state, '(');
     // write all the params
     let params = ast.args;
     if (params && params.length > 0) {
@@ -1050,6 +1053,9 @@ const compileFuncDeclaration = (node, state) => {
     }
     // write )
     state = (0, exports.writeJsToken)(state, `) `);
+    if (ast.isLambda) {
+        state = (0, exports.writeJsToken)(state, ' => ');
+    }
     // write function body
     let bodyResult = (0, exports.compileAstNode)(ast.body, state);
     if (bodyResult) {

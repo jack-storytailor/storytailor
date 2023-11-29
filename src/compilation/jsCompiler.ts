@@ -1240,7 +1240,12 @@ export const compileFuncDeclaration = (node: IAstNode, state: ICompilerState): I
 
     // write function (
     state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
-    state = writeJsToken(state, `function (`);
+
+	if (!ast.isLambda) {
+		state = writeJsToken(state, `function`);
+	}
+
+	state = writeJsToken(state, '(');
 
     // write all the params
     let params = ast.args;
@@ -1261,6 +1266,10 @@ export const compileFuncDeclaration = (node: IAstNode, state: ICompilerState): I
 
     // write )
     state = writeJsToken(state, `) `);
+
+	if (ast.isLambda) {
+		state = writeJsToken(state, ' => ');
+	}
 
     // write function body
     let bodyResult = compileAstNode(ast.body, state);

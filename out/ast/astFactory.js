@@ -168,13 +168,14 @@ exports.astFactory = {
         };
     },
     // declarations
-    functionDeclaration: (args, body, start, end) => {
+    functionDeclaration: (args, body, isLambda, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.FunctionDeclaration,
             start,
             end,
             args,
             body,
+            isLambda
         };
     },
     variableDeclaration: (identifier, kind, value, start, end) => {

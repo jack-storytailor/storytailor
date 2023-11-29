@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseImportStatement = exports.parseForInStatement = exports.parseForInConditions = exports.parseConditionBlock = exports.parseForCoditions = exports.parseForStatement = exports.parseWhileStatement = exports.parseDoWhileStatement = exports.parseDefaultCaseStatement = exports.parseCaseStatement = exports.parseSwitchStatement = exports.parseIfStatement = exports.parseBlockStatement = exports.parseContinueStatement = exports.parseTypeofExpression = exports.parseDeleteExpression = exports.parseReturnStatement = exports.parseBreakStatement = exports.parseStatement = exports.parsePropertyDeclaration = exports.parseVariableDeclaration = exports.parseFunctionDeclaration = exports.parseOperandIdentifier = exports.parseContextIdentifier = exports.parseAnyIdentifier = exports.parseRawIdentifier = exports.parseIdentifierScope = exports.parseIdentifier = exports.parseArrayItem = exports.parseArrayLiteral = exports.parseBooleanLiteral = exports.parseStringInclude = exports.parseStringLiteralItem = exports.parseStringLiteral = exports.parseNumberLiteral = exports.parseLiteral = exports.parseCommentBlock = exports.parseCommentLine = exports.parseKeywordOfType = exports.parseDebuggerKeyword = exports.parseKeyword = exports.parseUnaryOperatorPostfix = exports.parseUnaryOperatorPrefix = exports.parseBinaryOperator = exports.parseOperatorOfType = exports.parseOperator = exports.parseToken = exports.parseModuleContent = exports.parseModule = exports.defaultParserConfig = void 0;
-exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isEndOfFile = exports.readTokensAsString = exports.calcIndentFromWhitespace = exports.readWhitespace = exports.readString = exports.parseErrorTokens = exports.parseScope = exports.parseTag = exports.parsePrototypeExpression = exports.parseDeleteLineExpression = exports.parseObjectLine = exports.parseTextLineStatement = exports.parseOuterStatementContent = exports.parseOuterStatement = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseObjectExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseExpression = exports.parseThrowStatement = exports.parseFinallyStatement = exports.parseCatchStatement = exports.parseTryStatement = exports.parseImportPath = void 0;
-exports.prepareTokens = exports.addInvalidTokenError = void 0;
+exports.parseForInConditions = exports.parseConditionBlock = exports.parseForCoditions = exports.parseForStatement = exports.parseWhileStatement = exports.parseDoWhileStatement = exports.parseDefaultCaseStatement = exports.parseCaseStatement = exports.parseSwitchStatement = exports.parseIfStatement = exports.parseBlockStatement = exports.parseContinueStatement = exports.parseTypeofExpression = exports.parseDeleteExpression = exports.parseReturnStatement = exports.parseBreakStatement = exports.parseStatement = exports.parsePropertyDeclaration = exports.parseVariableDeclaration = exports.parseLambdaFunctionDeclaration = exports.parseSimpleFunctionDeclaration = exports.parseFunctionDeclaration = exports.parseOperandIdentifier = exports.parseContextIdentifier = exports.parseAnyIdentifier = exports.parseRawIdentifier = exports.parseIdentifierScope = exports.parseIdentifier = exports.parseArrayItem = exports.parseArrayLiteral = exports.parseBooleanLiteral = exports.parseStringInclude = exports.parseStringLiteralItem = exports.parseStringLiteral = exports.parseNumberLiteral = exports.parseLiteral = exports.parseCommentBlock = exports.parseCommentLine = exports.parseKeywordOfType = exports.parseDebuggerKeyword = exports.parseKeyword = exports.parseUnaryOperatorPostfix = exports.parseUnaryOperatorPrefix = exports.parseBinaryOperator = exports.parseOperatorOfType = exports.parseOperator = exports.parseToken = exports.parseModuleContent = exports.parseModule = exports.defaultParserConfig = void 0;
+exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isEndOfFile = exports.readTokensAsString = exports.calcIndentFromWhitespace = exports.readWhitespace = exports.readString = exports.parseErrorTokens = exports.parseScope = exports.parseTag = exports.parsePrototypeExpression = exports.parseDeleteLineExpression = exports.parseObjectLine = exports.parseTextLineStatement = exports.parseOuterStatementContent = exports.parseOuterStatement = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseObjectExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseExpression = exports.parseThrowStatement = exports.parseFinallyStatement = exports.parseCatchStatement = exports.parseTryStatement = exports.parseImportPath = exports.parseImportStatement = exports.parseForInStatement = void 0;
+exports.prepareTokens = exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = void 0;
 const CodeTokenType_1 = require("../shared/CodeTokenType");
 const IParsingError_1 = require("../shared/IParsingError");
 const KeywordType_1 = require("../ast/KeywordType");
@@ -1131,6 +1131,18 @@ const parseOperandIdentifier = (state) => {
 exports.parseOperandIdentifier = parseOperandIdentifier;
 // declarations
 const parseFunctionDeclaration = (state, isMultiline) => {
+    let functionResult = (0, exports.parseSimpleFunctionDeclaration)(state, isMultiline);
+    if (functionResult) {
+        return functionResult;
+    }
+    let lambdaResult = (0, exports.parseLambdaFunctionDeclaration)(state, isMultiline);
+    if (lambdaResult) {
+        return lambdaResult;
+    }
+    return undefined;
+};
+exports.parseFunctionDeclaration = parseFunctionDeclaration;
+const parseSimpleFunctionDeclaration = (state, isMultiline) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -1167,13 +1179,58 @@ const parseFunctionDeclaration = (state, isMultiline) => {
     }
     // prepare result
     let end = (0, exports.getCursorPosition)(state);
-    let result = astFactory_1.astFactory.functionDeclaration(args, body, start, end);
+    let result = astFactory_1.astFactory.functionDeclaration(args, body, false, start, end);
     return {
         state,
         result
     };
 };
-exports.parseFunctionDeclaration = parseFunctionDeclaration;
+exports.parseSimpleFunctionDeclaration = parseSimpleFunctionDeclaration;
+const parseLambdaFunctionDeclaration = (state, isMultiline) => {
+    if ((0, exports.isEndOfFile)(state)) {
+        return undefined;
+    }
+    // parse function (args) {operations...}
+    // save start point
+    let start = (0, exports.getCursorPosition)(state);
+    // parse function params scope
+    let paramsScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseAnyIdentifier)(state), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, true), undefined, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Comma]));
+    if (!paramsScopeResult) {
+        return undefined;
+    }
+    state = paramsScopeResult.state;
+    state = (0, exports.skipComments)(state, true, isMultiline);
+    // parse =>
+    let arrowResult = (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Equals, CodeTokenType_1.CodeTokenType.TupleClose]);
+    if (!arrowResult) {
+        return undefined;
+    }
+    state = arrowResult.state;
+    // extract function arguments
+    let args = [];
+    if (paramsScopeResult.result) {
+        args = paramsScopeResult.result.content || [];
+    }
+    // skip comments and whitespaces
+    state = (0, exports.skipComments)(state, true, isMultiline);
+    // parse function body
+    // let blockScopeResult = parseBlockStatement(state);
+    let blockScopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceOpen]), (state) => (0, exports.parseStatement)(state, true), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => (0, exports.skipComments)(state, true, true), undefined, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Semicolon]));
+    let body;
+    if (blockScopeResult) {
+        state = blockScopeResult.state;
+        let blockScope = blockScopeResult.result;
+        body = astFactory_1.astFactory.program(blockScope.content, blockScope.start, blockScope.end);
+    }
+    // prepare result
+    let end = (0, exports.getCursorPosition)(state);
+    let result = astFactory_1.astFactory.functionDeclaration(args, body, true, start, end);
+    return {
+        state,
+        result
+    };
+};
+exports.parseLambdaFunctionDeclaration = parseLambdaFunctionDeclaration;
 const parseVariableDeclaration = (state, isMultiline) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;

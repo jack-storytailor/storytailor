@@ -1375,6 +1375,19 @@ export const parseOperandIdentifier = (state: IParserState): IParseResult<IAstNo
 
 // declarations
 export const parseFunctionDeclaration = (state: IParserState, isMultiline: boolean): IParseResult<IAstFunctionDeclaration> => {
+	let functionResult = parseSimpleFunctionDeclaration(state, isMultiline);
+	if (functionResult) {
+		return functionResult;
+	}
+
+	let lambdaResult = parseLambdaFunctionDeclaration(state, isMultiline);
+	if (lambdaResult) {
+		return lambdaResult;
+	}
+
+	return undefined;
+}
+export const parseSimpleFunctionDeclaration = (state: IParserState, isMultiline: boolean): IParseResult<IAstFunctionDeclaration> => {
 	if (isEndOfFile(state)) {
 		return undefined;
 	}
@@ -1436,7 +1449,78 @@ export const parseFunctionDeclaration = (state: IParserState, isMultiline: boole
 
 	// prepare result
 	let end = getCursorPosition(state);
-	let result = astFactory.functionDeclaration(args, body, start, end);
+	let result = astFactory.functionDeclaration(args, body, false, start, end);
+
+	return {
+		state,
+		result
+	}
+}
+export const parseLambdaFunctionDeclaration = (state: IParserState, isMultiline: boolean): IParseResult<IAstFunctionDeclaration> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	// parse function (args) {operations...}
+
+	// save start point
+	let start = getCursorPosition(state);
+
+	// parse function params scope
+	let paramsScopeResult = parseScope(
+		skipComments(state, true, isMultiline),
+		(state) => parseTokenSequence(state, [CodeTokenType.ParenOpen]),
+		(state) => parseAnyIdentifier(state),
+		(state) => parseTokenSequence(state, [CodeTokenType.ParenClose]),
+		(state) => skipComments(state, true, true),
+		undefined,
+		(state) => parseTokenSequence(state, [CodeTokenType.Comma])
+	);
+
+	if (!paramsScopeResult) {
+		return undefined;
+	}
+	state = paramsScopeResult.state;
+
+	state = skipComments(state, true, isMultiline);
+
+	// parse =>
+	let arrowResult = parseTokenSequence(state, [CodeTokenType.Equals, CodeTokenType.TupleClose]);
+	if (!arrowResult) {
+		return undefined;
+	}
+	state = arrowResult.state;
+
+	// extract function arguments
+	let args: IAstNode[] = [];
+	if (paramsScopeResult.result) {
+		args = paramsScopeResult.result.content || [];
+	}
+
+	// skip comments and whitespaces
+	state = skipComments(state, true, isMultiline);
+
+	// parse function body
+	// let blockScopeResult = parseBlockStatement(state);
+	let blockScopeResult = parseScope(
+		state,
+		(state) => parseTokenSequence(state, [CodeTokenType.BraceOpen]),
+		(state) => parseStatement(state, true),
+		(state) => parseTokenSequence(state, [CodeTokenType.BraceClose]),
+		(state) => skipComments(state, true, true),
+		undefined,
+		(state) => parseTokenSequence(state, [CodeTokenType.Semicolon])
+	);
+	let body: IAstProgram;
+	if (blockScopeResult) {
+		state = blockScopeResult.state;
+		let blockScope = blockScopeResult.result;
+		body = astFactory.program(blockScope.content, blockScope.start, blockScope.end);
+	}
+
+	// prepare result
+	let end = getCursorPosition(state);
+	let result = astFactory.functionDeclaration(args, body, true, start, end);
 
 	return {
 		state,

@@ -240,13 +240,14 @@ export const astFactory = {
   },
 
   // declarations
-  functionDeclaration: (args: IAstNode[], body: IAstProgram, start: ISymbolPosition, end: ISymbolPosition): IAstFunctionDeclaration => {
+  functionDeclaration: (args: IAstNode[], body: IAstProgram, isLambda: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstFunctionDeclaration => {
     return {
       nodeType: AstNodeType.FunctionDeclaration,
       start, 
       end,
       args,
       body,
+	  isLambda
     }
   },  
   variableDeclaration: (identifier: IAstNode, kind: VariableDeclarationKind, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstVariableDeclaration => {
