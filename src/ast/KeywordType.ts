@@ -23,6 +23,8 @@ export enum KeywordType {
   Break = "break",
   Null = "null",
   Undefined = "undefined",
+  Async = 'async',
+  Await = 'await',
   Var = "var",
   Let = "let",
   Const = "const",

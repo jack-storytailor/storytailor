@@ -27,6 +27,8 @@ var KeywordType;
     KeywordType["Break"] = "break";
     KeywordType["Null"] = "null";
     KeywordType["Undefined"] = "undefined";
+    KeywordType["Async"] = "async";
+    KeywordType["Await"] = "await";
     KeywordType["Var"] = "var";
     KeywordType["Let"] = "let";
     KeywordType["Const"] = "const";

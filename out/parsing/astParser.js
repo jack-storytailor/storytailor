@@ -1262,6 +1262,13 @@ const parseSimpleFunctionDeclaration = (state, isMultiline) => {
     // parse function (args) {operations...}
     // save start point
     let start = (0, exports.getCursorPosition)(state);
+    // parse async
+    let isAsync = false;
+    let asyncResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Async]);
+    if (asyncResult) {
+        state = asyncResult.state;
+        isAsync = true;
+    }
     // parse keyword
     let keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Function]);
     if (!keywordResult) {
@@ -1292,7 +1299,7 @@ const parseSimpleFunctionDeclaration = (state, isMultiline) => {
     }
     // prepare result
     let end = (0, exports.getCursorPosition)(state);
-    let result = astFactory_1.astFactory.functionDeclaration(args, body, false, start, end);
+    let result = astFactory_1.astFactory.functionDeclaration(args, body, false, isAsync, start, end);
     return {
         state,
         result
@@ -1306,6 +1313,13 @@ const parseLambdaFunctionDeclaration = (state, isMultiline) => {
     // parse function (args) {operations...}
     // save start point
     let start = (0, exports.getCursorPosition)(state);
+    // parse async
+    let isAsync = false;
+    let asyncResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Async]);
+    if (asyncResult) {
+        state = asyncResult.state;
+        isAsync = true;
+    }
     // parse function params scope
     let paramsScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseAnyIdentifier)(state), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, true), undefined, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Comma]));
     if (!paramsScopeResult) {
@@ -1337,7 +1351,7 @@ const parseLambdaFunctionDeclaration = (state, isMultiline) => {
     }
     // prepare result
     let end = (0, exports.getCursorPosition)(state);
-    let result = astFactory_1.astFactory.functionDeclaration(args, body, true, start, end);
+    let result = astFactory_1.astFactory.functionDeclaration(args, body, true, isAsync, start, end);
     return {
         state,
         result
@@ -3194,7 +3208,7 @@ const parseExpression = (state, isMultiline) => {
         state = prefixOperatorResult.state;
     }
     // parse first operand
-    let operandResult = (0, exports.parseOperand)(state);
+    let operandResult = (0, exports.parseOperand)(state, isMultiline);
     if (!operandResult) {
         return undefined;
     }
@@ -3240,7 +3254,7 @@ const parseExpression = (state, isMultiline) => {
     };
 };
 exports.parseExpression = parseExpression;
-const parseOperand = (state) => {
+const parseOperand = (state, isMultiline) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -3248,6 +3262,11 @@ const parseOperand = (state) => {
     let literalResult = (0, exports.parseLiteral)(state);
     if (literalResult) {
         return literalResult;
+    }
+    // function expression
+    let funcExpression = (0, exports.parseFunctionDeclaration)(state, isMultiline);
+    if (funcExpression != null) {
+        return funcExpression;
     }
     // object expression
     let objectExpressionResult = (0, exports.parseObjectExpression)(state);
@@ -3265,7 +3284,7 @@ const parseOperand = (state) => {
         return identifierResult;
     }
     // keyword
-    let keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Null, KeywordType_1.KeywordType.Undefined]);
+    let keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Null, KeywordType_1.KeywordType.Undefined, KeywordType_1.KeywordType.Await]);
     if (keywordResult) {
         return keywordResult;
     }

@@ -1046,6 +1046,9 @@ const compileFuncDeclaration = (node, state) => {
     }
     // write function (
     state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
+    if (ast.isAsync) {
+        state = (0, exports.writeJsToken)(state, 'async ');
+    }
     if (!ast.isLambda) {
         state = (0, exports.writeJsToken)(state, `function`);
     }

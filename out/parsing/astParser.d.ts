@@ -101,7 +101,7 @@ export declare const parseCatchStatement: (state: IParserState, isMultiline: boo
 export declare const parseFinallyStatement: (state: IParserState, isMultiline: boolean) => IParseResult<IAstFinallyStatement>;
 export declare const parseThrowStatement: (state: IParserState, isMultiline: boolean) => IParseResult<IAstThrowStatement>;
 export declare const parseExpression: (state: IParserState, isMultiline: boolean) => IParseResult<IAstNode>;
-export declare const parseOperand: (state: IParserState) => IParseResult<IAstNode>;
+export declare const parseOperand: (state: IParserState, isMultiline: boolean) => IParseResult<IAstNode>;
 export declare const parseOperation: (state: IParserState, leftOperand: IAstNode, isMultiline: boolean) => IParseResult<IAstNode>;
 export declare const parseParenExpression: (state: IParserState) => IParseResult<IAstParenExpression>;
 export declare const parseObjectExpression: (state: IParserState) => IParseResult<IAstObjectExpression>;

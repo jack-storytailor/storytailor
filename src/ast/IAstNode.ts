@@ -77,6 +77,7 @@ export interface IAstIdentifierScope extends IAstNode {
 // Declarations
 export interface IAstFunctionDeclaration extends IAstNode {
 	isLambda: boolean;
+	isAsync: boolean;
 	args: IAstNode[];
 	body: IAstNode;
 }

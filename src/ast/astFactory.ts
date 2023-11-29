@@ -240,14 +240,15 @@ export const astFactory = {
   },
 
   // declarations
-  functionDeclaration: (args: IAstNode[], body: IAstNode, isLambda: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstFunctionDeclaration => {
+  functionDeclaration: (args: IAstNode[], body: IAstNode, isLambda: boolean, isAsync: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstFunctionDeclaration => {
     return {
       nodeType: AstNodeType.FunctionDeclaration,
       start, 
       end,
       args,
       body,
-	  isLambda
+	  isLambda,
+	  isAsync
     }
   },  
   variableDeclaration: (identifier: IAstNode, kind: VariableDeclarationKind, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstVariableDeclaration => {

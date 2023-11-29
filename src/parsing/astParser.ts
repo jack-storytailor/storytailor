@@ -1534,6 +1534,14 @@ export const parseSimpleFunctionDeclaration = (state: IParserState, isMultiline:
 	// save start point
 	let start = getCursorPosition(state);
 
+	// parse async
+	let isAsync: boolean = false;
+	let asyncResult = parseKeywordOfType(state, [KeywordType.Async]);
+	if (asyncResult) {
+		state = asyncResult.state;
+		isAsync = true;
+	}
+
 	// parse keyword
 	let keywordResult = parseKeywordOfType(state, [KeywordType.Function]);
 	if (!keywordResult) {
@@ -1586,7 +1594,7 @@ export const parseSimpleFunctionDeclaration = (state: IParserState, isMultiline:
 
 	// prepare result
 	let end = getCursorPosition(state);
-	let result = astFactory.functionDeclaration(args, body, false, start, end);
+	let result = astFactory.functionDeclaration(args, body, false, isAsync, start, end);
 
 	return {
 		state,
@@ -1602,6 +1610,14 @@ export const parseLambdaFunctionDeclaration = (state: IParserState, isMultiline:
 
 	// save start point
 	let start = getCursorPosition(state);
+
+	// parse async
+	let isAsync: boolean = false;
+	let asyncResult = parseKeywordOfType(state, [KeywordType.Async]);
+	if (asyncResult) {
+		state = asyncResult.state;
+		isAsync = true;
+	}
 
 	// parse function params scope
 	let paramsScopeResult = parseScope(
@@ -1657,7 +1673,7 @@ export const parseLambdaFunctionDeclaration = (state: IParserState, isMultiline:
 
 	// prepare result
 	let end = getCursorPosition(state);
-	let result = astFactory.functionDeclaration(args, body, true, start, end);
+	let result = astFactory.functionDeclaration(args, body, true, isAsync, start, end);
 
 	return {
 		state,
@@ -1965,41 +1981,59 @@ export const parseBreakStatement = (state: IParserState): IParseResult<IAstBreak
 	let start = getCursorPosition(state);
 
 	// parse keyword
-	let keywordResult = parseKeywordOfType(state, [KeywordType.Break]);
+	const keywordResult = parseKeywordOfType(state, [KeywordType.Break]);
 	if (!keywordResult) {
 		return undefined;
 	}
 	state = keywordResult.state;
-	// skip whitespace
-	state = skipWhitespace(state, false);
 
-	// skip until ; or endline
-	while (!isEndOfFile(state) && !getTokenOfType(state, [CodeTokenType.Semicolon, CodeTokenType.Endline])) {
-		let nextToken: ICodeToken = getToken(state);
-		let errorStart = getCursorPosition(state);
-		state = skipTokens(state, 1);
-		let errorEnd = getCursorPosition(state);
-		state = addParsingError(
-			state,
-			ParsingErrorType.Error,
-			"unexpected symbol '" + nextToken.value || nextToken.type + "'",
-			errorStart,
-			errorEnd
-		);
+	// skip comments and whitespaces
+	state = skipComments(state, true, false);
+
+	// next should be endline or semicolon
+	const endTokens = [CodeTokenType.Semicolon, CodeTokenType.Endline];
+	if (getTokenOfType(state, endTokens)) {
+		state = skipTokenOfType(state, endTokens);
 	}
-
-	// skip ; if any
-	if (getTokenOfType(state, [CodeTokenType.Semicolon])) {
-		state = skipTokens(state, 1);
+	else {
+		state = addInvalidTokenError(state, getToken(state));
 	}
-
-	let end = getCursorPosition(state);
-	let result = astFactory.breakStatement(start, end);
 
 	return {
-		result,
-		state
+		state, 
+		result: astFactory.breakStatement(keywordResult.result?.start, keywordResult.result?.end)
 	}
+
+	// // skip whitespace
+	// state = skipWhitespace(state, false);
+
+	// // skip until ; or endline
+	// while (!isEndOfFile(state) && !getTokenOfType(state, [CodeTokenType.Semicolon, CodeTokenType.Endline])) {
+	// 	let nextToken: ICodeToken = getToken(state);
+	// 	let errorStart = getCursorPosition(state);
+	// 	state = skipTokens(state, 1);
+	// 	let errorEnd = getCursorPosition(state);
+	// 	state = addParsingError(
+	// 		state,
+	// 		ParsingErrorType.Error,
+	// 		"unexpected symbol '" + nextToken.value || nextToken.type + "'",
+	// 		errorStart,
+	// 		errorEnd
+	// 	);
+	// }
+
+	// skip ; if any
+	// if (getTokenOfType(state, [CodeTokenType.Semicolon])) {
+	// 	state = skipTokens(state, 1);
+	// }
+
+	// let end = getCursorPosition(state);
+	// let result = astFactory.breakStatement(start, end);
+
+	// return {
+	// 	result,
+	// 	state
+	// }
 }
 export const parseReturnStatement = (state: IParserState, isMultiline: boolean): IParseResult<IAstReturnStatement> => {
 	if (isEndOfFile(state)) {
@@ -3974,7 +4008,7 @@ export const parseExpression = (state: IParserState, isMultiline: boolean): IPar
 	}
 
 	// parse first operand
-	let operandResult = parseOperand(state);
+	let operandResult = parseOperand(state, isMultiline);
 	if (!operandResult) {
 		return undefined;
 	}
@@ -4028,7 +4062,7 @@ export const parseExpression = (state: IParserState, isMultiline: boolean): IPar
 		state
 	}
 }
-export const parseOperand = (state: IParserState): IParseResult<IAstNode> => {
+export const parseOperand = (state: IParserState, isMultiline: boolean): IParseResult<IAstNode> => {
 	if (isEndOfFile(state)) {
 		return undefined;
 	}
@@ -4037,6 +4071,12 @@ export const parseOperand = (state: IParserState): IParseResult<IAstNode> => {
 	let literalResult = parseLiteral(state);
 	if (literalResult) {
 		return literalResult;
+	}
+
+	// function expression
+	let funcExpression = parseFunctionDeclaration(state, isMultiline);
+	if (funcExpression != null) {
+		return funcExpression;
 	}
 
 	// object expression
@@ -4058,7 +4098,7 @@ export const parseOperand = (state: IParserState): IParseResult<IAstNode> => {
 	}
 
 	// keyword
-	let keywordResult = parseKeywordOfType(state, [KeywordType.Null, KeywordType.Undefined]);
+	let keywordResult = parseKeywordOfType(state, [KeywordType.Null, KeywordType.Undefined, KeywordType.Await]);
 	if (keywordResult) {
 		return keywordResult;
 	}

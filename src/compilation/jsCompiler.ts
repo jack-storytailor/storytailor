@@ -1256,6 +1256,10 @@ export const compileFuncDeclaration = (node: IAstNode, state: ICompilerState): I
     // write function (
     state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
 
+	if (ast.isAsync) {
+		state = writeJsToken(state, 'async ');
+	}
+
 	if (!ast.isLambda) {
 		state = writeJsToken(state, `function`);
 	}
