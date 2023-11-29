@@ -15,7 +15,7 @@ var CodeTokenType;
     CodeTokenType["Colon"] = "Colon";
     /**; */
     CodeTokenType["Semicolon"] = "Semicolon";
-    /**; */
+    /**. */
     CodeTokenType["Dot"] = "Dot";
     /**, */
     CodeTokenType["Comma"] = "Comma";

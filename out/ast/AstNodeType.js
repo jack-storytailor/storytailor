@@ -41,6 +41,7 @@ var AstNodeType;
     AstNodeType["DoWhileStatement"] = "DoWhileStatement";
     AstNodeType["ForStatement"] = "ForStatement";
     AstNodeType["ForInStatement"] = "ForInStatement";
+    AstNodeType["ForOfStatement"] = "ForOfStatement";
     AstNodeType["ImportStatement"] = "ImportStatement";
     AstNodeType["TryStatement"] = "TryStatement";
     AstNodeType["CatchStatement"] = "CatchStatement";

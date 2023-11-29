@@ -131,6 +131,11 @@ export interface IAstForInStatement extends IAstNode {
     right: IAstNode;
     body: IAstNode;
 }
+export interface IAstForOfStatement extends IAstNode {
+    left: IAstNode;
+    right: IAstNode;
+    body: IAstNode;
+}
 export interface IAstImportStatement extends IAstNode {
     identifier: IAstNode;
     alias: IAstNode;
@@ -178,7 +183,7 @@ export interface IAstBinaryExpression extends IAstNode {
 export interface IAstMemberExpression extends IAstNode {
     object: IAstNode;
     property: IAstNode;
-    computed: boolean;
+    optional: boolean;
 }
 export interface IAstIndexerExpression extends IAstNode {
     member: IAstMemberExpression;

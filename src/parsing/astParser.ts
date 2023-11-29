@@ -252,6 +252,38 @@ export const parseOperator = (state: IParserState): IParseResult<IAstOperator> =
 		}
 	}
 
+	// PercentEquals = "PercentEquals",
+	sequence = [CodeTokenType.Percent, CodeTokenType.Equals];
+	operatorType = OperatorType.PercentEquals;
+
+	if (checkTokenSequence(state, sequence)) {
+		state = skipTokens(state, sequence.length);
+		let end = getCursorPosition(state);
+		let opText = `%=`;
+		let result = astFactory.operator(operatorType, opText, start, end);
+
+		return {
+			state,
+			result
+		}
+	}
+
+	// Percent = "Percent",
+	sequence = [CodeTokenType.Percent];
+	operatorType = OperatorType.Percent;
+
+	if (checkTokenSequence(state, sequence)) {
+		state = skipTokens(state, sequence.length);
+		let end = getCursorPosition(state);
+		let opText = `%`;
+		let result = astFactory.operator(operatorType, opText, start, end);
+
+		return {
+			state,
+			result
+		}
+	}
+
 	// PlusEquals = "PlusEquals",
 	sequence = [CodeTokenType.Plus, CodeTokenType.Equals];
 	operatorType = OperatorType.PlusEquals;
@@ -276,6 +308,102 @@ export const parseOperator = (state: IParserState): IParseResult<IAstOperator> =
 		state = skipTokens(state, sequence.length);
 		let end = getCursorPosition(state);
 		let opText = `-=`;
+		let result = astFactory.operator(operatorType, opText, start, end);
+
+		return {
+			state,
+			result
+		}
+	}
+
+	// MultiplyEquals = "MultiplyEquals",
+	sequence = [CodeTokenType.Star, CodeTokenType.Equals];
+	operatorType = OperatorType.MultiplyEquals;
+
+	if (checkTokenSequence(state, sequence)) {
+		state = skipTokens(state, sequence.length);
+		let end = getCursorPosition(state);
+		let opText = `*=`;
+		let result = astFactory.operator(operatorType, opText, start, end);
+
+		return {
+			state,
+			result
+		}
+	}
+
+	// DivideEquals = "DivideEquals",
+	sequence = [CodeTokenType.Slash, CodeTokenType.Equals];
+	operatorType = OperatorType.DivideEquals;
+
+	if (checkTokenSequence(state, sequence)) {
+		state = skipTokens(state, sequence.length);
+		let end = getCursorPosition(state);
+		let opText = `/=`;
+		let result = astFactory.operator(operatorType, opText, start, end);
+
+		return {
+			state,
+			result
+		}
+	}
+
+	// MoreMoreMore = "MoreMoreMore",
+	sequence = [CodeTokenType.TupleClose, CodeTokenType.TupleClose, CodeTokenType.TupleClose];
+	operatorType = OperatorType.MoreMoreMore;
+
+	if (checkTokenSequence(state, sequence)) {
+		state = skipTokens(state, sequence.length);
+		let end = getCursorPosition(state);
+		let opText = `>>>`;
+		let result = astFactory.operator(operatorType, opText, start, end);
+
+		return {
+			state,
+			result
+		}
+	}
+	
+	// MoreMore = "MoreMore",
+	sequence = [CodeTokenType.TupleClose, CodeTokenType.TupleClose];
+	operatorType = OperatorType.MoreMore;
+
+	if (checkTokenSequence(state, sequence)) {
+		state = skipTokens(state, sequence.length);
+		let end = getCursorPosition(state);
+		let opText = `>>`;
+		let result = astFactory.operator(operatorType, opText, start, end);
+
+		return {
+			state,
+			result
+		}
+	}
+
+	// LessLess = "LessLess",
+	sequence = [CodeTokenType.TupleOpen, CodeTokenType.TupleOpen];
+	operatorType = OperatorType.LessLess;
+
+	if (checkTokenSequence(state, sequence)) {
+		state = skipTokens(state, sequence.length);
+		let end = getCursorPosition(state);
+		let opText = `<<`;
+		let result = astFactory.operator(operatorType, opText, start, end);
+
+		return {
+			state,
+			result
+		}
+	}
+
+	// QuestionQuestion = "QuestionQuestion",
+	sequence = [CodeTokenType.Question, CodeTokenType.Question];
+	operatorType = OperatorType.QuestionQuestion;
+
+	if (checkTokenSequence(state, sequence)) {
+		state = skipTokens(state, sequence.length);
+		let end = getCursorPosition(state);
+		let opText = `??`;
 		let result = astFactory.operator(operatorType, opText, start, end);
 
 		return {
@@ -628,12 +756,21 @@ export const parseOperatorOfType = (state: IParserState, operatorTypes: Operator
 }
 export const parseBinaryOperator = (state: IParserState): IParseResult<IAstOperator> => {
 	return parseOperatorOfType(state, [
+		OperatorType.PercentEquals,
+		OperatorType.Percent,
 		OperatorType.GreaterOrEquals,
 		OperatorType.Greater,
 		OperatorType.LessOrEquals,
+		OperatorType.LessLess,
 		OperatorType.Less,
 		OperatorType.PlusEquals,
 		OperatorType.MinusEquals,
+		OperatorType.MultiplyEquals,
+		OperatorType.DivideEquals,
+		OperatorType.QuestionQuestion,
+		OperatorType.MoreMoreMore,
+		OperatorType.MoreMore,
+		OperatorType.QuestionQuestion,
 		OperatorType.Minus,
 		OperatorType.Multiply,
 		OperatorType.NotEqualsEquals,
@@ -1538,7 +1675,7 @@ export const parseVariableDeclaration = (state: IParserState, isMultiline: boole
 	// var|let|const Identifier = Expression
 
 	// parse keyword
-	let keywordResult = parseKeywordOfType(state, [KeywordType.Var, KeywordType.Let, KeywordType.Const]);
+	let keywordResult = parseKeywordOfType(state, [KeywordType.Var, KeywordType.Let, KeywordType.Const, KeywordType.Class]);
 	if (!keywordResult) {
 		return undefined;
 	}
@@ -1756,6 +1893,12 @@ export const parseStatement = (state: IParserState, isMultiline: boolean): IPars
 	let doWhileResult = parseDoWhileStatement(state, isMultiline);
 	if (doWhileResult) {
 		return doWhileResult;
+	}
+
+	// for of
+	let forOfResult = parseForOfStatement(state, isMultiline);
+	if (forOfResult) {
+		return forOfResult;
 	}
 
 	// for in
@@ -3081,6 +3224,81 @@ export const parseForInConditions = (state: IParserState): IParseResult<{ variab
 		state
 	}
 }
+export const parseForOfConditions = (state: IParserState): IParseResult<{ variable: IAstNode, expression: IAstNode }> => {
+	// parse left expression
+	let variable: IAstNode = undefined;
+	// parse identifier
+	let identifierResult = parseOperandIdentifier(state);
+	if (identifierResult) {
+		state = identifierResult.state;
+		variable = identifierResult.result;
+	} else {
+		// if no identifier, parse variable declaration
+		let varDeclarationResult = parseVariableDeclaration(state, true);
+		if (varDeclarationResult) {
+			state = varDeclarationResult.state;
+			variable = varDeclarationResult.result;
+		} else {
+			// if we still don't have variable, mark this as error
+			state = addParsingError(
+				state,
+				ParsingErrorType.Error,
+				`variable declaration or identifier expected`,
+				getCursorPosition(state),
+				getCursorPosition(state)
+			);
+		}
+	}
+
+	// check break tokens
+	let breakTokens = [CodeTokenType.ParenClose];
+	let finalState = state;
+	let expression: IAstNode = undefined;
+	while (!isEndOfFile(state) && !getTokenOfType(state, breakTokens)) {
+		// skip comments and whitespaces
+		state = skipComments(state, true, true);
+
+		// check of keyword
+		let inResult = parseKeywordOfType(state, [KeywordType.Of]);
+		if (inResult) {
+			state = inResult.state;
+		} else {
+			// if there is no of keyword
+			return undefined;
+		}
+		finalState = state;
+
+		state = skipComments(state, true, true);
+
+		// check break tokens
+		if (isEndOfFile(state) || getTokenOfType(state, breakTokens)) {
+			break;
+		}
+
+		// parse right expression
+		let exprResult = parseExpression(state, true);
+		if (exprResult) {
+			state = exprResult.state;
+			expression = exprResult.result;
+			finalState = state;
+		}
+
+		break;
+	}
+	state = finalState;
+
+	// prepare result
+	let result: { variable: IAstNode, expression: IAstNode } =
+	{
+		variable,
+		expression
+	};
+
+	return {
+		result,
+		state
+	}
+}
 export const parseForInStatement = (state: IParserState, isMultiline: boolean): IParseResult<IAstForInStatement> => {
 	if (isEndOfFile(state)) {
 		return undefined;
@@ -3107,7 +3325,7 @@ export const parseForInStatement = (state: IParserState, isMultiline: boolean): 
 
 	// prepare break tokens
 	let breakTokens = [CodeTokenType.Semicolon];
-	breakTokens = isMultiline ? [...breakTokens, CodeTokenType.Endline] : breakTokens;
+	breakTokens = isMultiline ? breakTokens : [...breakTokens, CodeTokenType.Endline];
 
 	// parse for in body
 	let variable: IAstNode;
@@ -3176,6 +3394,108 @@ export const parseForInStatement = (state: IParserState, isMultiline: boolean): 
 	// prepare result
 	let end = getCursorPosition(state);
 	let result = astFactory.forInStatement(variable, expression, bodyProgram, start, end);
+
+	return {
+		state,
+		result
+	}
+
+}
+export const parseForOfStatement = (state: IParserState, isMultiline: boolean): IParseResult<IAstForInStatement> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	// parse for (initStatement; in updateStatement) {body}
+	let forResult = parseKeywordOfType(state, [KeywordType.For]);
+	if (!forResult) {
+		return undefined;
+	}
+	let start = getCursorPosition(state);
+	state = forResult.state;
+
+	// skip comments and whitespases
+	state = skipComments(state, true, isMultiline);
+
+	// parse condition block
+	// parse open paren (
+	if (!getTokenOfType(state, [CodeTokenType.ParenOpen])) {
+		return undefined;
+	}
+	state = skipTokens(state, 1);
+	let finalState = state;
+
+	// prepare break tokens
+	let breakTokens = [CodeTokenType.Semicolon];
+	breakTokens = isMultiline ? breakTokens : [...breakTokens, CodeTokenType.Endline];
+
+	// parse for of body
+	let variable: IAstNode;
+	let expression: IAstNode;
+	let bodyProgram: IAstNode;
+	while (!isEndOfFile(state) && !getTokenOfType(state, breakTokens)) {
+		// skip comments and whitespaces
+		state = skipComments(state, true, isMultiline);
+
+		// parse for conditions
+		let conditionsResult = parseForOfConditions(state);
+		if (conditionsResult) {
+			state = conditionsResult.state;
+			let condition = conditionsResult.result;
+			variable = condition.variable;
+			expression = condition.expression;
+
+			finalState = state;
+		} else {
+			return undefined;
+		}
+
+		state = skipComments(state, true, true);
+
+		// parse error tokens everything until )
+		state = parseErrorTokens(state, (state) => !getTokenOfType(state, [CodeTokenType.ParenClose]));
+		finalState = state;
+
+		// parse and skip ) token
+		if (getTokenOfType(state, [CodeTokenType.ParenClose])) {
+			state = skipTokens(state, 1);
+			finalState = state;
+		}
+
+		// skip comments and whitespaces
+		state = skipComments(state, true, isMultiline);
+
+		// check break tokens
+		if (isEndOfFile(state) || getTokenOfType(state, breakTokens)) {
+			break;
+		}
+
+		// now it's time to parse body code block
+
+		// skip everything until code block open token
+		let bodyErrorTokens = [...breakTokens, CodeTokenType.BraceOpen];
+		state = parseErrorTokens(state, (state) => !getTokenOfType(state, bodyErrorTokens));
+
+		// check break tokens
+		if (isEndOfFile(state) || getTokenOfType(state, breakTokens)) {
+			break;
+		}
+
+		// parse body code block
+		let codeBlockResult = parseBlockStatement(state);
+		if (codeBlockResult) {
+			bodyProgram = codeBlockResult.result;
+			state = codeBlockResult.state;
+			finalState = state;
+		}
+
+		break;
+	}
+	state = finalState;
+
+	// prepare result
+	let end = getCursorPosition(state);
+	let result = astFactory.forOfStatement(variable, expression, bodyProgram, start, end);
 
 	return {
 		state,
@@ -3774,16 +4094,16 @@ export const parseOperation = (state: IParserState, leftOperand: IAstNode, isMul
 		return updateResult;
 	}
 
-	// parse conditional expression
-	let conditionalExpressionResult = parseConditionalExpression(state, leftOperand, isMultiline);
-	if (conditionalExpressionResult) {
-		return conditionalExpressionResult;
-	}
-
 	// parse binary expression
 	let binaryResult = parseBinaryExpression(state, leftOperand, isMultiline);
 	if (binaryResult) {
 		return binaryResult;
+	}
+
+	// parse conditional expression
+	let conditionalExpressionResult = parseConditionalExpression(state, leftOperand, isMultiline);
+	if (conditionalExpressionResult) {
+		return conditionalExpressionResult;
 	}
 
 	return undefined;
@@ -4167,6 +4487,14 @@ export const parseMemberExpression = (state: IParserState, leftOperand: IAstNode
 	}
 
 	// parse leftOperand . [identifier]
+	
+	// parse ? (optional chaining)
+	let isOptional = false;
+	if (getTokenOfType(state, [CodeTokenType.Question])) {
+		isOptional = true;
+		state = skipTokens(state, 1);
+	}
+	
 	// parse .
 	if (!getTokenOfType(state, [CodeTokenType.Dot])) {
 		return undefined;
@@ -4186,7 +4514,7 @@ export const parseMemberExpression = (state: IParserState, leftOperand: IAstNode
 
 		// prepare result
 		let end = getCursorPosition(state);
-		let result = astFactory.memberExpression(leftOperand, identifier, false, start, end);
+		let result = astFactory.memberExpression(leftOperand, identifier, isOptional, start, end);
 
 		return {
 			state,
@@ -4211,7 +4539,9 @@ export const parseConditionalExpression = (state: IParserState, condition: IAstN
 	state = skipTokens(state, 1);
 	let finalState = state;
 
-	let breakTokens = [CodeTokenType.Endline];
+	let breakTokens = isMultiline ? [] : [CodeTokenType.Endline];
+	breakTokens.push(CodeTokenType.Semicolon);
+
 	let whenTrue: IAstNode;
 	let whenFalse: IAstNode;
 	let colonToken: IAstNode;
@@ -4227,6 +4557,8 @@ export const parseConditionalExpression = (state: IParserState, condition: IAstN
 			whenTrue = rightOperandResult.result;
 			finalState = state;
 		}
+
+		state = skipComments(state, true, isMultiline);
 
 		// check sequence end
 		if (getTokenOfType(state, breakTokens)) break;

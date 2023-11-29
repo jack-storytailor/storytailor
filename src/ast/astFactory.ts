@@ -379,6 +379,16 @@ export const astFactory = {
       body
     }
   },
+  forOfStatement: (left: IAstNode, right: IAstNode, body: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstForInStatement => {
+    return {
+      nodeType: AstNodeType.ForOfStatement,
+      start, 
+      end,
+      left,
+      right,
+      body
+    }
+  },
   importStatement: (alias: IAstNode, identifier: IAstNode, importInContext: boolean, path: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstImportStatement => {
     return {
       nodeType: AstNodeType.ImportStatement,
@@ -489,14 +499,14 @@ export const astFactory = {
       right
     }
   },
-  memberExpression: (object: IAstNode, property: IAstNode, computed: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstMemberExpression => {
+  memberExpression: (object: IAstNode, property: IAstNode, optional: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstMemberExpression => {
     return {
       nodeType: AstNodeType.MemberExpression,
       start, 
       end,
       object,
       property,
-      computed
+      optional
     }
   },
   IndexerExpression: (member: IAstMemberExpression, start: ISymbolPosition, end: ISymbolPosition): IAstIndexerExpression => { 

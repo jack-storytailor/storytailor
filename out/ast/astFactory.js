@@ -305,6 +305,16 @@ exports.astFactory = {
             body
         };
     },
+    forOfStatement: (left, right, body, start, end) => {
+        return {
+            nodeType: AstNodeType_1.AstNodeType.ForOfStatement,
+            start,
+            end,
+            left,
+            right,
+            body
+        };
+    },
     importStatement: (alias, identifier, importInContext, path, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.ImportStatement,
@@ -413,14 +423,14 @@ exports.astFactory = {
             right
         };
     },
-    memberExpression: (object, property, computed, start, end) => {
+    memberExpression: (object, property, optional, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.MemberExpression,
             start,
             end,
             object,
             property,
-            computed
+            optional
         };
     },
     IndexerExpression: (member, start, end) => {

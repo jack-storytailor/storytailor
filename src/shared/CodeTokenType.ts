@@ -11,7 +11,7 @@ export enum CodeTokenType {
 	Colon = 'Colon',
 	/**; */
 	Semicolon = 'Semicolon',
-	/**; */
+	/**. */
 	Dot = 'Dot',
 	/**, */
 	Comma = 'Comma',

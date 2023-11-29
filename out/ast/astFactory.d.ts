@@ -39,6 +39,7 @@ export declare const astFactory: {
     doWhileStatement: (condition: IAstNode, body: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstDoWhileStatement;
     forStatement: (init: IAstNode, test: IAstNode, update: IAstNode, body: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstForStatement;
     forInStatement: (left: IAstNode, right: IAstNode, body: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstForInStatement;
+    forOfStatement: (left: IAstNode, right: IAstNode, body: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstForInStatement;
     importStatement: (alias: IAstNode, identifier: IAstNode, importInContext: boolean, path: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstImportStatement;
     tryStatement: (body: IAstNode, catchClause: IAstNode, finallyBlock: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstTryStatement;
     catchStatement: (body: IAstNode, varDeclaration: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstCatchStatement;
@@ -51,7 +52,7 @@ export declare const astFactory: {
     operationExpression: (operation: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstOperationExpression;
     updateExpression: (argument: IAstNode, operator: IAstNode, prefix: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstUpdateExpression;
     binaryExpression: (left: IAstNode, operator: IAstNode, right: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstBinaryExpression;
-    memberExpression: (object: IAstNode, property: IAstNode, computed: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstMemberExpression;
+    memberExpression: (object: IAstNode, property: IAstNode, optional: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstMemberExpression;
     IndexerExpression: (member: IAstMemberExpression, start: ISymbolPosition, end: ISymbolPosition) => IAstIndexerExpression;
     conditionalExpression: (condition: IAstNode, whenTrue: IAstNode, whenFalse: IAstNode, colonToken: IAstNode, questionToken: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstConditionalExpression;
     newExpression: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstNewExpression;

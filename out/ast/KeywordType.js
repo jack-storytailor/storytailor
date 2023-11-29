@@ -9,6 +9,7 @@ var KeywordType;
     KeywordType["Is"] = "is";
     KeywordType["If"] = "if";
     KeywordType["In"] = "in";
+    KeywordType["Of"] = "of";
     KeywordType["While"] = "while";
     KeywordType["For"] = "for";
     KeywordType["Continue"] = "continue";
