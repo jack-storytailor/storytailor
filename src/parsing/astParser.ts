@@ -3638,6 +3638,12 @@ export const parseExpression = (state: IParserState, isMultiline: boolean): IPar
 		return typeofResult;
 	}
 
+	// lambda expression
+	let lambdaExpression = parseLambdaFunctionDeclaration(state, isMultiline);
+	if (lambdaExpression) {
+		return lambdaExpression;
+	}
+
 	// prefix
 	let prefixStart = getCursorPosition(state);
 

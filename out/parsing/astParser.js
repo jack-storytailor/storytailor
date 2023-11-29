@@ -2915,6 +2915,11 @@ const parseExpression = (state, isMultiline) => {
     if (typeofResult) {
         return typeofResult;
     }
+    // lambda expression
+    let lambdaExpression = (0, exports.parseLambdaFunctionDeclaration)(state, isMultiline);
+    if (lambdaExpression) {
+        return lambdaExpression;
+    }
     // prefix
     let prefixStart = (0, exports.getCursorPosition)(state);
     // parse unary prefix
