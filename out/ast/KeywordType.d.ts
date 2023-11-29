@@ -7,6 +7,7 @@ export declare enum KeywordType {
     In = "in",
     Of = "of",
     While = "while",
+    Class = "class",
     For = "for",
     Continue = "continue",
     Do = "do",

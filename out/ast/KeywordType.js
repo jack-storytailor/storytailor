@@ -11,6 +11,7 @@ var KeywordType;
     KeywordType["In"] = "in";
     KeywordType["Of"] = "of";
     KeywordType["While"] = "while";
+    KeywordType["Class"] = "class";
     KeywordType["For"] = "for";
     KeywordType["Continue"] = "continue";
     KeywordType["Do"] = "do";

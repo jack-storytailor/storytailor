@@ -1352,7 +1352,7 @@ const parseVariableDeclaration = (state, isMultiline) => {
     let start = (0, exports.getCursorPosition)(state);
     // var|let|const Identifier = Expression
     // parse keyword
-    let keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Var, KeywordType_1.KeywordType.Let, KeywordType_1.KeywordType.Const]);
+    let keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Var, KeywordType_1.KeywordType.Let, KeywordType_1.KeywordType.Const, KeywordType_1.KeywordType.Class]);
     if (!keywordResult) {
         return undefined;
     }
