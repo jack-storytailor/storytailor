@@ -46,6 +46,7 @@ export interface IAstNumber extends IAstNode {
     value: number;
 }
 export interface IAstString extends IAstNode {
+    allowIncludes: boolean;
     value: IAstNode[];
 }
 export interface IAstBoolean extends IAstNode {

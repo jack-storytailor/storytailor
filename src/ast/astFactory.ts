@@ -179,9 +179,10 @@ export const astFactory = {
       end
     }
   },
-  stringLiteral: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition): IAstString => {
+  stringLiteral: (value: IAstNode[], allowIncludes: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstString => {
     return {
       nodeType: AstNodeType.String,
+	  allowIncludes,
       value,
       start,
       end

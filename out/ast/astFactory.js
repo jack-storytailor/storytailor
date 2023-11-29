@@ -109,9 +109,10 @@ exports.astFactory = {
             end
         };
     },
-    stringLiteral: (value, start, end) => {
+    stringLiteral: (value, allowIncludes, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.String,
+            allowIncludes,
             value,
             start,
             end

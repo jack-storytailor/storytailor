@@ -730,7 +730,7 @@ const parseNumberLiteral = (state) => {
     return undefined;
 };
 exports.parseNumberLiteral = parseNumberLiteral;
-const parseStringLiteral = (state) => {
+const parseStringLiteral = (state, allowIncludes = true) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -747,13 +747,10 @@ const parseStringLiteral = (state) => {
             break;
         }
         // parse array item
-        let stringItem = (0, exports.parseStringLiteralItem)(state);
+        let stringItem = (0, exports.parseStringLiteralItem)(state, allowIncludes);
         if (stringItem) {
             state = stringItem.state;
-            content = [
-                ...content,
-                stringItem.result
-            ];
+            content.push(stringItem.result);
         }
         continue;
     }
@@ -767,7 +764,7 @@ const parseStringLiteral = (state) => {
     }
     // prepare result
     let end = (0, exports.getCursorPosition)(state);
-    let result = astFactory_1.astFactory.stringLiteral(content, start, end);
+    let result = astFactory_1.astFactory.stringLiteral(content, allowIncludes, start, end);
     return {
         result,
         state
@@ -795,6 +792,16 @@ const parseStringLiteralItem = (state, allowIncludes = true) => {
         let wordToken = (0, exports.getToken)(state);
         state = (0, exports.skipTokens)(state, 1);
         let tokenSeq = astFactory_1.astFactory.tokenSequence([nextToken, wordToken], nextToken.start, wordToken.end);
+        return {
+            result: tokenSeq,
+            state
+        };
+    }
+    if (nextToken.type == CodeTokenType_1.CodeTokenType.Prime && !allowIncludes) {
+        state = (0, exports.skipTokens)(state, 1);
+        // add backslash before tilde
+        let backslashToken = Object.assign(Object.assign({}, nextToken), { type: CodeTokenType_1.CodeTokenType.Backslash, value: "\\" });
+        let tokenSeq = astFactory_1.astFactory.tokenSequence([backslashToken, nextToken], nextToken.start, nextToken.end);
         return {
             result: tokenSeq,
             state
@@ -1272,20 +1279,20 @@ const parsePropertyDeclaration = (state) => {
     // identifier : value
     // identifier
     let identifier = undefined;
-    let identifierResult = (0, exports.parseAnyIdentifier)(state);
-    if (identifierResult) {
-        state = identifierResult.state;
-        identifier = identifierResult.result;
-    }
-    else {
-        // try string
-        let stringResult = (0, exports.parseStringLiteral)(state);
-        if (!stringResult) {
-            // if it's not identifier and not even string, that means we have something ugly and unexpected
-            return undefined;
-        }
+    let stringResult = (0, exports.parseStringLiteral)(state, false);
+    if (stringResult) {
         identifier = stringResult.result;
         state = stringResult.state;
+    }
+    else {
+        let identifierResult = (0, exports.parseAnyIdentifier)(state);
+        if (identifierResult) {
+            state = identifierResult.state;
+            identifier = identifierResult.result;
+        }
+        else {
+            return undefined;
+        }
     }
     let finalState = state;
     let breakTokens = [CodeTokenType_1.CodeTokenType.Semicolon];
@@ -2633,7 +2640,7 @@ const parseImportPath = (state) => {
     let pathContent = scopeResult.result.content;
     let start = scopeResult.result.start;
     let end = scopeResult.result.end;
-    let result = astFactory_1.astFactory.stringLiteral(pathContent, start, end);
+    let result = astFactory_1.astFactory.stringLiteral(pathContent, true, start, end);
     return {
         result,
         state

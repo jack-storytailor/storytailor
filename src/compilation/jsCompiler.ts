@@ -2209,7 +2209,7 @@ export const compileStringLiteral = (node: IAstNode, state: ICompilerState): ICo
 	state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
 
     // open `
-    state = writeJsToken(state, '`');
+    state = writeJsToken(state, ast.allowIncludes ? '`' : '\'');
 
     let content = ast.value;
     for (let i = 0; i < content.length; i++) {
@@ -2221,7 +2221,7 @@ export const compileStringLiteral = (node: IAstNode, state: ICompilerState): ICo
     }
 
     // close `
-    state = writeJsToken(state, '`');
+    state = writeJsToken(state, ast.allowIncludes ? '`' : '\'');
 
     return {
         state,

@@ -1909,7 +1909,7 @@ const compileStringLiteral = (node, state) => {
     // add sourcemap
     state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     // open `
-    state = (0, exports.writeJsToken)(state, '`');
+    state = (0, exports.writeJsToken)(state, ast.allowIncludes ? '`' : '\'');
     let content = ast.value;
     for (let i = 0; i < content.length; i++) {
         const contentItem = content[i];
@@ -1919,7 +1919,7 @@ const compileStringLiteral = (node, state) => {
         }
     }
     // close `
-    state = (0, exports.writeJsToken)(state, '`');
+    state = (0, exports.writeJsToken)(state, ast.allowIncludes ? '`' : '\'');
     return {
         state,
         result: ast

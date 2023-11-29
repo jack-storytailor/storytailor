@@ -17,7 +17,7 @@ export declare const astFactory: {
     commentLine: (text: string, start: ISymbolPosition, end: ISymbolPosition) => IAstCommentLine;
     commentBlock: (text: string, start: ISymbolPosition, end: ISymbolPosition) => IAstCommentBlock;
     numberLiteral: (value: number, start: ISymbolPosition, end: ISymbolPosition) => IAstNumber;
-    stringLiteral: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstString;
+    stringLiteral: (value: IAstNode[], allowIncludes: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstString;
     booleanLiteral: (value: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstBoolean;
     arrayLiteral: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstArray;
     identifier: (value: string, start: ISymbolPosition, end: ISymbolPosition) => IAstIdentifier;

@@ -10,6 +10,7 @@ import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstComment
 import { astFactory } from "../ast/astFactory";
 import { AstNodeType } from '../ast/AstNodeType';
 import { ISymbol } from "../ast/ISymbol";
+import { start } from "repl";
 
 let keywords = [];
 for (const key in KeywordType) {
@@ -883,7 +884,7 @@ export const parseNumberLiteral = (state: IParserState): IParseResult<IAstNumber
 
 	return undefined;
 }
-export const parseStringLiteral = (state: IParserState): IParseResult<IAstString> => {
+export const parseStringLiteral = (state: IParserState, allowIncludes: boolean = true): IParseResult<IAstString> => {
 	if (isEndOfFile(state)) {
 		return undefined;
 	}
@@ -905,13 +906,10 @@ export const parseStringLiteral = (state: IParserState): IParseResult<IAstString
 		}
 
 		// parse array item
-		let stringItem = parseStringLiteralItem(state);
+		let stringItem = parseStringLiteralItem(state, allowIncludes);
 		if (stringItem) {
 			state = stringItem.state;
-			content = [
-				...content,
-				stringItem.result
-			];
+			content.push(stringItem.result);
 		}
 
 		continue;
@@ -934,7 +932,7 @@ export const parseStringLiteral = (state: IParserState): IParseResult<IAstString
 
 	// prepare result
 	let end = getCursorPosition(state);
-	let result = astFactory.stringLiteral(content, start, end);
+	let result = astFactory.stringLiteral(content, allowIncludes, start, end);
 
 	return {
 		result,
@@ -965,6 +963,19 @@ export const parseStringLiteralItem = (state: IParserState, allowIncludes: boole
 		let wordToken = getToken(state);
 		state = skipTokens(state, 1);
 		let tokenSeq = astFactory.tokenSequence([nextToken, wordToken], nextToken.start, wordToken.end);
+
+		return {
+			result: tokenSeq,
+			state
+		}
+	}
+
+	if (nextToken.type == CodeTokenType.Prime && !allowIncludes) {
+		state = skipTokens(state, 1);
+
+		// add backslash before tilde
+		let backslashToken: ICodeToken = {...nextToken, type: CodeTokenType.Backslash, value: "\\"};
+		let tokenSeq = astFactory.tokenSequence([backslashToken, nextToken], nextToken.start, nextToken.end);
 
 		return {
 			result: tokenSeq,
@@ -1533,20 +1544,20 @@ export const parsePropertyDeclaration = (state: IParserState): IParseResult<IAst
 
 	// identifier
 	let identifier: IAstNode = undefined;
-	let identifierResult = parseAnyIdentifier(state);
-	if (identifierResult) {
-		state = identifierResult.state;
-		identifier = identifierResult.result;
-	} else {
-		// try string
-		let stringResult = parseStringLiteral(state);
-		if (!stringResult) {
-			// if it's not identifier and not even string, that means we have something ugly and unexpected
-			return undefined;
-		}
-
+	let stringResult = parseStringLiteral(state, false);
+	if (stringResult) {
 		identifier = stringResult.result;
 		state = stringResult.state;
+	}
+	else {
+		let identifierResult = parseAnyIdentifier(state);
+		if (identifierResult) {
+			state = identifierResult.state;
+			identifier = identifierResult.result;
+		}
+		else {
+			return undefined;
+		}		
 	}
 
 	let finalState = state;
@@ -3277,7 +3288,7 @@ export const parseImportPath = (state: IParserState): IParseResult<IAstNode> => 
 	let pathContent = scopeResult.result.content;
 	let start = scopeResult.result.start;
 	let end = scopeResult.result.end;
-	let result = astFactory.stringLiteral(pathContent, start, end);
+	let result = astFactory.stringLiteral(pathContent, true, start, end);
 
 	return {
 		result,
