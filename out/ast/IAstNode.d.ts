@@ -70,7 +70,7 @@ export interface IAstIdentifierScope extends IAstNode {
 export interface IAstFunctionDeclaration extends IAstNode {
     isLambda: boolean;
     args: IAstNode[];
-    body: IAstProgram;
+    body: IAstNode;
 }
 export interface IAstVariableDeclaration extends IAstNode {
     identifier: IAstNode;

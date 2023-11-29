@@ -1175,7 +1175,7 @@ const parseSimpleFunctionDeclaration = (state, isMultiline) => {
     if (blockScopeResult) {
         state = blockScopeResult.state;
         let blockScope = blockScopeResult.result;
-        body = astFactory_1.astFactory.program(blockScope.content, blockScope.start, blockScope.end);
+        body = astFactory_1.astFactory.blockStatement(blockScope.content, blockScope.start, blockScope.end);
     }
     // prepare result
     let end = (0, exports.getCursorPosition)(state);
@@ -1220,7 +1220,7 @@ const parseLambdaFunctionDeclaration = (state, isMultiline) => {
     if (blockScopeResult) {
         state = blockScopeResult.state;
         let blockScope = blockScopeResult.result;
-        body = astFactory_1.astFactory.program(blockScope.content, blockScope.start, blockScope.end);
+        body = astFactory_1.astFactory.blockStatement(blockScope.content, blockScope.start, blockScope.end);
     }
     // prepare result
     let end = (0, exports.getCursorPosition)(state);

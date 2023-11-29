@@ -30,6 +30,7 @@ export interface ITargetState {
     javascript: string[];
     sourceMaps: ISourceMapToken[];
     cursor: ISymbolPosition;
+    indent: number;
 }
 export interface ICompilerState {
     sourceState: ISourceState;
@@ -137,6 +138,9 @@ export declare const addSourceMaps: (state: ICompilerState, sourceMaps: ISourceM
 export declare const addSourceMap: (state: ICompilerState, sourceMap: ISourceMapToken) => ICompilerState;
 export declare const addSourceMapAtCurrentPlace: (state: ICompilerState, tokenName?: string, symbolPos?: ISymbolPosition, jsLineOffset?: number, stsLineOffset?: number) => ICompilerState;
 export declare const isNeedToLinkSourcemap: (astNode: IAstNode) => boolean;
+export declare const addTargetIndent: (state: ICompilerState, amount?: number) => ICompilerState;
+export declare const setIndent: (state: ICompilerState, indent: number) => ICompilerState;
+export declare const writeTargetIndent: (state: ICompilerState) => ICompilerState;
 export declare const writeJavascript: (state: ICompilerState, javascript: string) => ICompilerState;
 export declare const writeEndline: (state: ICompilerState) => ICompilerState;
 export declare const writeJsToken: (state: ICompilerState, jsToken: string) => ICompilerState;

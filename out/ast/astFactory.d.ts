@@ -24,7 +24,7 @@ export declare const astFactory: {
     rawIndentifier: (value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstRawIdentifier;
     contextIndentifier: (value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstContextIdentifier;
     IdentifierScope: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstIdentifierScope;
-    functionDeclaration: (args: IAstNode[], body: IAstProgram, isLambda: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstFunctionDeclaration;
+    functionDeclaration: (args: IAstNode[], body: IAstNode, isLambda: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstFunctionDeclaration;
     variableDeclaration: (identifier: IAstNode, kind: VariableDeclarationKind, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstVariableDeclaration;
     propertyDeclaration: (identifier: IAstNode, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstPropertyDeclaration;
     statement: (statement: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstStatement;

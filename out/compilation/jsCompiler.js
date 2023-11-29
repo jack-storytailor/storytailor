@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.compileThrowStatement = exports.compileDebuggerKeyword = exports.compileFinallyStatement = exports.compileCatchStatement = exports.compileTryStatement = exports.compileIndexerExpression = exports.compileConditionalExpression = exports.compileKeyword = exports.compileUpdateExpression = exports.compileObjectExpression = exports.compileArrayLiteral = exports.compileForInStatement = exports.compileForStatement = exports.compilePropertyDeclaration = exports.compileImportStatement = exports.compileParenExpression = exports.compileCaseStatement = exports.compileSwitchStatement = exports.compileDoWhileStatement = exports.compileWhileStatement = exports.compileIfStatement = exports.compileContinueStatement = exports.compileBreakStatement = exports.compileTypeofExpression = exports.compileDeleteExpression = exports.compileReturnStatement = exports.compileProgram = exports.compileFuncDeclaration = exports.compileVarDeclaration = exports.compileCallExpression = exports.compileStringInclude = exports.compileMemberExpression = exports.compileBinaryExpression = exports.compileContextIdentifier = exports.compileRawIdentifier = exports.compileIdentifierScope = exports.compileIdentifier = exports.compileBoolean = exports.compileNumber = exports.compileTextLine = exports.compileStatement = exports.compileDeleteLine = exports.compileObjectLine = exports.compileBlockStatement = exports.compileOuterStatement = exports.compileAstModule = exports.compileAstNode = exports.compile = exports.compileSingleNode = exports.compilerConfig = void 0;
-exports.toStringSafe = exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.isNeedToLinkSourcemap = exports.addSourceMapAtCurrentPlace = exports.addSourceMap = exports.addSourceMaps = exports.getIdentifierFullName = exports.getIdentifierFromNode = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = exports.compileNewExpression = void 0;
+exports.toStringSafe = exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.writeTargetIndent = exports.setIndent = exports.addTargetIndent = exports.isNeedToLinkSourcemap = exports.addSourceMapAtCurrentPlace = exports.addSourceMap = exports.addSourceMaps = exports.getIdentifierFullName = exports.getIdentifierFromNode = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = exports.compileNewExpression = void 0;
 const source_map_1 = require("source-map");
 const AstNodeType_1 = require("../ast/AstNodeType");
 const astFactory_1 = require("../ast/astFactory");
@@ -129,7 +129,8 @@ const compileSingleNode = (ast) => {
         cursor,
         javascript: [],
         sourceMaps: [],
-        fileName: 'nofile'
+        fileName: 'nofile',
+        indent: 0
     };
     let state = {
         sourceState,
@@ -154,10 +155,6 @@ const compile = (request) => {
     // prepare state
     let ast = request.ast;
     let cursor = Object.assign({}, ast[0].start);
-    // let sourceMapGenerator = new SourceMapGenerator({
-    //   file: request.sourceFileName,
-    //   sourceRoot: request.sourceRoot
-    // });
     let sourceState = {
         ast,
         astIndex: 0,
@@ -170,7 +167,8 @@ const compile = (request) => {
         cursor,
         javascript: [],
         sourceMaps: [],
-        fileName: request.targetFileName
+        fileName: request.targetFileName,
+        indent: 0
     };
     let state = {
         sourceState,
@@ -567,13 +565,14 @@ const compileBlockStatement = (node, state) => {
         // open scope
         state = (0, exports.writeJsToken)(state, "{ ");
         state = (0, exports.writeEndline)(state);
+        state = (0, exports.addTargetIndent)(state, 1);
     }
     // write all the statements
     let content = ast.content;
     if (content && content.length > 0) {
         for (let i = 0; i < content.length; i++) {
-            // write \t
-            state = (0, exports.writeJsToken)(state, '\t');
+            // write indent
+            state = (0, exports.writeTargetIndent)(state);
             const contentNode = content[i];
             let contentNodeResult = (0, exports.compileAstNode)(contentNode, state);
             if (contentNodeResult) {
@@ -586,7 +585,9 @@ const compileBlockStatement = (node, state) => {
     }
     if (!ast.withoutBraces) {
         // close scope
-        state = (0, exports.writeJsToken)(state, " }");
+        state = (0, exports.addTargetIndent)(state, -1);
+        state = (0, exports.writeTargetIndent)(state);
+        state = (0, exports.writeJsToken)(state, "}");
     }
     return {
         state,
@@ -1054,7 +1055,7 @@ const compileFuncDeclaration = (node, state) => {
     // write )
     state = (0, exports.writeJsToken)(state, `) `);
     if (ast.isLambda) {
-        state = (0, exports.writeJsToken)(state, ' => ');
+        state = (0, exports.writeJsToken)(state, '=> ');
     }
     // write function body
     let bodyResult = (0, exports.compileAstNode)(ast.body, state);
@@ -1448,6 +1449,10 @@ const compilePropertyDeclaration = (node, state) => {
     }
     // write "identifier" : value
     // write identifier
+    let identifier = (0, exports.getIdentifierFromNode)(ast.identifier, state);
+    if (identifier) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, identifier.value, identifier.start);
+    }
     let identResult = (0, exports.compileAstNode)(ast.identifier, state);
     if (identResult) {
         state = identResult.state;
@@ -1555,6 +1560,7 @@ const compileArrayLiteral = (node, state) => {
     // [
     state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `[`);
+    state = (0, exports.addTargetIndent)(state, 1);
     // write items
     let items = ast.value;
     if (items && items.length > 0) {
@@ -1564,6 +1570,7 @@ const compileArrayLiteral = (node, state) => {
                 state = (0, exports.writeJsToken)(state, `, `);
             }
             state = (0, exports.writeEndline)(state);
+            state = (0, exports.writeTargetIndent)(state);
             // write item
             const itemAst = items[i];
             let itemResult = (0, exports.compileAstNode)(itemAst, state);
@@ -1575,6 +1582,7 @@ const compileArrayLiteral = (node, state) => {
     // ]
     state = (0, exports.writeEndline)(state);
     state = (0, exports.writeJsToken)(state, `]`);
+    state = (0, exports.addTargetIndent)(state, -1);
     // result
     return {
         state,
@@ -1590,6 +1598,7 @@ const compileObjectExpression = (node, state) => {
     // {
     state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeJsToken)(state, `{`);
+    state = (0, exports.addTargetIndent)(state, 1);
     // write properties
     let props = ast.properties;
     if (props && props.length > 0) {
@@ -1599,6 +1608,7 @@ const compileObjectExpression = (node, state) => {
                 state = (0, exports.writeJsToken)(state, `, `);
             }
             state = (0, exports.writeEndline)(state);
+            state = (0, exports.writeTargetIndent)(state);
             // write prop
             const propASt = props[i];
             let propResult = (0, exports.compileAstNode)(propASt, state);
@@ -1609,6 +1619,8 @@ const compileObjectExpression = (node, state) => {
     }
     // }
     state = (0, exports.writeEndline)(state);
+    state = (0, exports.addTargetIndent)(state, -1);
+    state = (0, exports.writeTargetIndent)(state);
     state = (0, exports.writeJsToken)(state, `}`);
     // result
     return {
@@ -2144,6 +2156,32 @@ const isNeedToLinkSourcemap = (astNode) => {
     return false;
 };
 exports.isNeedToLinkSourcemap = isNeedToLinkSourcemap;
+const addTargetIndent = (state, amount = 1) => {
+    if (!state || !state.targetState) {
+        return state;
+    }
+    state = (0, exports.setIndent)(state, state.targetState.indent + amount);
+    return state;
+};
+exports.addTargetIndent = addTargetIndent;
+const setIndent = (state, indent) => {
+    if (!state || !state.targetState) {
+        return state;
+    }
+    let targetState = state.targetState;
+    targetState = Object.assign(Object.assign({}, targetState), { indent: indent });
+    state = Object.assign(Object.assign({}, state), { targetState });
+    return state;
+};
+exports.setIndent = setIndent;
+const writeTargetIndent = (state) => {
+    if (!state || !state.targetState || state.targetState.indent === 0) {
+        return state;
+    }
+    state = (0, exports.writeJsToken)(state, "\t".repeat(state.targetState.indent));
+    return state;
+};
+exports.writeTargetIndent = writeTargetIndent;
 const writeJavascript = (state, javascript) => {
     if (!state) {
         return state;

@@ -39,6 +39,7 @@ export interface ITargetState {
     javascript: string[];
     sourceMaps: ISourceMapToken[];
     cursor: ISymbolPosition;
+	indent: number;
 }
 
 export interface ICompilerState {
@@ -202,7 +203,8 @@ export const compileSingleNode = (ast: IAstNode): string => {
         cursor,
         javascript: [],
         sourceMaps: [],
-        fileName: 'nofile'
+        fileName: 'nofile',
+		indent:0
     };
     let state: ICompilerState = {
         sourceState,
@@ -232,11 +234,6 @@ export const compile = (request: ICompileFileRequest): ICompileFileResult => {
     let ast = request.ast;
     let cursor = { ...ast[0].start };
 
-    // let sourceMapGenerator = new SourceMapGenerator({
-    //   file: request.sourceFileName,
-    //   sourceRoot: request.sourceRoot
-    // });
-
     let sourceState: ISourceState = {
         ast,
         astIndex: 0,
@@ -249,7 +246,8 @@ export const compile = (request: ICompileFileRequest): ICompileFileResult => {
         cursor,
         javascript: [],
         sourceMaps: [],
-        fileName: request.targetFileName
+        fileName: request.targetFileName,
+		indent:0
     };
     let state: ICompilerState = {
         sourceState,
@@ -716,14 +714,15 @@ export const compileBlockStatement = (node: IAstNode, state: ICompilerState): IC
         // open scope
         state = writeJsToken(state, "{ ");
         state = writeEndline(state);
+		state = addTargetIndent(state, 1);
     }
 
     // write all the statements
     let content = ast.content;
     if (content && content.length > 0) {
         for (let i = 0; i < content.length; i++) {
-            // write \t
-            state = writeJsToken(state, '\t');
+            // write indent
+			state = writeTargetIndent(state);
 
             const contentNode: IAstNode = content[i];
             let contentNodeResult = compileAstNode(contentNode, state);
@@ -739,7 +738,9 @@ export const compileBlockStatement = (node: IAstNode, state: ICompilerState): IC
 
     if (!ast.withoutBraces) {
         // close scope
-        state = writeJsToken(state, " }");
+		state = addTargetIndent(state, -1);
+		state = writeTargetIndent(state);
+        state = writeJsToken(state, "}");
     }
 
     return {
@@ -1268,7 +1269,7 @@ export const compileFuncDeclaration = (node: IAstNode, state: ICompilerState): I
     state = writeJsToken(state, `) `);
 
 	if (ast.isLambda) {
-		state = writeJsToken(state, ' => ');
+		state = writeJsToken(state, '=> ');
 	}
 
     // write function body
@@ -1716,6 +1717,10 @@ export const compilePropertyDeclaration = (node: IAstNode, state: ICompilerState
     // write "identifier" : value
 
     // write identifier
+	let identifier = getIdentifierFromNode(ast.identifier, state);
+	if (identifier) {
+		state = addSourceMapAtCurrentPlace(state, identifier.value, identifier.start);
+	}
     let identResult = compileAstNode(ast.identifier, state);
     if (identResult) {
         state = identResult.state;
@@ -1827,6 +1832,7 @@ export const compileArrayLiteral = (node: IAstNode, state: ICompilerState): ICom
     // [
     state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
     state = writeJsToken(state, `[`);
+	state = addTargetIndent(state, 1);
     // write items
     let items = ast.value;
     if (items && items.length > 0) {
@@ -1836,6 +1842,7 @@ export const compileArrayLiteral = (node: IAstNode, state: ICompilerState): ICom
                 state = writeJsToken(state, `, `);
             }
             state = writeEndline(state);
+			state = writeTargetIndent(state);
 
             // write item
             const itemAst: IAstNode = items[i];
@@ -1848,6 +1855,8 @@ export const compileArrayLiteral = (node: IAstNode, state: ICompilerState): ICom
     // ]
     state = writeEndline(state);
     state = writeJsToken(state, `]`);
+	state = addTargetIndent(state, -1);
+
 
     // result
     return {
@@ -1864,6 +1873,8 @@ export const compileObjectExpression = (node: IAstNode, state: ICompilerState): 
     // {
     state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
     state = writeJsToken(state, `{`);
+	state = addTargetIndent(state, 1);
+
     // write properties
     let props = ast.properties;
     if (props && props.length > 0) {
@@ -1873,6 +1884,7 @@ export const compileObjectExpression = (node: IAstNode, state: ICompilerState): 
                 state = writeJsToken(state, `, `);
             }
             state = writeEndline(state);
+			state = writeTargetIndent(state);
 
             // write prop
             const propASt: IAstNode = props[i];
@@ -1884,6 +1896,8 @@ export const compileObjectExpression = (node: IAstNode, state: ICompilerState): 
     }
     // }
     state = writeEndline(state);
+	state = addTargetIndent(state, -1);
+	state = writeTargetIndent(state);
     state = writeJsToken(state, `}`);
 
     // result
@@ -2528,6 +2542,44 @@ export const isNeedToLinkSourcemap = (astNode: IAstNode): boolean => {
     }
 
     return false;
+}
+
+export const addTargetIndent = (state: ICompilerState, amount: number = 1): ICompilerState => {
+	if (!state || !state.targetState) {
+		return state;
+	}
+
+	state = setIndent(state, state.targetState.indent + amount);
+
+	return state;
+}
+
+export const setIndent = (state: ICompilerState, indent: number): ICompilerState => {
+	if (!state || !state.targetState) {
+		return state;
+	}
+
+	let targetState = state.targetState;
+	targetState = {
+		...targetState,
+		indent: indent
+	}
+
+	state = {
+		...state,
+		targetState
+	}
+
+	return state;
+}
+
+export const writeTargetIndent = (state: ICompilerState): ICompilerState => {
+	if (!state || !state.targetState || state.targetState.indent === 0) {
+		return state;
+	}
+
+	state = writeJsToken(state, "\t".repeat(state.targetState.indent));
+	return state;
 }
 
 export const writeJavascript = (state: ICompilerState, javascript: string): ICompilerState => {

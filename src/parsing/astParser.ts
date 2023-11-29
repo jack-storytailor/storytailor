@@ -1444,7 +1444,7 @@ export const parseSimpleFunctionDeclaration = (state: IParserState, isMultiline:
 	if (blockScopeResult) {
 		state = blockScopeResult.state;
 		let blockScope = blockScopeResult.result;
-		body = astFactory.program(blockScope.content, blockScope.start, blockScope.end);
+		body = astFactory.blockStatement(blockScope.content, blockScope.start, blockScope.end);
 	}
 
 	// prepare result
@@ -1515,7 +1515,7 @@ export const parseLambdaFunctionDeclaration = (state: IParserState, isMultiline:
 	if (blockScopeResult) {
 		state = blockScopeResult.state;
 		let blockScope = blockScopeResult.result;
-		body = astFactory.program(blockScope.content, blockScope.start, blockScope.end);
+		body = astFactory.blockStatement(blockScope.content, blockScope.start, blockScope.end);
 	}
 
 	// prepare result
