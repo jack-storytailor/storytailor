@@ -60,7 +60,8 @@ import {
   IAstArray, 
   IAstModule, 
   IAstAwaitExpression,
-  IAstYieldExpression
+  IAstYieldExpression,
+  IAstRegexLiteral
 } from "./IAstNode";
 import { AstNodeType } from "./AstNodeType";
 import { astFactory } from "./astFactory";
@@ -139,6 +140,12 @@ const childrenRegistry = {
     return ast.value;
   },
   
+  RegexLiteral: (ast: IAstRegexLiteral): IAstNode[] => {
+	if (!ast) { return undefined; }
+
+	return undefined;
+  },
+
   Boolean: (ast: IAstBoolean): IAstNode[] => {
     if (!ast) { return undefined; }
   
@@ -629,6 +636,22 @@ export const astUtils = {
       
       case AstNodeType.String: {
         let astNode = astFactory.asNode<IAstString>(root, AstNodeType.String);
+        if (!astNode) { return; }
+      
+        let getChildren = childrenRegistry[rootNodeType];
+        if (!getChildren) { return; }
+      
+        let children = getChildren(astNode);
+        if (!children) { return; }
+      
+        children.forEach(child => {
+          if (child) { operation(child); }
+        });
+        break;
+      }
+      
+      case AstNodeType.RegexLiteral: {
+        let astNode = astFactory.asNode<IAstRegexLiteral>(root, AstNodeType.RegexLiteral);
         if (!astNode) { return; }
       
         let getChildren = childrenRegistry[rootNodeType];
@@ -1674,6 +1697,27 @@ export const astUtils = {
       
       case AstNodeType.String: {
         let astNode = astFactory.asNode<IAstString>(root, AstNodeType.String);
+        if (!astNode) { return; }
+      
+        let getChildren = childrenRegistry[rootNodeType];
+        if (!getChildren) { return; }
+      
+        let children = getChildren(astNode);
+        if (!children) { return; }
+      
+        children.forEach(child => { 
+          if (child) {
+            let operation = operations[child.nodeType] || defaultOp;
+            if (!operation) { return; }
+            
+            operation(child);
+          }
+        });
+        break;
+      }
+      
+      case AstNodeType.RegexLiteral: {
+        let astNode = astFactory.asNode<IAstRegexLiteral>(root, AstNodeType.RegexLiteral);
         if (!astNode) { return; }
       
         let getChildren = childrenRegistry[rootNodeType];

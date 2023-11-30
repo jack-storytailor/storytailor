@@ -64,7 +64,8 @@ import {
   IAstTypeofExpression,
   IAstFunctionDeclaration,
   IAstAwaitExpression,
-  IAstYieldExpression
+  IAstYieldExpression,
+  IAstRegexLiteral
 } from "./IAstNode";
 import { KeywordType } from "./KeywordType";
 import { OperatorType } from "./OperatorType";
@@ -186,6 +187,14 @@ export const astFactory = {
     return {
       nodeType: AstNodeType.String,
 	  allowIncludes,
+      value,
+      start,
+      end
+    }
+  },
+  regexLiteral: (value: string, start: ISymbolPosition, end: ISymbolPosition): IAstRegexLiteral => {
+    return {
+      nodeType: AstNodeType.RegexLiteral,
       value,
       start,
       end

@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseStringLiteralItem = exports.parseStringLiteral = exports.parseNumberLiteral = exports.parseLiteral = exports.parseObjectLineTags = exports.parseFunctionParametersScope = exports.parseCodeBlock = exports.parseCommentBlock = exports.parseCommentLine = exports.parseKeywordOfType = exports.parseDebuggerKeyword = exports.parseKeyword = exports.parseUnaryOperatorPostfix = exports.parseUnaryOperatorPrefix = exports.parseBinaryOperator = exports.parseOperatorOfType = exports.parseOperator = exports.parseThrowStatement = exports.parseFinallyStatement = exports.parseCatchStatement = exports.parseTryStatement = exports.parseImportPath = exports.parseImportStatement = exports.parseForOfStatement = exports.parseForInStatement = exports.parseForOfConditions = exports.parseForInConditions = exports.parseConditionBlock = exports.parseForCoditions = exports.parseForStatement = exports.parseWhileStatement = exports.parseDoWhileStatement = exports.parseDefaultCaseStatement = exports.parseCaseStatement = exports.parseSwitchStatement = exports.parseIfStatement = exports.parseContinueStatement = exports.parseTypeofExpression = exports.parseDeleteExpression = exports.parseReturnStatement = exports.parseBreakStatement = exports.parseStatement = exports.parseTextLineStatement = exports.parseDeleteLineExpression = exports.parseObjectLine = exports.parseOuterStatementContent = exports.parseOuterStatement = exports.parseRootStatement = exports.parseModule = exports.defaultParserConfig = void 0;
-exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isEndOfFile = exports.readTokensAsString = exports.calcIndentFromWhitespace = exports.readWhitespace = exports.readString = exports.parseErrorTokens = exports.parseScope = exports.parseToken = exports.parseTag = exports.parsePrototypeExpression = exports.parseYieldExpression = exports.parseAwaitExpression = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseObjectExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseFunctionExpression = exports.parseExpression = exports.parsePropertyDeclaration = exports.parseFunctionDeclaration = exports.parseVariableDeclaration = exports.parseOperandIdentifier = exports.parseContextIdentifier = exports.parseAnyIdentifier = exports.parseRawIdentifier = exports.parseIdentifierScope = exports.parseIdentifier = exports.parseArrayItem = exports.parseArrayLiteral = exports.parseBooleanLiteral = exports.parseStringInclude = void 0;
-exports.prepareTokens = exports.addInvalidTokenSequenceError = exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = void 0;
+exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isEndOfFile = exports.readTokensAsString = exports.calcIndentFromWhitespace = exports.readWhitespace = exports.readString = exports.parseErrorTokens = exports.parseScope = exports.parseToken = exports.parseTag = exports.parsePrototypeExpression = exports.parseYieldExpression = exports.parseAwaitExpression = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseObjectExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseFunctionExpression = exports.parseExpression = exports.parsePropertyDeclaration = exports.parseFunctionDeclaration = exports.parseVariableDeclaration = exports.parseOperandIdentifier = exports.parseContextIdentifier = exports.parseAnyIdentifier = exports.parseRawIdentifier = exports.parseIdentifierScope = exports.parseIdentifier = exports.parseArrayItem = exports.parseArrayLiteral = exports.parseRegexParenScope = exports.parseRegexLiteral = exports.parseBooleanLiteral = exports.parseStringInclude = void 0;
+exports.prepareTokens = exports.addInvalidTokenSequenceError = exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = void 0;
 const CodeTokenType_1 = require("../shared/CodeTokenType");
 const IParsingError_1 = require("../shared/IParsingError");
 const KeywordType_1 = require("../ast/KeywordType");
@@ -2616,6 +2616,11 @@ const parseLiteral = (state) => {
         return undefined;
     }
     // number
+    let regexLiteralResult = (0, exports.parseRegexLiteral)(state);
+    if (regexLiteralResult) {
+        return regexLiteralResult;
+    }
+    // number
     let numberResult = (0, exports.parseNumberLiteral)(state);
     if (numberResult) {
         return numberResult;
@@ -2831,6 +2836,151 @@ const parseBooleanLiteral = (state) => {
     return undefined;
 };
 exports.parseBooleanLiteral = parseBooleanLiteral;
+const parseRegexLiteral = (state) => {
+    var _a, _b, _c, _d;
+    if ((0, exports.isEndOfFile)(state)) {
+        return undefined;
+    }
+    // parse start token '/'
+    if (!(0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Slash])) {
+        return undefined;
+    }
+    const start = (0, exports.getCursorPosition)(state);
+    const firstTokenResult = (0, exports.parseToken)(state);
+    if (!firstTokenResult) {
+        return undefined;
+    }
+    state = firstTokenResult.state;
+    const values = [(_b = (_a = firstTokenResult.result) === null || _a === void 0 ? void 0 : _a.token) === null || _b === void 0 ? void 0 : _b.value];
+    let escapeSymbol = false;
+    let isEndOfRegex = false;
+    let end = (0, exports.getCursorPosition)(state);
+    // parse all the next tokens until braking 
+    while (!(0, exports.isEndOfFile)(state) && !isEndOfRegex) {
+        let nextToken = (0, exports.getToken)(state);
+        if (!nextToken) {
+            continue;
+        }
+        // check the end of regex line
+        if (nextToken.type == CodeTokenType_1.CodeTokenType.Slash) {
+            if (!escapeSymbol) {
+                // end of regex line
+                isEndOfRegex = true;
+            }
+        }
+        if (nextToken.type == CodeTokenType_1.CodeTokenType.Endline) {
+            // we don't have / symbol before endline, so this is not a regex line
+            return undefined;
+        }
+        // check escape symbol
+        if (nextToken.type == CodeTokenType_1.CodeTokenType.Backslash) {
+            escapeSymbol = !escapeSymbol;
+        }
+        // if it's not an escaped ( symbol, we need to add the entire string until ) to regex
+        if (nextToken.type == CodeTokenType_1.CodeTokenType.ParenOpen && !escapeSymbol) {
+            let regexParenScopeResult = (0, exports.parseRegexParenScope)(state);
+            if (regexParenScopeResult) {
+                state = regexParenScopeResult.state;
+                values.push((_c = regexParenScopeResult.result) === null || _c === void 0 ? void 0 : _c.value);
+                nextToken = (_d = regexParenScopeResult.result) === null || _d === void 0 ? void 0 : _d.nextToken;
+                continue;
+            }
+        }
+        else {
+            // add token to result values
+            values.push(nextToken.value);
+            end = nextToken.end;
+        }
+        if (nextToken.type != CodeTokenType_1.CodeTokenType.Backslash) {
+            escapeSymbol = false;
+        }
+        state = (0, exports.skipTokens)(state, 1);
+    }
+    // now parse the regex flags (if any)
+    let flagsToken = (0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Word]);
+    if (flagsToken) {
+        // now this word must contain gimusy letters only
+        let wordValue = flagsToken.value || "";
+        if (!wordValue.match(/^[gimusy]+$/)) {
+            return undefined;
+        }
+        // if we here, that means we have a correct flags
+        values.push(wordValue);
+        end = flagsToken.end;
+        state = (0, exports.skipTokens)(state, 1);
+    }
+    const regexValue = values.join('');
+    const result = astFactory_1.astFactory.regexLiteral(regexValue, start, end);
+    return {
+        state,
+        result
+    };
+};
+exports.parseRegexLiteral = parseRegexLiteral;
+const parseRegexParenScope = (state) => {
+    var _a, _b, _c;
+    if ((0, exports.isEndOfFile)(state)) {
+        return undefined;
+    }
+    // parse first symbol (
+    const firstToken = (0, exports.getToken)(state);
+    if (!firstToken || firstToken.type !== CodeTokenType_1.CodeTokenType.ParenOpen) {
+        return undefined;
+    }
+    state = (0, exports.skipTokens)(state, 1);
+    // now parse everything until ) token. Parse all nested paren scopes
+    const values = [firstToken.value];
+    let escapeSymbol = false;
+    let isEndOfScope = false;
+    let end = (0, exports.getCursorPosition)(state);
+    let nextToken = firstToken;
+    // parse all the next tokens until braking 
+    while (!(0, exports.isEndOfFile)(state) && !isEndOfScope) {
+        nextToken = (0, exports.getToken)(state);
+        if (!nextToken) {
+            continue;
+        }
+        // check the end of regex paren scope
+        if (nextToken.type == CodeTokenType_1.CodeTokenType.ParenClose) {
+            if (!escapeSymbol) {
+                // end of regex scope
+                isEndOfScope = true;
+            }
+        }
+        // check escape symbol
+        if (nextToken.type == CodeTokenType_1.CodeTokenType.Backslash) {
+            escapeSymbol = !escapeSymbol;
+        }
+        // if it's not an escaped ( symbol, we need to add the entire string until ) to regex
+        if (nextToken.type == CodeTokenType_1.CodeTokenType.ParenOpen && !escapeSymbol) {
+            let regexParenScopeResult = (0, exports.parseRegexParenScope)(state);
+            if (regexParenScopeResult) {
+                state = regexParenScopeResult.state;
+                values.push((_a = regexParenScopeResult.result) === null || _a === void 0 ? void 0 : _a.value);
+                end = ((_c = (_b = regexParenScopeResult.result) === null || _b === void 0 ? void 0 : _b.nextToken) === null || _c === void 0 ? void 0 : _c.end) || end;
+                continue;
+            }
+        }
+        else {
+            // add token to result values
+            values.push(nextToken.value);
+            end = nextToken.end;
+        }
+        if (nextToken.type != CodeTokenType_1.CodeTokenType.Backslash) {
+            escapeSymbol = false;
+        }
+        state = (0, exports.skipTokens)(state, 1);
+    }
+    let scopeValue = values.join('');
+    return {
+        state,
+        result: {
+            value: scopeValue,
+            nextToken
+        }
+    };
+};
+exports.parseRegexParenScope = parseRegexParenScope;
 const parseArrayLiteral = (state) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;

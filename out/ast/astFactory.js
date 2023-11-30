@@ -118,6 +118,14 @@ exports.astFactory = {
             end
         };
     },
+    regexLiteral: (value, start, end) => {
+        return {
+            nodeType: AstNodeType_1.AstNodeType.RegexLiteral,
+            value,
+            start,
+            end
+        };
+    },
     booleanLiteral: (value, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.Boolean,

@@ -17,6 +17,7 @@ var AstNodeType;
     // literals
     AstNodeType["Number"] = "Number";
     AstNodeType["String"] = "String";
+    AstNodeType["RegexLiteral"] = "RegexLiteral";
     AstNodeType["Boolean"] = "Boolean";
     AstNodeType["Array"] = "Array";
     // identifiers

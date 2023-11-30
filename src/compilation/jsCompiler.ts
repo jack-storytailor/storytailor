@@ -1,4 +1,4 @@
-import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstForOfStatement, IAstAwaitExpression, IAstYieldExpression } from "../ast/IAstNode";
+import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstForOfStatement, IAstAwaitExpression, IAstYieldExpression, IAstRegexLiteral } from "../ast/IAstNode";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { SourceMapGenerator } from 'source-map';
 import { AstNodeType } from "../ast/AstNodeType";
@@ -444,6 +444,12 @@ export const compileAstNode = (ast: IAstNode, state: ICompilerState): ICompileRe
     let booleanResult = compileBoolean(ast, state);
     if (booleanResult) {
         return booleanResult;
+    }
+
+    // regex literal
+    let regexLiteralResult = compileRegexLiteral(ast, state);
+    if (regexLiteralResult) {
+        return regexLiteralResult;
     }
 
     // identifier
@@ -975,6 +981,19 @@ export const compileBoolean = (node: IAstNode, state: ICompilerState): ICompileR
 
     state = addSourceMapAtCurrentPlace(state, toStringSafe(ast.value), ast.start);
     state = writeJsToken(state, ast.value.toString());
+    return {
+        state,
+        result: ast
+    }
+}
+export const compileRegexLiteral = (node: IAstNode, state: ICompilerState): ICompileResult<IAstRegexLiteral> => {
+    let ast = astFactory.asNode<IAstRegexLiteral>(node, AstNodeType.RegexLiteral);
+    if (!ast || !state) {
+        return undefined;
+    }
+
+    state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
+    state = writeJsToken(state, ast.value);
     return {
         state,
         result: ast
@@ -2799,7 +2818,7 @@ export const writeJsToken = (state: ICompilerState, jsToken: string): ICompilerS
     let javascript = targetState.javascript;
 
     // check is it endline
-    if (jsToken.match(/\r?\n/)) {
+    if (jsToken.match(/^\r?\n$/)) {
         // endline
 
         // cursor

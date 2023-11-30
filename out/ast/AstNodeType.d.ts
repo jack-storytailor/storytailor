@@ -11,6 +11,7 @@ export declare enum AstNodeType {
     CommentBlock = "CommentBlock",
     Number = "Number",
     String = "String",
+    RegexLiteral = "RegexLiteral",
     Boolean = "Boolean",
     Array = "Array",
     Identifier = "Identifier",

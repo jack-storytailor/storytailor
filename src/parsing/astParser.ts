@@ -6,7 +6,7 @@ import { ParsingErrorType, IDiagnostic } from "../shared/IParsingError";
 import { KeywordType } from "../ast/KeywordType";
 import { VariableDeclarationKind } from "../ast/VariableDeclarationKind";
 import { OperatorType } from "../ast/OperatorType";
-import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstStringIncludeStatement, IAstBoolean, IAstArray, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstVariableDeclaration, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression } from "../ast/IAstNode";
+import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstStringIncludeStatement, IAstBoolean, IAstArray, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstVariableDeclaration, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstRegexLiteral } from "../ast/IAstNode";
 import { astFactory } from "../ast/astFactory";
 import { AstNodeType } from '../ast/AstNodeType';
 import { ISymbol } from "../ast/ISymbol";
@@ -3287,6 +3287,12 @@ export const parseLiteral = (state: IParserState): IParseResult<IAstNode> => {
 	}
 
 	// number
+	let regexLiteralResult = parseRegexLiteral(state);
+	if (regexLiteralResult) {
+		return regexLiteralResult;
+	}
+
+	// number
 	let numberResult = parseNumberLiteral(state);
 	if (numberResult) {
 		return numberResult;
@@ -3551,6 +3557,173 @@ export const parseBooleanLiteral = (state: IParserState): IParseResult<IAstBoole
 	}
 
 	return undefined;
+}
+export const parseRegexLiteral = (state: IParserState): IParseResult<IAstRegexLiteral> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	// parse start token '/'
+	if (!getTokenOfType(state, [CodeTokenType.Slash])) {
+		return undefined;
+	}
+
+	const start = getCursorPosition(state);
+
+	const firstTokenResult = parseToken(state);
+	if (!firstTokenResult) {
+		return undefined;
+	}
+	state = firstTokenResult.state;
+
+	const values = [firstTokenResult.result?.token?.value];
+	let escapeSymbol = false;
+	let isEndOfRegex = false;
+	let end = getCursorPosition(state);
+
+	// parse all the next tokens until braking 
+	while (!isEndOfFile(state) && !isEndOfRegex) {
+		let nextToken = getToken(state);
+		if (!nextToken) {
+			continue;
+		}
+
+		// check the end of regex line
+		if (nextToken.type == CodeTokenType.Slash) {
+			if (!escapeSymbol) {
+				// end of regex line
+				isEndOfRegex = true;
+			}
+		}
+
+		if (nextToken.type == CodeTokenType.Endline) {
+			// we don't have / symbol before endline, so this is not a regex line
+			return undefined;
+		}
+
+		// check escape symbol
+		if (nextToken.type == CodeTokenType.Backslash) {
+			escapeSymbol = !escapeSymbol;
+		}
+
+		// if it's not an escaped ( symbol, we need to add the entire string until ) to regex
+		if (nextToken.type == CodeTokenType.ParenOpen && !escapeSymbol) {
+			let regexParenScopeResult = parseRegexParenScope(state);
+			if (regexParenScopeResult) {
+				state = regexParenScopeResult.state;
+				values.push(regexParenScopeResult.result?.value);
+				nextToken = regexParenScopeResult.result?.nextToken;
+				continue;
+			}
+		}
+		else {
+			// add token to result values
+			values.push(nextToken.value);
+			end = nextToken.end;
+		}
+
+		if (nextToken.type != CodeTokenType.Backslash) {
+			escapeSymbol = false;
+		}
+
+		state = skipTokens(state, 1);
+	}
+	
+	// now parse the regex flags (if any)
+	let flagsToken = getTokenOfType(state, [CodeTokenType.Word]);
+	if (flagsToken) {
+		// now this word must contain gimusy letters only
+		let wordValue = flagsToken.value || "";
+		if (!wordValue.match(/^[gimusy]+$/)) {
+			return undefined;
+		}
+
+		// if we here, that means we have a correct flags
+		values.push(wordValue);
+		end = flagsToken.end;
+		state = skipTokens(state, 1);
+	}
+
+	const regexValue = values.join('');
+	const result = astFactory.regexLiteral(regexValue, start, end);
+
+	return {
+		state,
+		result
+	}
+}
+export const parseRegexParenScope = (state: IParserState): IParseResult<{value: string, nextToken: ICodeToken}> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	// parse first symbol (
+	const firstToken = getToken(state);
+	if (!firstToken || firstToken.type !== CodeTokenType.ParenOpen) {
+		return undefined;
+	}
+
+	state = skipTokens(state, 1);
+
+	// now parse everything until ) token. Parse all nested paren scopes
+
+	const values = [firstToken.value];
+	let escapeSymbol = false;
+	let isEndOfScope = false;
+	let end = getCursorPosition(state);
+	let nextToken = firstToken;
+
+	// parse all the next tokens until braking 
+	while (!isEndOfFile(state) && !isEndOfScope) {
+		nextToken = getToken(state);
+		if (!nextToken) {
+			continue;
+		}
+
+		// check the end of regex paren scope
+		if (nextToken.type == CodeTokenType.ParenClose) {
+			if (!escapeSymbol) {
+				// end of regex scope
+				isEndOfScope = true;
+			}
+		}
+
+		// check escape symbol
+		if (nextToken.type == CodeTokenType.Backslash) {
+			escapeSymbol = !escapeSymbol;
+		}
+
+		// if it's not an escaped ( symbol, we need to add the entire string until ) to regex
+		if (nextToken.type == CodeTokenType.ParenOpen && !escapeSymbol) {
+			let regexParenScopeResult = parseRegexParenScope(state);
+			if (regexParenScopeResult) {
+				state = regexParenScopeResult.state;
+				values.push(regexParenScopeResult.result?.value);
+				end = regexParenScopeResult.result?.nextToken?.end || end;
+				continue;
+			}
+		}
+		else {
+			// add token to result values
+			values.push(nextToken.value);
+			end = nextToken.end;
+		}
+
+		if (nextToken.type != CodeTokenType.Backslash) {
+			escapeSymbol = false;
+		}
+
+		state = skipTokens(state, 1);
+	}
+
+	let scopeValue = values.join('');
+	return {
+		state, 
+		result: {
+			value: scopeValue,
+			nextToken
+		}
+	}
 }
 export const parseArrayLiteral = (state: IParserState): IParseResult<IAstArray> => {
 	if (isEndOfFile(state)) {

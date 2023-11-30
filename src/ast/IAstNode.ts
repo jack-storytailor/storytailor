@@ -53,6 +53,9 @@ export interface IAstString extends IAstNode {
 	allowIncludes: boolean;
 	value: IAstNode[];
 }
+export interface IAstRegexLiteral extends IAstNode {
+	value: string;
+}
 export interface IAstBoolean extends IAstNode {
 	value: boolean;
 }

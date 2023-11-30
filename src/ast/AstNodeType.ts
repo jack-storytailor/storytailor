@@ -13,6 +13,7 @@ export enum AstNodeType {
   // literals
   Number = "Number",
   String = "String",
+  RegexLiteral = "RegexLiteral",
   Boolean = "Boolean",
   Array = "Array",
   // identifiers
