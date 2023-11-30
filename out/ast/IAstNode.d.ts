@@ -67,8 +67,14 @@ export interface IAstContextIdentifier extends IAstNode {
 export interface IAstIdentifierScope extends IAstNode {
     value: IAstNode[];
 }
-export interface IAstFunctionDeclaration extends IAstNode {
+export interface IAstFunctionExpression extends IAstNode {
     isLambda: boolean;
+    isAsync: boolean;
+    args: IAstNode[];
+    body: IAstNode;
+}
+export interface IAstFunctionDeclaration extends IAstNode {
+    identifier: IAstNode;
     isAsync: boolean;
     args: IAstNode[];
     body: IAstNode;

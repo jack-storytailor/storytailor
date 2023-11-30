@@ -51,6 +51,7 @@ export declare enum AstNodeType {
     NewExpression = "NewExpression",
     DeleteExpression = "DeleteExpression",
     TypeofExpression = "TypeofExpression",
+    FunctionExpression = "FunctionExpression",
     OuterStatement = "OuterStatement",
     TextLineStatement = "TextLineStatement",
     ObjectLineStatement = "ObjectLineStatement",

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.compileDebuggerKeyword = exports.compileFinallyStatement = exports.compileCatchStatement = exports.compileTryStatement = exports.compileIndexerExpression = exports.compileConditionalExpression = exports.compileKeyword = exports.compileUpdateExpression = exports.compileObjectExpression = exports.compileArrayLiteral = exports.compileForOfStatement = exports.compileForInStatement = exports.compileForStatement = exports.compilePropertyDeclaration = exports.compileImportStatement = exports.compileParenExpression = exports.compileCaseStatement = exports.compileSwitchStatement = exports.compileDoWhileStatement = exports.compileWhileStatement = exports.compileIfStatement = exports.compileContinueStatement = exports.compileBreakStatement = exports.compileTypeofExpression = exports.compileDeleteExpression = exports.compileReturnStatement = exports.compileProgram = exports.compileFuncDeclaration = exports.compileVarDeclaration = exports.compileCallExpression = exports.compileStringInclude = exports.compileMemberExpression = exports.compileBinaryExpression = exports.compileContextIdentifier = exports.compileRawIdentifier = exports.compileIdentifierScope = exports.compileIdentifier = exports.compileBoolean = exports.compileNumber = exports.compileTextLine = exports.compileStatement = exports.compileDeleteLine = exports.compileObjectLine = exports.compileBlockStatement = exports.compileOuterStatement = exports.compileAstModule = exports.compileAstNode = exports.compile = exports.compileSingleNode = exports.compilerConfig = void 0;
-exports.toStringSafe = exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.writeTargetIndent = exports.setIndent = exports.addTargetIndent = exports.isNeedToLinkSourcemap = exports.addSourceMapAtCurrentPlace = exports.addSourceMap = exports.addSourceMaps = exports.getIdentifierFullName = exports.getIdentifierFromNode = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = exports.compileNewExpression = exports.compileThrowStatement = void 0;
+exports.compileFinallyStatement = exports.compileCatchStatement = exports.compileTryStatement = exports.compileIndexerExpression = exports.compileConditionalExpression = exports.compileKeyword = exports.compileUpdateExpression = exports.compileObjectExpression = exports.compileArrayLiteral = exports.compileForOfStatement = exports.compileForInStatement = exports.compileForStatement = exports.compilePropertyDeclaration = exports.compileImportStatement = exports.compileParenExpression = exports.compileCaseStatement = exports.compileSwitchStatement = exports.compileDoWhileStatement = exports.compileWhileStatement = exports.compileIfStatement = exports.compileContinueStatement = exports.compileBreakStatement = exports.compileTypeofExpression = exports.compileDeleteExpression = exports.compileReturnStatement = exports.compileProgram = exports.compileFuncDeclaration = exports.compileFuncExpression = exports.compileVarDeclaration = exports.compileCallExpression = exports.compileStringInclude = exports.compileMemberExpression = exports.compileBinaryExpression = exports.compileContextIdentifier = exports.compileRawIdentifier = exports.compileIdentifierScope = exports.compileIdentifier = exports.compileBoolean = exports.compileNumber = exports.compileTextLine = exports.compileStatement = exports.compileDeleteLine = exports.compileObjectLine = exports.compileBlockStatement = exports.compileOuterStatement = exports.compileAstModule = exports.compileAstNode = exports.compile = exports.compileSingleNode = exports.compilerConfig = void 0;
+exports.toStringSafe = exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.writeTargetIndent = exports.setIndent = exports.addTargetIndent = exports.isNeedToLinkSourcemap = exports.addSourceMapAtCurrentPlace = exports.addSourceMap = exports.addSourceMaps = exports.getIdentifierFullName = exports.getIdentifierFromNode = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = exports.compileNewExpression = exports.compileThrowStatement = exports.compileDebuggerKeyword = void 0;
 const source_map_1 = require("source-map");
 const AstNodeType_1 = require("../ast/AstNodeType");
 const astFactory_1 = require("../ast/astFactory");
@@ -1039,8 +1039,8 @@ const compileVarDeclaration = (node, state) => {
     };
 };
 exports.compileVarDeclaration = compileVarDeclaration;
-const compileFuncDeclaration = (node, state) => {
-    let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.FunctionDeclaration);
+const compileFuncExpression = (node, state) => {
+    let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.FunctionExpression);
     if (!ast || !state) {
         return undefined;
     }
@@ -1073,6 +1073,51 @@ const compileFuncDeclaration = (node, state) => {
     if (ast.isLambda) {
         state = (0, exports.writeJsToken)(state, '=> ');
     }
+    // write function body
+    let bodyResult = (0, exports.compileAstNode)(ast.body, state);
+    if (bodyResult) {
+        state = bodyResult.state;
+    }
+    // result
+    return {
+        state,
+        result: ast
+    };
+};
+exports.compileFuncExpression = compileFuncExpression;
+const compileFuncDeclaration = (node, state) => {
+    let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.FunctionDeclaration);
+    if (!ast || !state) {
+        return undefined;
+    }
+    // write function (
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
+    if (ast.isAsync) {
+        state = (0, exports.writeJsToken)(state, 'async ');
+    }
+    state = (0, exports.writeJsToken)(state, `function `);
+    const identifierResult = (0, exports.compileAstNode)(ast.identifier, state);
+    if (identifierResult) {
+        state = identifierResult.state;
+    }
+    state = (0, exports.writeJsToken)(state, '(');
+    // write all the params
+    let params = ast.args;
+    if (params && params.length > 0) {
+        for (let i = 0; i < params.length; i++) {
+            // if it's not first item, add separator before
+            if (i > 0) {
+                state = (0, exports.writeJsToken)(state, `, `);
+            }
+            const param = params[i];
+            let paramResult = (0, exports.compileAstNode)(param, state);
+            if (paramResult) {
+                state = paramResult.state;
+            }
+        }
+    }
+    // write )
+    state = (0, exports.writeJsToken)(state, `) `);
     // write function body
     let bodyResult = (0, exports.compileAstNode)(ast.body, state);
     if (bodyResult) {

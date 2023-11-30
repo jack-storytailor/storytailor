@@ -13,6 +13,7 @@ import {
   IAstIdentifierScope, 
   IAstRawIdentifier, 
   IAstContextIdentifier, 
+  IAstFunctionExpression, 
   IAstFunctionDeclaration, 
   IAstVariableDeclaration, 
   IAstPropertyDeclaration, 
@@ -172,10 +173,16 @@ const childrenRegistry = {
     return [ast.value];
   },
   
-  FunctionDeclaration: (ast: IAstFunctionDeclaration): IAstNode[] => {
+  FunctionExpression: (ast: IAstFunctionExpression): IAstNode[] => {
     if (!ast) { return undefined; }
   
     return [...ast.args, ast.body];
+  },
+  
+  FunctionDeclaration: (ast: IAstFunctionDeclaration): IAstNode[] => {
+    if (!ast) { return undefined; }
+  
+    return [ast.identifier, ...ast.args, ast.body];
   },
   
   VariableDeclaration: (ast: IAstVariableDeclaration): IAstNode[] => {
@@ -704,6 +711,22 @@ export const astUtils = {
       
       case AstNodeType.ContextIdentifier: {
         let astNode = astFactory.asNode<IAstContextIdentifier>(root, AstNodeType.ContextIdentifier);
+        if (!astNode) { return; }
+      
+        let getChildren = childrenRegistry[rootNodeType];
+        if (!getChildren) { return; }
+      
+        let children = getChildren(astNode);
+        if (!children) { return; }
+      
+        children.forEach(child => {
+          if (child) { operation(child); }
+        });
+        break;
+      }
+      
+      case AstNodeType.FunctionExpression: {
+        let astNode = astFactory.asNode<IAstFunctionExpression>(root, AstNodeType.FunctionExpression);
         if (!astNode) { return; }
       
         let getChildren = childrenRegistry[rootNodeType];
@@ -1731,6 +1754,27 @@ export const astUtils = {
       
       case AstNodeType.ContextIdentifier: {
         let astNode = astFactory.asNode<IAstContextIdentifier>(root, AstNodeType.ContextIdentifier);
+        if (!astNode) { return; }
+      
+        let getChildren = childrenRegistry[rootNodeType];
+        if (!getChildren) { return; }
+      
+        let children = getChildren(astNode);
+        if (!children) { return; }
+      
+        children.forEach(child => { 
+          if (child) {
+            let operation = operations[child.nodeType] || defaultOp;
+            if (!operation) { return; }
+            
+            operation(child);
+          }
+        });
+        break;
+      }
+      
+      case AstNodeType.FunctionExpression: {
+        let astNode = astFactory.asNode<IAstFunctionExpression>(root, AstNodeType.FunctionExpression);
         if (!astNode) { return; }
       
         let getChildren = childrenRegistry[rootNodeType];

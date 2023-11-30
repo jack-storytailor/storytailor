@@ -1,4 +1,4 @@
-import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstForOfStatement } from "../ast/IAstNode";
+import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstForOfStatement } from "../ast/IAstNode";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { SourceMapGenerator } from 'source-map';
 import { AstNodeType } from "../ast/AstNodeType";
@@ -1247,8 +1247,8 @@ export const compileVarDeclaration = (node: IAstNode, state: ICompilerState): IC
         result: ast
     }
 }
-export const compileFuncDeclaration = (node: IAstNode, state: ICompilerState): ICompileResult<IAstFunctionDeclaration> => {
-    let ast = astFactory.asNode<IAstFunctionDeclaration>(node, AstNodeType.FunctionDeclaration);
+export const compileFuncExpression = (node: IAstNode, state: ICompilerState): ICompileResult<IAstFunctionExpression> => {
+    let ast = astFactory.asNode<IAstFunctionExpression>(node, AstNodeType.FunctionExpression);
     if (!ast || !state) {
         return undefined;
     }
@@ -1289,6 +1289,60 @@ export const compileFuncDeclaration = (node: IAstNode, state: ICompilerState): I
 	if (ast.isLambda) {
 		state = writeJsToken(state, '=> ');
 	}
+
+    // write function body
+    let bodyResult = compileAstNode(ast.body, state);
+    if (bodyResult) {
+        state = bodyResult.state;
+    }
+
+    // result
+    return {
+        state,
+        result: ast
+    }
+}
+export const compileFuncDeclaration = (node: IAstNode, state: ICompilerState): ICompileResult<IAstFunctionDeclaration> => {
+    let ast = astFactory.asNode<IAstFunctionDeclaration>(node, AstNodeType.FunctionDeclaration);
+    if (!ast || !state) {
+        return undefined;
+    }
+
+    // write function (
+    state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
+
+	if (ast.isAsync) {
+		state = writeJsToken(state, 'async ');
+	}
+
+	state = writeJsToken(state, `function `);
+
+	const identifierResult = compileAstNode(ast.identifier, state);
+	if (identifierResult) {
+		state = identifierResult.state;
+	}
+
+	state = writeJsToken(state, '(');
+
+    // write all the params
+    let params = ast.args;
+    if (params && params.length > 0) {
+        for (let i = 0; i < params.length; i++) {
+            // if it's not first item, add separator before
+            if (i > 0) {
+                state = writeJsToken(state, `, `);
+            }
+
+            const param = params[i];
+            let paramResult = compileAstNode(param, state);
+            if (paramResult) {
+                state = paramResult.state;
+            }
+        }
+    }
+
+    // write )
+    state = writeJsToken(state, `) `);
 
     // write function body
     let bodyResult = compileAstNode(ast.body, state);

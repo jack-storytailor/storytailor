@@ -18,7 +18,7 @@ import {
   IAstIdentifier, 
   IAstRawIdentifier, 
   IAstIdentifierScope, 
-  IAstFunctionDeclaration, 
+  IAstFunctionExpression, 
   IAstVariableDeclaration, 
   IAstPropertyDeclaration, 
   IAstStatement, 
@@ -61,7 +61,8 @@ import {
   IAstDeleteLineExpression, 
   IAstContextIdentifier, 
   IAstTag, 
-  IAstTypeofExpression
+  IAstTypeofExpression,
+  IAstFunctionDeclaration
 } from "./IAstNode";
 import { KeywordType } from "./KeywordType";
 import { OperatorType } from "./OperatorType";
@@ -240,15 +241,26 @@ export const astFactory = {
   },
 
   // declarations
-  functionDeclaration: (args: IAstNode[], body: IAstNode, isLambda: boolean, isAsync: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstFunctionDeclaration => {
+  functionExpression: (args: IAstNode[], body: IAstNode, isLambda: boolean, isAsync: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstFunctionExpression => {
     return {
-      nodeType: AstNodeType.FunctionDeclaration,
+      nodeType: AstNodeType.FunctionExpression,
       start, 
       end,
       args,
       body,
 	  isLambda,
 	  isAsync
+    }
+  },  
+  functionDeclaration: (identifier: IAstNode, args: IAstNode[], body: IAstNode, isAsync: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstFunctionDeclaration => {
+    return {
+      nodeType: AstNodeType.FunctionDeclaration,
+      start, 
+      end,
+      args,
+      body,
+	  isAsync,
+	  identifier
     }
   },  
   variableDeclaration: (identifier: IAstNode, kind: VariableDeclarationKind, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstVariableDeclaration => {

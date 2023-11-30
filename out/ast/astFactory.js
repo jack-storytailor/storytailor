@@ -168,15 +168,26 @@ exports.astFactory = {
         };
     },
     // declarations
-    functionDeclaration: (args, body, isLambda, isAsync, start, end) => {
+    functionExpression: (args, body, isLambda, isAsync, start, end) => {
         return {
-            nodeType: AstNodeType_1.AstNodeType.FunctionDeclaration,
+            nodeType: AstNodeType_1.AstNodeType.FunctionExpression,
             start,
             end,
             args,
             body,
             isLambda,
             isAsync
+        };
+    },
+    functionDeclaration: (identifier, args, body, isAsync, start, end) => {
+        return {
+            nodeType: AstNodeType_1.AstNodeType.FunctionDeclaration,
+            start,
+            end,
+            args,
+            body,
+            isAsync,
+            identifier
         };
     },
     variableDeclaration: (identifier, kind, value, start, end) => {

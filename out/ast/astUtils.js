@@ -112,11 +112,17 @@ const childrenRegistry = {
         }
         return [ast.value];
     },
-    FunctionDeclaration: (ast) => {
+    FunctionExpression: (ast) => {
         if (!ast) {
             return undefined;
         }
         return [...ast.args, ast.body];
+    },
+    FunctionDeclaration: (ast) => {
+        if (!ast) {
+            return undefined;
+        }
+        return [ast.identifier, ...ast.args, ast.body];
     },
     VariableDeclaration: (ast) => {
         if (!ast) {
@@ -708,6 +714,26 @@ exports.astUtils = {
             }
             case AstNodeType_1.AstNodeType.ContextIdentifier: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ContextIdentifier);
+                if (!astNode) {
+                    return;
+                }
+                let getChildren = childrenRegistry[rootNodeType];
+                if (!getChildren) {
+                    return;
+                }
+                let children = getChildren(astNode);
+                if (!children) {
+                    return;
+                }
+                children.forEach(child => {
+                    if (child) {
+                        operation(child);
+                    }
+                });
+                break;
+            }
+            case AstNodeType_1.AstNodeType.FunctionExpression: {
+                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.FunctionExpression);
                 if (!astNode) {
                     return;
                 }
@@ -1945,6 +1971,30 @@ exports.astUtils = {
             }
             case AstNodeType_1.AstNodeType.ContextIdentifier: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ContextIdentifier);
+                if (!astNode) {
+                    return;
+                }
+                let getChildren = childrenRegistry[rootNodeType];
+                if (!getChildren) {
+                    return;
+                }
+                let children = getChildren(astNode);
+                if (!children) {
+                    return;
+                }
+                children.forEach(child => {
+                    if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
+                        operation(child);
+                    }
+                });
+                break;
+            }
+            case AstNodeType_1.AstNodeType.FunctionExpression: {
+                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.FunctionExpression);
                 if (!astNode) {
                     return;
                 }
