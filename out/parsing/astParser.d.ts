@@ -95,7 +95,8 @@ export declare const parseRegexParenScope: (state: IParserState) => IParseResult
     value: string;
     nextToken: ICodeToken;
 }>;
-export declare const parseArrayLiteral: (state: IParserState) => IParseResult<IAstArray>;
+export declare const parseArrayLiteral: (state: IParserState, allowEmptyItems: boolean) => IParseResult<IAstArray>;
+export declare const parseArrayElement: (state: IParserState, isMultiline: any, allowEmptyItems: boolean) => IParseResult<IAstNode>;
 export declare const parseArrayItem: (state: IParserState) => IParseResult<IAstNode>;
 export declare const parseIdentifier: (state: IParserState) => IParseResult<IAstIdentifier>;
 export declare const parseIdentifierScope: (state: IParserState) => IParseResult<IAstIdentifierScope>;
