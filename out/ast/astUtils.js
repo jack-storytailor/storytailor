@@ -136,6 +136,12 @@ const childrenRegistry = {
         }
         return [ast.identifier, ast.value];
     },
+    VariableListDeclaration: (ast) => {
+        if (!ast) {
+            return undefined;
+        }
+        return [...ast.identifiers, ast.value];
+    },
     PropertyDeclaration: (ast) => {
         if (!ast) {
             return undefined;
@@ -812,6 +818,26 @@ exports.astUtils = {
             }
             case AstNodeType_1.AstNodeType.VariableDeclaration: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.VariableDeclaration);
+                if (!astNode) {
+                    return;
+                }
+                let getChildren = childrenRegistry[rootNodeType];
+                if (!getChildren) {
+                    return;
+                }
+                let children = getChildren(astNode);
+                if (!children) {
+                    return;
+                }
+                children.forEach(child => {
+                    if (child) {
+                        operation(child);
+                    }
+                });
+                break;
+            }
+            case AstNodeType_1.AstNodeType.VariableListDeclaration: {
+                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.VariableListDeclaration);
                 if (!astNode) {
                     return;
                 }
@@ -2145,6 +2171,30 @@ exports.astUtils = {
             }
             case AstNodeType_1.AstNodeType.VariableDeclaration: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.VariableDeclaration);
+                if (!astNode) {
+                    return;
+                }
+                let getChildren = childrenRegistry[rootNodeType];
+                if (!getChildren) {
+                    return;
+                }
+                let children = getChildren(astNode);
+                if (!children) {
+                    return;
+                }
+                children.forEach(child => {
+                    if (child) {
+                        let operation = operations[child.nodeType] || defaultOp;
+                        if (!operation) {
+                            return;
+                        }
+                        operation(child);
+                    }
+                });
+                break;
+            }
+            case AstNodeType_1.AstNodeType.VariableListDeclaration: {
+                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.VariableListDeclaration);
                 if (!astNode) {
                     return;
                 }

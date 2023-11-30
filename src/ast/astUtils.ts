@@ -61,7 +61,8 @@ import {
   IAstModule, 
   IAstAwaitExpression,
   IAstYieldExpression,
-  IAstRegexLiteral
+  IAstRegexLiteral,
+  IAstVariableListDeclaration
 } from "./IAstNode";
 import { AstNodeType } from "./AstNodeType";
 import { astFactory } from "./astFactory";
@@ -198,6 +199,12 @@ const childrenRegistry = {
     if (!ast) { return undefined; }
   
     return [ast.identifier, ast.value];
+  },
+  
+  VariableListDeclaration: (ast: IAstVariableListDeclaration): IAstNode[] => {
+    if (!ast) { return undefined; }
+  
+    return [...ast.identifiers, ast.value];
   },
   
   PropertyDeclaration: (ast: IAstPropertyDeclaration): IAstNode[] => {
@@ -796,6 +803,22 @@ export const astUtils = {
       
       case AstNodeType.VariableDeclaration: {
         let astNode = astFactory.asNode<IAstVariableDeclaration>(root, AstNodeType.VariableDeclaration);
+        if (!astNode) { return; }
+      
+        let getChildren = childrenRegistry[rootNodeType];
+        if (!getChildren) { return; }
+      
+        let children = getChildren(astNode);
+        if (!children) { return; }
+      
+        children.forEach(child => {
+          if (child) { operation(child); }
+        });
+        break;
+      }
+      
+      case AstNodeType.VariableListDeclaration: {
+        let astNode = astFactory.asNode<IAstVariableListDeclaration>(root, AstNodeType.VariableListDeclaration);
         if (!astNode) { return; }
       
         let getChildren = childrenRegistry[rootNodeType];
@@ -1907,6 +1930,27 @@ export const astUtils = {
       
       case AstNodeType.VariableDeclaration: {
         let astNode = astFactory.asNode<IAstVariableDeclaration>(root, AstNodeType.VariableDeclaration);
+        if (!astNode) { return; }
+      
+        let getChildren = childrenRegistry[rootNodeType];
+        if (!getChildren) { return; }
+      
+        let children = getChildren(astNode);
+        if (!children) { return; }
+      
+        children.forEach(child => { 
+          if (child) {
+            let operation = operations[child.nodeType] || defaultOp;
+            if (!operation) { return; }
+            
+            operation(child);
+          }
+        });
+        break;
+      }
+      
+      case AstNodeType.VariableListDeclaration: {
+        let astNode = astFactory.asNode<IAstVariableListDeclaration>(root, AstNodeType.VariableListDeclaration);
         if (!astNode) { return; }
       
         let getChildren = childrenRegistry[rootNodeType];

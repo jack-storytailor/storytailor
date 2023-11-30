@@ -28,6 +28,7 @@ var AstNodeType;
     // declarations
     AstNodeType["FunctionDeclaration"] = "FunctionDeclaration";
     AstNodeType["VariableDeclaration"] = "VariableDeclaration";
+    AstNodeType["VariableListDeclaration"] = "VariableListDeclaration";
     AstNodeType["PropertyDeclaration"] = "PropertyDeclaration";
     // statements
     AstNodeType["Statement"] = "Statement";

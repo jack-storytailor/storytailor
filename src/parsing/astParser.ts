@@ -6,7 +6,7 @@ import { ParsingErrorType, IDiagnostic } from "../shared/IParsingError";
 import { KeywordType } from "../ast/KeywordType";
 import { VariableDeclarationKind } from "../ast/VariableDeclarationKind";
 import { OperatorType } from "../ast/OperatorType";
-import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstStringIncludeStatement, IAstBoolean, IAstArray, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstVariableDeclaration, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstRegexLiteral } from "../ast/IAstNode";
+import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstStringIncludeStatement, IAstBoolean, IAstArray, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstVariableDeclaration, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstRegexLiteral, IAstVariableListDeclaration } from "../ast/IAstNode";
 import { astFactory } from "../ast/astFactory";
 import { AstNodeType } from '../ast/AstNodeType';
 import { ISymbol } from "../ast/ISymbol";
@@ -456,6 +456,12 @@ export const parseTextLineStatement = (state: IParserState): IParseResult<IAstTe
 export const parseStatement = (state: IParserState, isMultiline: boolean): IParseResult<IAstNode> => {
 	if (isEndOfFile(state)) {
 		return undefined;
+	}
+
+	// var list declaration
+	let varListDeclarResult = parseVariableListDeclaration(state, isMultiline);
+	if (varListDeclarResult) {
+		return varListDeclarResult;
 	}
 
 	// var declaration
@@ -4108,6 +4114,91 @@ export const parseVariableDeclaration = (state: IParserState, isMultiline: boole
 	// prepare result
 	let end = getCursorPosition(state);
 	let result = astFactory.variableDeclaration(identifier, kind, initValue, start, end);
+	return {
+		state,
+		result
+	}
+}
+export const parseVariableListDeclaration = (state: IParserState, isMultiline: boolean): IParseResult<IAstVariableListDeclaration> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	// save start position
+	let start = getCursorPosition(state);
+
+	// var|let|const Identifier = Expression
+
+	// parse keyword
+	let keywordResult = parseKeywordOfType(state, [KeywordType.Var, KeywordType.Let, KeywordType.Const, KeywordType.Class]);
+	if (!keywordResult) {
+		return undefined;
+	}
+	let keyword = keywordResult.result;
+	state = keywordResult.state;
+
+	// read declaration kind
+	let kind: VariableDeclarationKind = undefined;
+	switch (keyword.keywordType) {
+		case KeywordType.Var: {
+			kind = VariableDeclarationKind.Var;
+		} break;
+		case KeywordType.Const: {
+			kind = VariableDeclarationKind.Const;
+		} break;
+		case KeywordType.Let: {
+			kind = VariableDeclarationKind.Let;
+		} break;
+
+		default: return undefined;
+	}
+
+	// prepare break tokens
+	let breakTokens = [CodeTokenType.Endfile, CodeTokenType.Semicolon];
+
+	let identifiers = [];
+	let initValue: IAstNode = undefined;
+	
+	while (!isEndOfFile(state) && !getTokenOfType(state, breakTokens)) {
+		state = skipComments(state, true, isMultiline);
+
+		// parse identifier
+		let identifierResult = parseAnyIdentifier(state);
+		if (identifierResult) {
+			state = identifierResult.state;
+			identifiers.push(identifierResult.result);
+		}
+
+		state = skipComments(state, true, false);
+
+		// now there can be a ',' which means we have another variable to parse
+		if (getTokenOfType(state, [CodeTokenType.Comma])) {
+			state = skipTokens(state, 1);
+			continue;
+		}
+
+		break;
+	}
+
+	state = skipComments(state, true, isMultiline);
+
+	// parse equals
+	if (getTokenOfType(state, [CodeTokenType.Equals])) {
+		/// skip equals token
+		state = skipTokens(state, 1);
+		state = skipComments(state, true, isMultiline);
+
+		// parse init value expression
+		let expressionResult = parseExpression(state, isMultiline);
+		if (expressionResult) {
+			state = expressionResult.state;
+			initValue = expressionResult.result;
+		}
+	}
+
+	// prepare result
+	let end = getCursorPosition(state);
+	let result = astFactory.variableListDeclaration(identifiers, kind, initValue, start, end);
 	return {
 		state,
 		result

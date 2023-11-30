@@ -20,6 +20,7 @@ export declare enum AstNodeType {
     ContextIdentifier = "ContextIdentifier",
     FunctionDeclaration = "FunctionDeclaration",
     VariableDeclaration = "VariableDeclaration",
+    VariableListDeclaration = "VariableListDeclaration",
     PropertyDeclaration = "PropertyDeclaration",
     Statement = "Statement",
     BreakStatement = "BreakStatement",

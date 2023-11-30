@@ -210,6 +210,16 @@ exports.astFactory = {
             value
         };
     },
+    variableListDeclaration: (identifiers, kind, value, start, end) => {
+        return {
+            nodeType: AstNodeType_1.AstNodeType.VariableListDeclaration,
+            start,
+            end,
+            identifiers,
+            kind,
+            value
+        };
+    },
     propertyDeclaration: (identifier, value, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.PropertyDeclaration,

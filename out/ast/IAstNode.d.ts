@@ -89,6 +89,11 @@ export interface IAstVariableDeclaration extends IAstNode {
     value: IAstNode;
     kind: VariableDeclarationKind;
 }
+export interface IAstVariableListDeclaration extends IAstNode {
+    identifiers: IAstNode[];
+    value: IAstNode;
+    kind: VariableDeclarationKind;
+}
 export interface IAstPropertyDeclaration extends IAstNode {
     identifier: IAstNode;
     value: IAstNode;

@@ -65,7 +65,8 @@ import {
   IAstFunctionDeclaration,
   IAstAwaitExpression,
   IAstYieldExpression,
-  IAstRegexLiteral
+  IAstRegexLiteral,
+  IAstVariableListDeclaration
 } from "./IAstNode";
 import { KeywordType } from "./KeywordType";
 import { OperatorType } from "./OperatorType";
@@ -275,13 +276,23 @@ export const astFactory = {
 	  identifier,
 	  isGenerator
     }
-  },  
+  },
   variableDeclaration: (identifier: IAstNode, kind: VariableDeclarationKind, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstVariableDeclaration => {
     return {
       nodeType: AstNodeType.VariableDeclaration,
       start, 
       end,
       identifier,
+      kind,
+      value
+    }
+  },  
+  variableListDeclaration: (identifiers: IAstNode[], kind: VariableDeclarationKind, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstVariableListDeclaration => {
+    return {
+      nodeType: AstNodeType.VariableListDeclaration,
+      start, 
+      end,
+      identifiers,
       kind,
       value
     }
