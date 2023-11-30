@@ -168,7 +168,7 @@ exports.astFactory = {
         };
     },
     // declarations
-    functionExpression: (args, body, isLambda, isAsync, start, end) => {
+    functionExpression: (args, body, isLambda, isAsync, isGenerator, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.FunctionExpression,
             start,
@@ -176,10 +176,11 @@ exports.astFactory = {
             args,
             body,
             isLambda,
-            isAsync
+            isAsync,
+            isGenerator
         };
     },
-    functionDeclaration: (identifier, args, body, isAsync, start, end) => {
+    functionDeclaration: (identifier, args, body, isAsync, isGenerator, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.FunctionDeclaration,
             start,
@@ -187,7 +188,8 @@ exports.astFactory = {
             args,
             body,
             isAsync,
-            identifier
+            identifier,
+            isGenerator
         };
     },
     variableDeclaration: (identifier, kind, value, start, end) => {
@@ -374,6 +376,22 @@ exports.astFactory = {
         };
     },
     // expression statements
+    awaitExpression: (expression, start, end) => {
+        return {
+            nodeType: AstNodeType_1.AstNodeType.AwaitExpression,
+            expression,
+            start,
+            end
+        };
+    },
+    yieldExpression: (expression, start, end) => {
+        return {
+            nodeType: AstNodeType_1.AstNodeType.YieldExpression,
+            expression,
+            start,
+            end
+        };
+    },
     expressionStatement: (expression, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.ExpressionStatement,

@@ -122,6 +122,8 @@ export declare const compileFinallyStatement: (node: IAstNode, state: ICompilerS
 export declare const compileDebuggerKeyword: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstDebuggerKeyword>;
 export declare const compileThrowStatement: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstThrowStatement>;
 export declare const compileNewExpression: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstNewExpression>;
+export declare const compileAwaitExpression: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstNewExpression>;
+export declare const compileYieldExpression: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstNewExpression>;
 export declare const compileToken: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstToken>;
 export declare const compileTokenSequence: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstTokenSequence>;
 export declare const compileOperator: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstOperator>;

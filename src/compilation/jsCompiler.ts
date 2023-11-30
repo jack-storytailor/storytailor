@@ -1,4 +1,4 @@
-import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstForOfStatement } from "../ast/IAstNode";
+import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstForOfStatement, IAstAwaitExpression, IAstYieldExpression } from "../ast/IAstNode";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { SourceMapGenerator } from 'source-map';
 import { AstNodeType } from "../ast/AstNodeType";
@@ -494,6 +494,12 @@ export const compileAstNode = (ast: IAstNode, state: ICompilerState): ICompileRe
         return funcDeclarResult;
     }
 
+    // function expression
+    let funcExprResult = compileFuncExpression(ast, state);
+    if (funcExprResult) {
+        return funcExprResult;
+    }
+
     // return statement
     let returnStatementResult = compileReturnStatement(ast, state);
     if (returnStatementResult) {
@@ -642,6 +648,18 @@ export const compileAstNode = (ast: IAstNode, state: ICompilerState): ICompileRe
     let newResult = compileNewExpression(ast, state);
     if (newResult) {
         return newResult;
+    }
+
+    // await 
+    let awaitResult = compileAwaitExpression(ast, state);
+    if (awaitResult) {
+        return awaitResult;
+    }
+
+    // yield 
+    let yieldResult = compileYieldExpression(ast, state);
+    if (yieldResult) {
+        return yieldResult;
     }
 
     // debugger
@@ -1253,7 +1271,6 @@ export const compileFuncExpression = (node: IAstNode, state: ICompilerState): IC
         return undefined;
     }
 
-    // write function (
     state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
 
 	if (ast.isAsync) {
@@ -1261,7 +1278,12 @@ export const compileFuncExpression = (node: IAstNode, state: ICompilerState): IC
 	}
 
 	if (!ast.isLambda) {
+	    // write function (
 		state = writeJsToken(state, `function`);
+	}
+
+	if (ast.isGenerator) {
+		state = writeJsToken(state, '*');
 	}
 
 	state = writeJsToken(state, '(');
@@ -1308,14 +1330,21 @@ export const compileFuncDeclaration = (node: IAstNode, state: ICompilerState): I
         return undefined;
     }
 
-    // write function (
     state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
 
 	if (ast.isAsync) {
+		// write async
 		state = writeJsToken(state, 'async ');
 	}
 
-	state = writeJsToken(state, `function `);
+    // write function
+	state = writeJsToken(state, `function`);
+
+	if (ast.isGenerator) {
+		state = writeJsToken(state, '*');
+	}
+
+	state = writeJsToken(state, ' ');
 
 	const identifierResult = compileAstNode(ast.identifier, state);
 	if (identifierResult) {
@@ -2272,6 +2301,48 @@ export const compileNewExpression = (node: IAstNode, state: ICompilerState): ICo
     // write throw
     state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
     state = writeJsToken(state, `new `);
+
+    // write expression
+    let exprResult = compileAstNode(ast.expression, state);
+    if (exprResult) {
+        state = exprResult.state;
+    }
+
+    return {
+        state,
+        result: ast
+    }
+}
+export const compileAwaitExpression = (node: IAstNode, state: ICompilerState): ICompileResult<IAstNewExpression> => {
+    let ast = astFactory.asNode<IAstAwaitExpression>(node, AstNodeType.AwaitExpression);
+    if (!ast || !state) {
+        return undefined;
+    }
+
+    // write throw
+    state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
+    state = writeJsToken(state, `await `);
+
+    // write expression
+    let exprResult = compileAstNode(ast.expression, state);
+    if (exprResult) {
+        state = exprResult.state;
+    }
+
+    return {
+        state,
+        result: ast
+    }
+}
+export const compileYieldExpression = (node: IAstNode, state: ICompilerState): ICompileResult<IAstNewExpression> => {
+    let ast = astFactory.asNode<IAstYieldExpression>(node, AstNodeType.YieldExpression);
+    if (!ast || !state) {
+        return undefined;
+    }
+
+    // write throw
+    state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
+    state = writeJsToken(state, `yield `);
 
     // write expression
     let exprResult = compileAstNode(ast.expression, state);

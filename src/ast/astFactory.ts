@@ -62,7 +62,9 @@ import {
   IAstContextIdentifier, 
   IAstTag, 
   IAstTypeofExpression,
-  IAstFunctionDeclaration
+  IAstFunctionDeclaration,
+  IAstAwaitExpression,
+  IAstYieldExpression
 } from "./IAstNode";
 import { KeywordType } from "./KeywordType";
 import { OperatorType } from "./OperatorType";
@@ -241,7 +243,7 @@ export const astFactory = {
   },
 
   // declarations
-  functionExpression: (args: IAstNode[], body: IAstNode, isLambda: boolean, isAsync: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstFunctionExpression => {
+  functionExpression: (args: IAstNode[], body: IAstNode, isLambda: boolean, isAsync: boolean, isGenerator: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstFunctionExpression => {
     return {
       nodeType: AstNodeType.FunctionExpression,
       start, 
@@ -249,10 +251,11 @@ export const astFactory = {
       args,
       body,
 	  isLambda,
-	  isAsync
+	  isAsync,
+	  isGenerator
     }
   },  
-  functionDeclaration: (identifier: IAstNode, args: IAstNode[], body: IAstNode, isAsync: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstFunctionDeclaration => {
+  functionDeclaration: (identifier: IAstNode, args: IAstNode[], body: IAstNode, isAsync: boolean, isGenerator: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstFunctionDeclaration => {
     return {
       nodeType: AstNodeType.FunctionDeclaration,
       start, 
@@ -260,7 +263,8 @@ export const astFactory = {
       args,
       body,
 	  isAsync,
-	  identifier
+	  identifier,
+	  isGenerator
     }
   },  
   variableDeclaration: (identifier: IAstNode, kind: VariableDeclarationKind, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstVariableDeclaration => {
@@ -450,7 +454,22 @@ export const astFactory = {
   },
 
   // expression statements
-
+  awaitExpression: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstAwaitExpression => {
+	return {
+		nodeType: AstNodeType.AwaitExpression,
+		expression,
+		start,
+		end
+	}
+  },
+  yieldExpression: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstYieldExpression => {
+	return {
+		nodeType: AstNodeType.YieldExpression,
+		expression,
+		start,
+		end
+	}
+  },
   expressionStatement: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstExpressionStatement => {
     return {
       nodeType: AstNodeType.ExpressionStatement,

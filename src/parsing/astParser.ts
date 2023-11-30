@@ -3948,11 +3948,14 @@ export const parseFunctionDeclaration = (state: IParserState, isMultiline: boole
 	const start = getCursorPosition(state);
 
 	let isAsync = false;
-	const awaitResult = parseKeywordOfType(state, [KeywordType.Await]);
-	if (awaitResult) {
-		state = awaitResult.state;
+	const asyncResult = parseKeywordOfType(state, [KeywordType.Async]);
+	if (asyncResult) {
+		state = asyncResult.state;
 		isAsync = true; 
 	}
+
+	// skip comments
+	state = skipComments(state, true, isMultiline);
 
 	// parse 'function' keyword
 	const keywordResult = parseKeywordOfType(state, [KeywordType.Function]);
@@ -3961,6 +3964,12 @@ export const parseFunctionDeclaration = (state: IParserState, isMultiline: boole
 	}
 
 	state = keywordResult.state;
+
+	let isGenerator = false;
+	if (getTokenOfType(state, [CodeTokenType.Star])) {
+		isGenerator = true;
+		state = skipTokens(state, 1);
+	}
 
 	// skip comments
 	state = skipComments(state, true, isMultiline);
@@ -3996,7 +4005,15 @@ export const parseFunctionDeclaration = (state: IParserState, isMultiline: boole
 	state = bodyResult.state;
 	const end = bodyResult.result?.end;
 
-	let result = astFactory.functionDeclaration(identifierResult.result, paramsResult.result, bodyResult.result, isAsync, start, end);
+	let result = astFactory.functionDeclaration(
+		identifierResult.result, 
+		paramsResult.result, 
+		bodyResult.result, 
+		isAsync, 
+		isGenerator, 
+		start, 
+		end
+	);
 
 	return {
 		state,
@@ -4099,6 +4116,18 @@ export const parseExpression = (state: IParserState, isMultiline: boolean): IPar
 	let newExpressionResult = parseNewExpression(state, isMultiline);
 	if (newExpressionResult) {
 		return newExpressionResult;
+	}
+
+	// await expression
+	let awaitExpressionResult = parseAwaitExpression(state, isMultiline);
+	if (awaitExpressionResult) {
+		return awaitExpressionResult;
+	}
+
+	// yield expression
+	let yieldExpressionResult = parseYieldExpression(state, isMultiline);
+	if (yieldExpressionResult) {
+		return yieldExpressionResult;
 	}
 
 	// delete expression
@@ -4212,6 +4241,12 @@ export const parseFunctionExpression = (state: IParserState, isMultiline: boolea
 		state = keywordResult.state;
 	}
 
+	let isGenerator = false;
+	if (getTokenOfType(state, [CodeTokenType.Star])) {
+		isGenerator = true;
+		state = skipTokens(state, 1);
+	}
+
 	// skip comments and whitespaces
 	state = skipComments(state, true, isMultiline);
 
@@ -4258,7 +4293,7 @@ export const parseFunctionExpression = (state: IParserState, isMultiline: boolea
 
 	// prepare result
 	const end = getCursorPosition(state);
-	const result = astFactory.functionExpression(args, body, isLambda, isAsync, start, end);
+	const result = astFactory.functionExpression(args, body, isLambda, isAsync, isGenerator, start, end);
 
 	return {
 		state,
@@ -4302,7 +4337,7 @@ export const parseOperand = (state: IParserState, isMultiline: boolean): IParseR
 	}
 
 	// keyword
-	let keywordResult = parseKeywordOfType(state, [KeywordType.Null, KeywordType.Undefined, KeywordType.Await]);
+	let keywordResult = parseKeywordOfType(state, [KeywordType.Null, KeywordType.Undefined]);
 	if (keywordResult) {
 		return keywordResult;
 	}
@@ -4476,7 +4511,7 @@ export const parseObjectExpression = (state: IParserState): IParseResult<IAstObj
 		state = addParsingError(
 			state,
 			ParsingErrorType.Error,
-			"Invalid token '" + errorToken.value || errorToken.type + "'",
+			`Invalid token '${errorToken.value || errorToken.type}'`,
 			errorStart,
 			errorEnd
 		);
@@ -4636,7 +4671,7 @@ export const parseIndexerExpression = (state: IParserState, leftOperand: IAstNod
 		state = addParsingError(
 			state,
 			ParsingErrorType.Error,
-			"invalid token '" + errorToken.value || errorToken.type + "'",
+			`invalid token '${errorToken.value || errorToken.type}'`,
 			errorStart,
 			errorEnd
 		)
@@ -4891,6 +4926,96 @@ export const parseNewExpression = (state: IParserState, isMultiline: boolean): I
 	// prepare result
 	let end = getCursorPosition(state);
 	let result = astFactory.newExpression(
+		expression,
+		start,
+		end
+	);
+
+	return {
+		result,
+		state
+	}
+}
+export const parseAwaitExpression = (state: IParserState, isMultiline: boolean): IParseResult<IAstNewExpression> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	// parse await keyword
+	let keywordResult = parseKeywordOfType(state, [KeywordType.Await]);
+	if (!keywordResult) {
+		return undefined;
+	}
+	let start = getCursorPosition(state);
+	state = keywordResult.state;
+	let finalState = state;
+	let breakTokens = isMultiline ? [] : [CodeTokenType.Endline];
+	breakTokens = [...breakTokens, CodeTokenType.Semicolon];
+	let expression: IAstNode = undefined;
+
+	// parse expression
+	if (!isEndOfFile(state) && !getTokenOfType(state, breakTokens)) {
+		// skip comments and whitespaces
+		state = skipComments(state, true, isMultiline);
+
+		// parse expression
+		let expressionResult = parseExpression(state, isMultiline);
+		if (expressionResult) {
+			state = expressionResult.state;
+			expression = expressionResult.result;
+			finalState = state;
+		}
+	}
+	state = finalState;
+
+	// prepare result
+	let end = getCursorPosition(state);
+	let result = astFactory.awaitExpression(
+		expression,
+		start,
+		end
+	);
+
+	return {
+		result,
+		state
+	}
+}
+export const parseYieldExpression = (state: IParserState, isMultiline: boolean): IParseResult<IAstNewExpression> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	// parse yield keyword
+	let keywordResult = parseKeywordOfType(state, [KeywordType.Yield]);
+	if (!keywordResult) {
+		return undefined;
+	}
+	let start = getCursorPosition(state);
+	state = keywordResult.state;
+	let finalState = state;
+	let breakTokens = isMultiline ? [] : [CodeTokenType.Endline];
+	breakTokens = [...breakTokens, CodeTokenType.Semicolon];
+	let expression: IAstNode = undefined;
+
+	// parse expression
+	if (!isEndOfFile(state) && !getTokenOfType(state, breakTokens)) {
+		// skip comments and whitespaces
+		state = skipComments(state, true, isMultiline);
+
+		// parse expression
+		let expressionResult = parseExpression(state, isMultiline);
+		if (expressionResult) {
+			state = expressionResult.state;
+			expression = expressionResult.result;
+			finalState = state;
+		}
+	}
+	state = finalState;
+
+	// prepare result
+	let end = getCursorPosition(state);
+	let result = astFactory.yieldExpression(
 		expression,
 		start,
 		end
@@ -5530,7 +5655,7 @@ export const addInvalidTokenError = (state: IParserState, token: ICodeToken): IP
 	return addParsingError(
 		state,
 		ParsingErrorType.Error,
-		"invalid token '" + token.value || token.type + "'",
+		`Invalid token '${token.value || token.type}'`,
 		token.start,
 		token.end
 	);

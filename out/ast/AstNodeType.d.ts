@@ -39,6 +39,8 @@ export declare enum AstNodeType {
     FinallyStatement = "FinallyStatement",
     ThrowStatement = "ThrowStatement",
     ExpressionStatement = "ExpressionStatement",
+    AwaitExpression = "AwaitExpression",
+    YieldExpression = "YieldExpression",
     ParenExpression = "ParenExpression",
     ObjectExpression = "ObjectExpression",
     CallExpression = "CallExpression",

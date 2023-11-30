@@ -25,6 +25,7 @@ export enum KeywordType {
   Undefined = "undefined",
   Async = 'async',
   Await = 'await',
+  Yield = 'yield',
   Var = "var",
   Let = "let",
   Const = "const",

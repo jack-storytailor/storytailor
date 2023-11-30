@@ -29,6 +29,7 @@ var KeywordType;
     KeywordType["Undefined"] = "undefined";
     KeywordType["Async"] = "async";
     KeywordType["Await"] = "await";
+    KeywordType["Yield"] = "yield";
     KeywordType["Var"] = "var";
     KeywordType["Let"] = "let";
     KeywordType["Const"] = "const";

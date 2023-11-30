@@ -58,7 +58,9 @@ import {
   IAstString, 
   IAstBoolean, 
   IAstArray, 
-  IAstModule 
+  IAstModule, 
+  IAstAwaitExpression,
+  IAstYieldExpression
 } from "./IAstNode";
 import { AstNodeType } from "./AstNodeType";
 import { astFactory } from "./astFactory";
@@ -303,6 +305,18 @@ const childrenRegistry = {
     if (!ast) { return undefined; }
   
     return [ast.expression];
+  },
+
+  AwaitExpression: (ast: IAstAwaitExpression): IAstNode[] => {
+	if (!ast) { return undefined; }
+
+	return [ast.expression];
+  },
+  
+  YieldExpression: (ast: IAstYieldExpression): IAstNode[] => {
+	if (!ast) { return undefined; }
+
+	return [ast.expression];
   },
   
   ParenExpression: (ast: IAstParenExpression): IAstNode[] => {
@@ -1079,6 +1093,38 @@ export const astUtils = {
       
       case AstNodeType.ParenExpression: {
         let astNode = astFactory.asNode<IAstParenExpression>(root, AstNodeType.ParenExpression);
+        if (!astNode) { return; }
+      
+        let getChildren = childrenRegistry[rootNodeType];
+        if (!getChildren) { return; }
+      
+        let children = getChildren(astNode);
+        if (!children) { return; }
+      
+        children.forEach(child => {
+          if (child) { operation(child); }
+        });
+        break;
+      }
+
+	  case AstNodeType.AwaitExpression: {
+        let astNode = astFactory.asNode<IAstAwaitExpression>(root, AstNodeType.AwaitExpression);
+        if (!astNode) { return; }
+      
+        let getChildren = childrenRegistry[rootNodeType];
+        if (!getChildren) { return; }
+      
+        let children = getChildren(astNode);
+        if (!children) { return; }
+      
+        children.forEach(child => {
+          if (child) { operation(child); }
+        });
+        break;
+      }
+      
+	  case AstNodeType.YieldExpression: {
+        let astNode = astFactory.asNode<IAstYieldExpression>(root, AstNodeType.YieldExpression);
         if (!astNode) { return; }
       
         let getChildren = childrenRegistry[rootNodeType];
@@ -2237,6 +2283,48 @@ export const astUtils = {
       
       case AstNodeType.ParenExpression: {
         let astNode = astFactory.asNode<IAstParenExpression>(root, AstNodeType.ParenExpression);
+        if (!astNode) { return; }
+      
+        let getChildren = childrenRegistry[rootNodeType];
+        if (!getChildren) { return; }
+      
+        let children = getChildren(astNode);
+        if (!children) { return; }
+      
+        children.forEach(child => { 
+          if (child) {
+            let operation = operations[child.nodeType] || defaultOp;
+            if (!operation) { return; }
+            
+            operation(child);
+          }
+        });
+        break;
+      }
+      
+      case AstNodeType.AwaitExpression: {
+        let astNode = astFactory.asNode<IAstAwaitExpression>(root, AstNodeType.AwaitExpression);
+        if (!astNode) { return; }
+      
+        let getChildren = childrenRegistry[rootNodeType];
+        if (!getChildren) { return; }
+      
+        let children = getChildren(astNode);
+        if (!children) { return; }
+      
+        children.forEach(child => { 
+          if (child) {
+            let operation = operations[child.nodeType] || defaultOp;
+            if (!operation) { return; }
+            
+            operation(child);
+          }
+        });
+        break;
+      }
+
+	  case AstNodeType.YieldExpression: {
+        let astNode = astFactory.asNode<IAstYieldExpression>(root, AstNodeType.YieldExpression);
         if (!astNode) { return; }
       
         let getChildren = childrenRegistry[rootNodeType];

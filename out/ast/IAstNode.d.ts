@@ -70,12 +70,14 @@ export interface IAstIdentifierScope extends IAstNode {
 export interface IAstFunctionExpression extends IAstNode {
     isLambda: boolean;
     isAsync: boolean;
+    isGenerator: boolean;
     args: IAstNode[];
     body: IAstNode;
 }
 export interface IAstFunctionDeclaration extends IAstNode {
     identifier: IAstNode;
     isAsync: boolean;
+    isGenerator: boolean;
     args: IAstNode[];
     body: IAstNode;
 }
@@ -160,6 +162,12 @@ export interface IAstCatchStatement extends IAstNode {
 }
 export interface IAstFinallyStatement extends IAstNode {
     body: IAstNode;
+}
+export interface IAstAwaitExpression extends IAstNode {
+    expression: IAstNode;
+}
+export interface IAstYieldExpression extends IAstNode {
+    expression: IAstNode;
 }
 export interface IAstParenExpression extends IAstNode {
     expression: IAstNode;

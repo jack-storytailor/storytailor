@@ -49,6 +49,8 @@ var AstNodeType;
     AstNodeType["ThrowStatement"] = "ThrowStatement";
     // expression statements
     AstNodeType["ExpressionStatement"] = "ExpressionStatement";
+    AstNodeType["AwaitExpression"] = "AwaitExpression";
+    AstNodeType["YieldExpression"] = "YieldExpression";
     AstNodeType["ParenExpression"] = "ParenExpression";
     AstNodeType["ObjectExpression"] = "ObjectExpression";
     AstNodeType["CallExpression"] = "CallExpression";

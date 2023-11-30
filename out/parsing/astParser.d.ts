@@ -118,6 +118,8 @@ export declare const parseBinaryExpression: (state: IParserState, leftOperand: I
 export declare const parseMemberExpression: (state: IParserState, leftOperand: IAstNode, isMultiline: boolean) => IParseResult<IAstMemberExpression>;
 export declare const parseConditionalExpression: (state: IParserState, condition: IAstNode, isMultiline: boolean) => IParseResult<IAstConditionalExpression>;
 export declare const parseNewExpression: (state: IParserState, isMultiline: boolean) => IParseResult<IAstNewExpression>;
+export declare const parseAwaitExpression: (state: IParserState, isMultiline: boolean) => IParseResult<IAstNewExpression>;
+export declare const parseYieldExpression: (state: IParserState, isMultiline: boolean) => IParseResult<IAstNewExpression>;
 export declare const parsePrototypeExpression: (state: IParserState) => IParseResult<IAstPrototypeExpression>;
 export declare const parseTag: (state: IParserState) => IParseResult<IAstTag>;
 export declare const parseToken: (state: IParserState) => IParseResult<IAstToken>;

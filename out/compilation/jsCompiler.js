@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.compileFinallyStatement = exports.compileCatchStatement = exports.compileTryStatement = exports.compileIndexerExpression = exports.compileConditionalExpression = exports.compileKeyword = exports.compileUpdateExpression = exports.compileObjectExpression = exports.compileArrayLiteral = exports.compileForOfStatement = exports.compileForInStatement = exports.compileForStatement = exports.compilePropertyDeclaration = exports.compileImportStatement = exports.compileParenExpression = exports.compileCaseStatement = exports.compileSwitchStatement = exports.compileDoWhileStatement = exports.compileWhileStatement = exports.compileIfStatement = exports.compileContinueStatement = exports.compileBreakStatement = exports.compileTypeofExpression = exports.compileDeleteExpression = exports.compileReturnStatement = exports.compileProgram = exports.compileFuncDeclaration = exports.compileFuncExpression = exports.compileVarDeclaration = exports.compileCallExpression = exports.compileStringInclude = exports.compileMemberExpression = exports.compileBinaryExpression = exports.compileContextIdentifier = exports.compileRawIdentifier = exports.compileIdentifierScope = exports.compileIdentifier = exports.compileBoolean = exports.compileNumber = exports.compileTextLine = exports.compileStatement = exports.compileDeleteLine = exports.compileObjectLine = exports.compileBlockStatement = exports.compileOuterStatement = exports.compileAstModule = exports.compileAstNode = exports.compile = exports.compileSingleNode = exports.compilerConfig = void 0;
-exports.toStringSafe = exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.writeTargetIndent = exports.setIndent = exports.addTargetIndent = exports.isNeedToLinkSourcemap = exports.addSourceMapAtCurrentPlace = exports.addSourceMap = exports.addSourceMaps = exports.getIdentifierFullName = exports.getIdentifierFromNode = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = exports.compileNewExpression = exports.compileThrowStatement = exports.compileDebuggerKeyword = void 0;
+exports.toStringSafe = exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.writeTargetIndent = exports.setIndent = exports.addTargetIndent = exports.isNeedToLinkSourcemap = exports.addSourceMapAtCurrentPlace = exports.addSourceMap = exports.addSourceMaps = exports.getIdentifierFullName = exports.getIdentifierFromNode = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = exports.compileYieldExpression = exports.compileAwaitExpression = exports.compileNewExpression = exports.compileThrowStatement = exports.compileDebuggerKeyword = void 0;
 const source_map_1 = require("source-map");
 const AstNodeType_1 = require("../ast/AstNodeType");
 const astFactory_1 = require("../ast/astFactory");
@@ -376,6 +376,11 @@ const compileAstNode = (ast, state) => {
     if (funcDeclarResult) {
         return funcDeclarResult;
     }
+    // function expression
+    let funcExprResult = (0, exports.compileFuncExpression)(ast, state);
+    if (funcExprResult) {
+        return funcExprResult;
+    }
     // return statement
     let returnStatementResult = (0, exports.compileReturnStatement)(ast, state);
     if (returnStatementResult) {
@@ -500,6 +505,16 @@ const compileAstNode = (ast, state) => {
     let newResult = (0, exports.compileNewExpression)(ast, state);
     if (newResult) {
         return newResult;
+    }
+    // await 
+    let awaitResult = (0, exports.compileAwaitExpression)(ast, state);
+    if (awaitResult) {
+        return awaitResult;
+    }
+    // yield 
+    let yieldResult = (0, exports.compileYieldExpression)(ast, state);
+    if (yieldResult) {
+        return yieldResult;
     }
     // debugger
     let debuggerResult = (0, exports.compileDebuggerKeyword)(ast, state);
@@ -1044,13 +1059,16 @@ const compileFuncExpression = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
-    // write function (
     state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     if (ast.isAsync) {
         state = (0, exports.writeJsToken)(state, 'async ');
     }
     if (!ast.isLambda) {
+        // write function (
         state = (0, exports.writeJsToken)(state, `function`);
+    }
+    if (ast.isGenerator) {
+        state = (0, exports.writeJsToken)(state, '*');
     }
     state = (0, exports.writeJsToken)(state, '(');
     // write all the params
@@ -1090,12 +1108,17 @@ const compileFuncDeclaration = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
-    // write function (
     state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     if (ast.isAsync) {
+        // write async
         state = (0, exports.writeJsToken)(state, 'async ');
     }
-    state = (0, exports.writeJsToken)(state, `function `);
+    // write function
+    state = (0, exports.writeJsToken)(state, `function`);
+    if (ast.isGenerator) {
+        state = (0, exports.writeJsToken)(state, '*');
+    }
+    state = (0, exports.writeJsToken)(state, ' ');
     const identifierResult = (0, exports.compileAstNode)(ast.identifier, state);
     if (identifierResult) {
         state = identifierResult.state;
@@ -1971,6 +1994,44 @@ const compileNewExpression = (node, state) => {
     };
 };
 exports.compileNewExpression = compileNewExpression;
+const compileAwaitExpression = (node, state) => {
+    let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.AwaitExpression);
+    if (!ast || !state) {
+        return undefined;
+    }
+    // write throw
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
+    state = (0, exports.writeJsToken)(state, `await `);
+    // write expression
+    let exprResult = (0, exports.compileAstNode)(ast.expression, state);
+    if (exprResult) {
+        state = exprResult.state;
+    }
+    return {
+        state,
+        result: ast
+    };
+};
+exports.compileAwaitExpression = compileAwaitExpression;
+const compileYieldExpression = (node, state) => {
+    let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.YieldExpression);
+    if (!ast || !state) {
+        return undefined;
+    }
+    // write throw
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
+    state = (0, exports.writeJsToken)(state, `yield `);
+    // write expression
+    let exprResult = (0, exports.compileAstNode)(ast.expression, state);
+    if (exprResult) {
+        state = exprResult.state;
+    }
+    return {
+        state,
+        result: ast
+    };
+};
+exports.compileYieldExpression = compileYieldExpression;
 const compileToken = (node, state) => {
     let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.Token);
     if (!ast || !state) {
