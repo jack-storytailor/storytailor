@@ -1,7 +1,7 @@
 import { AstNodeType } from "./AstNodeType";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { ICodeToken } from "../shared/ICodeToken";
-import { IAstToken, IAstKeyword, IAstText, IAstOperator, IAstProgram, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstBoolean, IAstArray, IAstIdentifier, IAstRawIdentifier, IAstIdentifierScope, IAstFunctionExpression, IAstVariableDeclaration, IAstPropertyDeclaration, IAstStatement, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstWhileStatement, IAstDoWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstExpressionStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstOperationExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstIndexerExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstStringIncludeStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstFinallyStatement, IAstCatchStatement, IAstTryStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstFunctionDeclaration, IAstAwaitExpression, IAstYieldExpression, IAstRegexLiteral, IAstVariableListDeclaration } from "./IAstNode";
+import { IAstToken, IAstKeyword, IAstText, IAstOperator, IAstProgram, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstBoolean, IAstArray, IAstIdentifier, IAstRawIdentifier, IAstIdentifierScope, IAstFunctionExpression, IAstPropertyDeclaration, IAstStatement, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstWhileStatement, IAstDoWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstExpressionStatement, IAstParenExpression, IAstObjectLiteral, IAstCallExpression, IAstOperationExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstIndexerExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstStringIncludeStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstFinallyStatement, IAstCatchStatement, IAstTryStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstFunctionDeclaration, IAstAwaitExpression, IAstYieldExpression, IAstRegexLiteral, IAstVariableDeclaration } from "./IAstNode";
 import { KeywordType } from "./KeywordType";
 import { OperatorType } from "./OperatorType";
 import { VariableDeclarationKind } from "./VariableDeclarationKind";
@@ -27,9 +27,8 @@ export declare const astFactory: {
     IdentifierScope: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstIdentifierScope;
     functionExpression: (args: IAstNode[], body: IAstNode, isLambda: boolean, isAsync: boolean, isGenerator: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstFunctionExpression;
     functionDeclaration: (identifier: IAstNode, args: IAstNode[], body: IAstNode, isAsync: boolean, isGenerator: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstFunctionDeclaration;
-    variableDeclaration: (identifier: IAstNode, kind: VariableDeclarationKind, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstVariableDeclaration;
-    variableListDeclaration: (identifiers: IAstNode[], kind: VariableDeclarationKind, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstVariableListDeclaration;
-    propertyDeclaration: (identifier: IAstNode, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstPropertyDeclaration;
+    variableListDeclaration: (identifiers: IAstNode[], kind: VariableDeclarationKind, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstVariableDeclaration;
+    propertyDeclaration: (identifier: IAstNode, value: IAstNode, initializer: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstPropertyDeclaration;
     statement: (statement: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstStatement;
     breakStatement: (start: ISymbolPosition, end: ISymbolPosition) => IAstBreakStatement;
     returnStatement: (value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstReturnStatement;
@@ -52,7 +51,7 @@ export declare const astFactory: {
     yieldExpression: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstYieldExpression;
     expressionStatement: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstExpressionStatement;
     parenExpression: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstParenExpression;
-    objectExpression: (properties: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstObjectExpression;
+    objectLiteral: (properties: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstObjectLiteral;
     callExpression: (calee: IAstNode, args: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstCallExpression;
     operationExpression: (operation: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstOperationExpression;
     updateExpression: (argument: IAstNode, operator: IAstNode, prefix: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstUpdateExpression;

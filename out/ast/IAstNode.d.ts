@@ -85,11 +85,6 @@ export interface IAstFunctionDeclaration extends IAstNode {
     body: IAstNode;
 }
 export interface IAstVariableDeclaration extends IAstNode {
-    identifier: IAstNode;
-    value: IAstNode;
-    kind: VariableDeclarationKind;
-}
-export interface IAstVariableListDeclaration extends IAstNode {
     identifiers: IAstNode[];
     value: IAstNode;
     kind: VariableDeclarationKind;
@@ -97,6 +92,7 @@ export interface IAstVariableListDeclaration extends IAstNode {
 export interface IAstPropertyDeclaration extends IAstNode {
     identifier: IAstNode;
     value: IAstNode;
+    initializer: IAstNode;
 }
 export interface IAstStatement extends IAstNode {
     statement: IAstNode;
@@ -183,7 +179,7 @@ export interface IAstParenExpression extends IAstNode {
 export interface IAstExpressionStatement extends IAstNode {
     expression: IAstNode;
 }
-export interface IAstObjectExpression extends IAstNode {
+export interface IAstObjectLiteral extends IAstNode {
     properties: IAstNode[];
 }
 export interface IAstCallExpression extends IAstNode {

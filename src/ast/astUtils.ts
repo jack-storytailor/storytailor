@@ -15,7 +15,6 @@ import {
   IAstContextIdentifier, 
   IAstFunctionExpression, 
   IAstFunctionDeclaration, 
-  IAstVariableDeclaration, 
   IAstPropertyDeclaration, 
   IAstStatement, 
   IAstBreakStatement, 
@@ -36,7 +35,7 @@ import {
   IAstThrowStatement, 
   IAstExpressionStatement, 
   IAstParenExpression, 
-  IAstObjectExpression, 
+  IAstObjectLiteral, 
   IAstCallExpression, 
   IAstOperationExpression, 
   IAstUpdateExpression, 
@@ -62,7 +61,7 @@ import {
   IAstAwaitExpression,
   IAstYieldExpression,
   IAstRegexLiteral,
-  IAstVariableListDeclaration
+  IAstVariableDeclaration
 } from "./IAstNode";
 import { AstNodeType } from "./AstNodeType";
 import { astFactory } from "./astFactory";
@@ -198,19 +197,13 @@ const childrenRegistry = {
   VariableDeclaration: (ast: IAstVariableDeclaration): IAstNode[] => {
     if (!ast) { return undefined; }
   
-    return [ast.identifier, ast.value];
-  },
-  
-  VariableListDeclaration: (ast: IAstVariableListDeclaration): IAstNode[] => {
-    if (!ast) { return undefined; }
-  
     return [...ast.identifiers, ast.value];
   },
   
   PropertyDeclaration: (ast: IAstPropertyDeclaration): IAstNode[] => {
     if (!ast) { return undefined; }
   
-    return [ast.identifier, ast.value];
+    return [ast.identifier, ast.value, ast.initializer];
   },
   
   Statement: (ast: IAstStatement): IAstNode[] => {
@@ -339,7 +332,7 @@ const childrenRegistry = {
     return [ast.expression];
   },
   
-  ObjectExpression: (ast: IAstObjectExpression): IAstNode[] => {
+  ObjectExpression: (ast: IAstObjectLiteral): IAstNode[] => {
     if (!ast) { return undefined; }
   
     return ast.properties;
@@ -800,25 +793,9 @@ export const astUtils = {
         });
         break;
       }
-      
+
       case AstNodeType.VariableDeclaration: {
         let astNode = astFactory.asNode<IAstVariableDeclaration>(root, AstNodeType.VariableDeclaration);
-        if (!astNode) { return; }
-      
-        let getChildren = childrenRegistry[rootNodeType];
-        if (!getChildren) { return; }
-      
-        let children = getChildren(astNode);
-        if (!children) { return; }
-      
-        children.forEach(child => {
-          if (child) { operation(child); }
-        });
-        break;
-      }
-      
-      case AstNodeType.VariableListDeclaration: {
-        let astNode = astFactory.asNode<IAstVariableListDeclaration>(root, AstNodeType.VariableListDeclaration);
         if (!astNode) { return; }
       
         let getChildren = childrenRegistry[rootNodeType];
@@ -1185,8 +1162,8 @@ export const astUtils = {
         break;
       }
       
-      case AstNodeType.ObjectExpression: {
-        let astNode = astFactory.asNode<IAstObjectExpression>(root, AstNodeType.ObjectExpression);
+      case AstNodeType.ObjectLiteral: {
+        let astNode = astFactory.asNode<IAstObjectLiteral>(root, AstNodeType.ObjectLiteral);
         if (!astNode) { return; }
       
         let getChildren = childrenRegistry[rootNodeType];
@@ -1949,27 +1926,6 @@ export const astUtils = {
         break;
       }
       
-      case AstNodeType.VariableListDeclaration: {
-        let astNode = astFactory.asNode<IAstVariableListDeclaration>(root, AstNodeType.VariableListDeclaration);
-        if (!astNode) { return; }
-      
-        let getChildren = childrenRegistry[rootNodeType];
-        if (!getChildren) { return; }
-      
-        let children = getChildren(astNode);
-        if (!children) { return; }
-      
-        children.forEach(child => { 
-          if (child) {
-            let operation = operations[child.nodeType] || defaultOp;
-            if (!operation) { return; }
-            
-            operation(child);
-          }
-        });
-        break;
-      }
-      
       case AstNodeType.PropertyDeclaration: {
         let astNode = astFactory.asNode<IAstPropertyDeclaration>(root, AstNodeType.PropertyDeclaration);
         if (!astNode) { return; }
@@ -2432,8 +2388,8 @@ export const astUtils = {
         break;
       }
       
-      case AstNodeType.ObjectExpression: {
-        let astNode = astFactory.asNode<IAstObjectExpression>(root, AstNodeType.ObjectExpression);
+      case AstNodeType.ObjectLiteral: {
+        let astNode = astFactory.asNode<IAstObjectLiteral>(root, AstNodeType.ObjectLiteral);
         if (!astNode) { return; }
       
         let getChildren = childrenRegistry[rootNodeType];

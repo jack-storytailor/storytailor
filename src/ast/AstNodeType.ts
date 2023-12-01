@@ -24,7 +24,6 @@ export enum AstNodeType {
   // declarations
   FunctionDeclaration = "FunctionDeclaration",
   VariableDeclaration = "VariableDeclaration",
-  VariableListDeclaration = "VariableListDeclaration",
   PropertyDeclaration = "PropertyDeclaration",
   // statements
   Statement = "Statement",
@@ -50,7 +49,7 @@ export enum AstNodeType {
   AwaitExpression = "AwaitExpression",
   YieldExpression = "YieldExpression",
   ParenExpression = "ParenExpression",
-  ObjectExpression = "ObjectExpression",
+  ObjectLiteral = "ObjectLiteral",
   CallExpression = "CallExpression",
   OperationExpression = "OperationExpression",
   UpdateExpression = "UpdateExpression",

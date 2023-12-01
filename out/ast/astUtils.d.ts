@@ -1,4 +1,4 @@
-import { IAstNode, IAstToken, IAstTokenSequence, IAstText, IAstOperator, IAstProgram, IAstKeyword, IAstDebuggerKeyword, IAstCommentLine, IAstCommentBlock, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstContextIdentifier, IAstFunctionExpression, IAstFunctionDeclaration, IAstVariableDeclaration, IAstPropertyDeclaration, IAstStatement, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstWhileStatement, IAstDoWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstThrowStatement, IAstExpressionStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstOperationExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstIndexerExpression, IAstConditionalExpression, IAstNewExpression, IAstDeleteExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstStringIncludeStatement, IAstPrototypeExpression, IAstDeleteLineExpression, IAstScope, IAstTag, IAstNumber, IAstString, IAstBoolean, IAstArray, IAstModule, IAstAwaitExpression, IAstYieldExpression, IAstRegexLiteral, IAstVariableListDeclaration } from "./IAstNode";
+import { IAstNode, IAstToken, IAstTokenSequence, IAstText, IAstOperator, IAstProgram, IAstKeyword, IAstDebuggerKeyword, IAstCommentLine, IAstCommentBlock, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstContextIdentifier, IAstFunctionExpression, IAstFunctionDeclaration, IAstPropertyDeclaration, IAstStatement, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstWhileStatement, IAstDoWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstThrowStatement, IAstExpressionStatement, IAstParenExpression, IAstObjectLiteral, IAstCallExpression, IAstOperationExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstIndexerExpression, IAstConditionalExpression, IAstNewExpression, IAstDeleteExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstStringIncludeStatement, IAstPrototypeExpression, IAstDeleteLineExpression, IAstScope, IAstTag, IAstNumber, IAstString, IAstBoolean, IAstArray, IAstModule, IAstAwaitExpression, IAstYieldExpression, IAstRegexLiteral, IAstVariableDeclaration } from "./IAstNode";
 import { IHash } from "../shared/IHash";
 export declare const astUtils: {
     childrenRegistry: {
@@ -24,7 +24,6 @@ export declare const astUtils: {
         FunctionExpression: (ast: IAstFunctionExpression) => IAstNode[];
         FunctionDeclaration: (ast: IAstFunctionDeclaration) => IAstNode[];
         VariableDeclaration: (ast: IAstVariableDeclaration) => IAstNode[];
-        VariableListDeclaration: (ast: IAstVariableListDeclaration) => IAstNode[];
         PropertyDeclaration: (ast: IAstPropertyDeclaration) => IAstNode[];
         Statement: (ast: IAstStatement) => IAstNode[];
         BreakStatement: (ast: IAstBreakStatement) => IAstNode[];
@@ -47,7 +46,7 @@ export declare const astUtils: {
         AwaitExpression: (ast: IAstAwaitExpression) => IAstNode[];
         YieldExpression: (ast: IAstYieldExpression) => IAstNode[];
         ParenExpression: (ast: IAstParenExpression) => IAstNode[];
-        ObjectExpression: (ast: IAstObjectExpression) => IAstNode[];
+        ObjectExpression: (ast: IAstObjectLiteral) => IAstNode[];
         CallExpression: (ast: IAstCallExpression) => IAstNode[];
         OperationExpression: (ast: IAstOperationExpression) => IAstNode[];
         UpdateExpression: (ast: IAstUpdateExpression) => IAstNode[];

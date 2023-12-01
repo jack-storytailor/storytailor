@@ -1,4 +1,4 @@
-import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstVariableDeclaration, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObjectExpression, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstForOfStatement, IAstAwaitExpression, IAstYieldExpression, IAstRegexLiteral, IAstVariableListDeclaration } from "../ast/IAstNode";
+import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObjectLiteral, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstForOfStatement, IAstAwaitExpression, IAstYieldExpression, IAstRegexLiteral, IAstVariableDeclaration } from "../ast/IAstNode";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { SourceMapGenerator } from 'source-map';
 import { AstNodeType } from "../ast/AstNodeType";
@@ -483,15 +483,9 @@ export const compileAstNode = (ast: IAstNode, state: ICompilerState): ICompileRe
     }
 
     // var declaration
-    let varDeclarResult = compileVarDeclaration(ast, state);
-    if (varDeclarResult) {
-        return varDeclarResult;
-    }
-
-    // var declaration
-    let varListDeclarResult = compileVarListDeclaration(ast, state);
-    if (varListDeclarResult) {
-        return varListDeclarResult;
+    let variableResult = compileVarDeclaration(ast, state);
+    if (variableResult) {
+        return variableResult;
     }
 
     // program
@@ -597,7 +591,7 @@ export const compileAstNode = (ast: IAstNode, state: ICompilerState): ICompileRe
     }
 
     // object literal
-    let objLiteralResult = compileObjectExpression(ast, state);
+    let objLiteralResult = compileObjectLiteral(ast, state);
     if (objLiteralResult) {
         return objLiteralResult;
     }
@@ -1263,53 +1257,6 @@ export const compileVarDeclaration = (node: IAstNode, state: ICompilerState): IC
     state = writeJsToken(state, `${prefix} `);
 
     // write varname
-    let identifier = astFactory.asNode<IAstIdentifier>(ast.identifier, AstNodeType.Identifier);
-    if (identifier){
-        state = addSourceMapAtCurrentPlace(state, identifier.value, ast.identifier.start);
-    }
-    let varnameResult = compileAstNode(ast.identifier, state);
-    if (varnameResult) {
-        state = varnameResult.state;
-    }
-
-    // init value
-    if (ast.value) {
-        // write =
-        state = writeJsToken(state, ` = `);
-
-        // write init value
-        let initValResult = compileAstNode(ast.value, state);
-        if (initValResult) {
-            state = initValResult.state;
-        }
-    }
-
-    // result
-    return {
-        state,
-        result: ast
-    }
-}
-export const compileVarListDeclaration = (node: IAstNode, state: ICompilerState): ICompileResult<IAstVariableListDeclaration> => {
-    let ast = astFactory.asNode<IAstVariableListDeclaration>(node, AstNodeType.VariableListDeclaration);
-    if (!ast || !state) {
-        return undefined;
-    }
-
-    // get prefix
-    let prefix = "var";
-    if (ast.kind === VariableDeclarationKind.Const) {
-        prefix = "const";
-    }
-    if (ast.kind === VariableDeclarationKind.Let) {
-        prefix = "let";
-    }
-
-    // write prefix
-    state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
-    state = writeJsToken(state, `${prefix} `);
-
-    // write varname
 	const identifiers = ast.identifiers;
 	if (identifiers) {
 		for (let iIndex = 0; iIndex < identifiers.length; iIndex++) {
@@ -1921,6 +1868,16 @@ export const compilePropertyDeclaration = (node: IAstNode, state: ICompilerState
         }
     }
 
+	// write initializer
+	if (ast.initializer) {
+		state = writeJsToken(state, " = ");
+
+		let initResult = compileAstNode(ast.initializer, state);
+		if (initResult) {
+			state = initResult.state;
+		}
+	}
+
     // result
     return {
         state,
@@ -2074,8 +2031,9 @@ export const compileArrayLiteral = (node: IAstNode, state: ICompilerState): ICom
     }
     // ]
     state = writeEndline(state);
-    state = writeJsToken(state, `]`);
 	state = addTargetIndent(state, -1);
+	state = writeTargetIndent(state);
+	state = writeJsToken(state, `]`);
 
 
     // result
@@ -2084,8 +2042,8 @@ export const compileArrayLiteral = (node: IAstNode, state: ICompilerState): ICom
         result: ast
     }
 }
-export const compileObjectExpression = (node: IAstNode, state: ICompilerState): ICompileResult<IAstObjectExpression> => {
-    let ast = astFactory.asNode<IAstObjectExpression>(node, AstNodeType.ObjectExpression);
+export const compileObjectLiteral = (node: IAstNode, state: ICompilerState): ICompileResult<IAstObjectLiteral> => {
+    let ast = astFactory.asNode<IAstObjectLiteral>(node, AstNodeType.ObjectLiteral);
     if (!ast || !state) {
         return undefined;
     }

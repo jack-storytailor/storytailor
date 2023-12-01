@@ -6,7 +6,7 @@ import { ParsingErrorType, IDiagnostic } from "../shared/IParsingError";
 import { KeywordType } from "../ast/KeywordType";
 import { VariableDeclarationKind } from "../ast/VariableDeclarationKind";
 import { OperatorType } from "../ast/OperatorType";
-import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstStringIncludeStatement, IAstBoolean, IAstArray, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstVariableDeclaration, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstParenExpression, IAstObjectExpression, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstRegexLiteral, IAstVariableListDeclaration } from "../ast/IAstNode";
+import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstStringIncludeStatement, IAstBoolean, IAstArray, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstParenExpression, IAstObjectLiteral, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstRegexLiteral, IAstVariableDeclaration } from "../ast/IAstNode";
 import { astFactory } from "../ast/astFactory";
 import { AstNodeType } from '../ast/AstNodeType';
 import { ISymbol } from "../ast/ISymbol";
@@ -456,12 +456,6 @@ export const parseTextLineStatement = (state: IParserState): IParseResult<IAstTe
 export const parseStatement = (state: IParserState, isMultiline: boolean): IParseResult<IAstNode> => {
 	if (isEndOfFile(state)) {
 		return undefined;
-	}
-
-	// var list declaration
-	let varListDeclarResult = parseVariableListDeclaration(state, isMultiline);
-	if (varListDeclarResult) {
-		return varListDeclarResult;
 	}
 
 	// var declaration
@@ -3317,9 +3311,15 @@ export const parseLiteral = (state: IParserState): IParseResult<IAstNode> => {
 	}
 
 	// array
-	let arrayResult = parseArrayLiteral(state, false);
+	let arrayResult = parseArrayLiteral(state, true);
 	if (arrayResult) {
 		return arrayResult;
+	}
+
+	// object literal
+	let objResult = parseObjectLiteral(state);
+	if (objResult) {
+		return objResult;
 	}
 
 	return undefined;
@@ -3763,7 +3763,7 @@ export const parseArrayLiteral = (state: IParserState, allowEmptyItems: boolean)
 		result
 	};
 }
-export const parseArrayElement = (state: IParserState, isMultiline, allowEmptyItems: boolean): IParseResult<IAstNode> => {
+export const parseArrayElement = (state: IParserState, isMultiline: boolean, allowEmptyItems: boolean): IParseResult<IAstNode> => {
 	if (isEndOfFile(state)) {
 		return undefined;
 	}
@@ -3793,24 +3793,123 @@ export const parseArrayElement = (state: IParserState, isMultiline, allowEmptyIt
 
 	return undefined;
 }
-export const parseArrayItem = (state: IParserState): IParseResult<IAstNode> => {
+export const parseObjectLiteral = (state: IParserState): IParseResult<IAstObjectLiteral> => {
 	if (isEndOfFile(state)) {
 		return undefined;
 	}
 
-	// literal
-	let literalResult = parseLiteral(state);
-	if (literalResult) {
-		return literalResult;
+	// parse array scope
+	let scopeResult = parseScope(
+		state,
+		(state) => parseTokenSequence(state, [CodeTokenType.BraceOpen]),
+		(state) => parseObjectLiteralItem(state, true),
+		(state) => parseTokenSequence(state, [CodeTokenType.BraceClose]),
+		(state) => skipComments(state, true, true),
+		undefined,
+		(state) => parseTokenSequence(state, [CodeTokenType.Comma])
+	);
+	if (!scopeResult) {
+		return undefined;
 	}
 
-	// expression
-	let expressionResult = parseExpression(state, true);
+	// prepare result
+	state = scopeResult.state;
+	let scope = scopeResult.result;
+	let arrayContent = scope.content;
+	let start = scope.start;
+	let end = scope.end;
+	let result = astFactory.objectLiteral(arrayContent, start, end);
+
+	return {
+		state,
+		result
+	};
+}
+export const parseObjectLiteralItem = (state: IParserState, isMultiline: boolean): IParseResult<IAstNode> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	let propertyResult = parseObjectProperty(state, isMultiline);
+	if (propertyResult) {
+		return propertyResult;
+	}
+
+	let expressionResult = parseExpression(state, isMultiline);
 	if (expressionResult) {
 		return expressionResult;
 	}
 
 	return undefined;
+}
+export const parseObjectProperty = (state: IParserState, isMultiline: boolean): IParseResult<IAstPropertyDeclaration> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	const start = getCursorPosition(state);
+
+	// parse identifier
+	let identifier: IAstNode = undefined;
+	let literalIdentResult = parseStringLiteral(state, false);
+	if (literalIdentResult) {
+		state = literalIdentResult.state;
+		identifier = literalIdentResult.result;
+	}
+	else {
+		let identifierResult = parseAnyIdentifier(state);
+		if (identifierResult) {
+			state = identifierResult.state;
+			identifier = identifierResult.result;
+		} else {
+			let arrayResult = parseArrayLiteral(state, false);
+			if (arrayResult != null) {
+				state = arrayResult.state;
+				identifier = arrayResult.result;
+			}
+		}
+	}
+
+	if (!identifier) {
+		return undefined;
+	}
+	const end = identifier?.end;
+
+	state = skipComments(state, true, isMultiline);
+
+	let value: IAstNode;
+	let initializer: IAstNode;
+
+	// parse =
+	if (getTokenOfType(state, [CodeTokenType.Equals])) {
+		state = skipTokens(state, 1);
+		state = skipComments(state, true, isMultiline);
+
+		// parse value
+		let valueResult = parseExpression(state, isMultiline);
+		if (valueResult) {
+			state = valueResult.state;
+			initializer = valueResult.result;
+		}
+	}
+	// parse colon
+	else if (getTokenOfType(state, [CodeTokenType.Colon])) {
+		state = skipTokens(state, 1);
+		state = skipComments(state, true, isMultiline);
+
+		// parse value
+		let valueResult = parseExpression(state, isMultiline);
+		if (valueResult) {
+			state = valueResult.state;
+			value = valueResult.result;
+		}
+	}
+
+	let result = astFactory.propertyDeclaration(identifier, value, initializer, start, end);
+	return {
+		state,
+		result
+	}
 }
 
 // identifiers
@@ -4092,85 +4191,6 @@ export const parseVariableDeclaration = (state: IParserState, isMultiline: boole
 		default: return undefined;
 	}
 
-	// following algorithm can be broken by semicolon or endline, so let's wrap it in while scope that we can easilly break
-	let identifier: IAstNode = undefined;
-	let initValue: IAstNode = undefined;
-
-	state = skipComments(state, true, isMultiline);
-	
-	let identifierResult = parseAnyIdentifier(state);
-	if (identifierResult) {
-		state = identifierResult.state;
-		identifier = identifierResult.result;
-	}
-	else {
-		// parse object expression
-		let objResult = parseObjectExpression(state);
-		if (objResult) {
-			state = objResult.state;
-			identifier = objResult.result;
-		}
-	}
-
-	state = skipComments(state, true, isMultiline);
-
-	// parse equals
-	if (getTokenOfType(state, [CodeTokenType.Equals])) {
-		/// skip equals token
-		state = skipTokens(state, 1);
-
-		state = skipComments(state, true, isMultiline);
-
-		// parse init value expression
-		let expressionResult = parseExpression(state, isMultiline);
-		if (expressionResult) {
-			state = expressionResult.state;
-			initValue = expressionResult.result;
-		}
-	}
-	
-	// prepare result
-	let end = getCursorPosition(state);
-	let result = astFactory.variableDeclaration(identifier, kind, initValue, start, end);
-	return {
-		state,
-		result
-	}
-}
-export const parseVariableListDeclaration = (state: IParserState, isMultiline: boolean): IParseResult<IAstVariableListDeclaration> => {
-	if (isEndOfFile(state)) {
-		return undefined;
-	}
-
-	// save start position
-	let start = getCursorPosition(state);
-
-	// var|let|const Identifier = Expression
-
-	// parse keyword
-	let keywordResult = parseKeywordOfType(state, [KeywordType.Var, KeywordType.Let, KeywordType.Const]);
-	if (!keywordResult) {
-		return undefined;
-	}
-	let keyword = keywordResult.result;
-	state = keywordResult.state;
-
-	// read declaration kind
-	let kind: VariableDeclarationKind = undefined;
-	switch (keyword.keywordType) {
-		case KeywordType.Var: {
-			kind = VariableDeclarationKind.Var;
-		} break;
-		case KeywordType.Const: {
-			kind = VariableDeclarationKind.Const;
-		} break;
-		case KeywordType.Let: {
-			kind = VariableDeclarationKind.Let;
-		} break;
-
-		default: return undefined;
-	}
-
 	// prepare break tokens
 	let breakTokens = [CodeTokenType.Endfile, CodeTokenType.Semicolon];
 
@@ -4188,7 +4208,7 @@ export const parseVariableListDeclaration = (state: IParserState, isMultiline: b
 		} 
 		else {
 			// parse object expression
-			let objResult = parseObjectExpression(state);
+			let objResult = parseObjectLiteral(state);
 			if (objResult) {
 				state = objResult.state;
 				identifiers.push(objResult.result);
@@ -4316,91 +4336,6 @@ export const parseFunctionDeclaration = (state: IParserState, isMultiline: boole
 	return {
 		state,
 		result
-	}
-}
-export const parsePropertyDeclaration = (state: IParserState): IParseResult<IAstPropertyDeclaration> => {
-	if (isEndOfFile(state)) {
-		return undefined;
-	}
-
-	let start = getCursorPosition(state);
-	// identifier : value
-
-	// identifier
-	let identifier: IAstNode = undefined;
-	let stringResult = parseStringLiteral(state, false);
-	if (stringResult) {
-		identifier = stringResult.result;
-		state = stringResult.state;
-	}
-	else {
-		let identifierResult = parseAnyIdentifier(state);
-		if (identifierResult) {
-			state = identifierResult.state;
-			identifier = identifierResult.result;
-		}
-		else {
-			return undefined;
-		}		
-	}
-
-	let finalState = state;
-	let breakTokens = [CodeTokenType.Semicolon];
-	let initValue: IAstNode = undefined;
-	while (!isEndOfFile(state) && !getTokenOfType(state, breakTokens)) {
-		// skip comments and whitespace
-		let prevState = state;
-		state = skipComments(state, true, true);
-		if (state.cursor > prevState.cursor) {
-			continue;
-		}
-
-		// colon
-		if (getTokenOfType(state, [CodeTokenType.Colon])) {
-			// skip colon
-			state = skipTokens(state, 1);
-
-			// skip comments and whitespace
-			state = skipComments(state, true, true);
-
-			let functionResult = parseFunctionExpression(state, true);
-			if (functionResult) {
-				state = functionResult.state;
-				initValue = functionResult.result;
-				finalState = state;
-				break;
-			}
-
-			// parse expression
-			let expressionResult = parseExpression(state, true);
-			if (expressionResult) {
-				state = expressionResult.state;
-				initValue = expressionResult.result;
-				finalState = state;
-			}
-		}
-
-		break;
-	}
-	state = finalState;
-
-	// skip comments and whitespace
-	state = skipComments(state, true, true);
-
-	// skip comma
-	if (getTokenOfType(state, [CodeTokenType.Comma])) {
-		state = skipTokens(state, 1);
-		finalState = state;
-	}
-	state = finalState;
-
-	// prepare result
-	let end = getCursorPosition(state);
-	let result = astFactory.propertyDeclaration(identifier, initValue, start, end);
-
-	return {
-		result,
-		state
 	}
 }
 
@@ -4616,12 +4551,6 @@ export const parseOperand = (state: IParserState, isMultiline: boolean): IParseR
 		return funcExpression;
 	}
 
-	// object expression
-	let objectExpressionResult = parseObjectExpression(state);
-	if (objectExpressionResult) {
-		return objectExpressionResult;
-	}
-
 	// paren expression
 	let parenExpressionResult = parseParenExpression(state);
 	if (parenExpressionResult) {
@@ -4734,102 +4663,6 @@ export const parseParenExpression = (state: IParserState): IParseResult<IAstPare
 	return {
 		result,
 		state
-	}
-}
-export const parseObjectExpression = (state: IParserState): IParseResult<IAstObjectExpression> => {
-	if (isEndOfFile(state)) {
-		return undefined;
-	}
-
-	let start = getCursorPosition(state);
-
-	// parse open brace
-	if (!getTokenOfType(state, [CodeTokenType.BraceOpen])) {
-		return undefined;
-	}
-	state = skipTokens(state, 1);
-
-	// parse properties
-	let properties: IAstNode[] = [];
-	let finalState = state;
-	do {
-		// check end token
-		if (isEndOfFile(state) || getTokenOfType(state, [CodeTokenType.BraceClose])) {
-			break;
-		}
-
-		let prevState = state;
-		state = skipComments(state, true, true);
-		finalState = state;
-		if (state.cursor > prevState.cursor) {
-			continue;
-		}
-
-		// parse property
-		let propertyResult = parsePropertyDeclaration(state);
-		if (propertyResult) {
-			state = propertyResult.state;
-			properties = [
-				...properties,
-				propertyResult.result
-			];
-			finalState = state;
-
-			continue;
-		}
-		else {
-			// if no property parsed
-			// parse expression
-			let expressionResult = parseStatement(state, true);
-			if (expressionResult) {
-				state = expressionResult.state,
-					properties = [
-						...properties,
-						expressionResult.result
-					];
-				finalState = state;
-
-				continue;
-			}
-		}
-
-		// skip separator
-		if (getTokenOfType(state, [CodeTokenType.Comma])) {
-			state = skipTokens(state, 1);
-
-			continue;
-		}
-
-		// if we here, that means this is invalid token
-		let errorStart = getCursorPosition(state);
-		let errorToken = getToken(state);
-		state = skipTokens(state, 1);
-		let errorEnd = getCursorPosition(state);
-
-		state = addParsingError(
-			state,
-			ParsingErrorType.Error,
-			`Invalid token '${errorToken.value || errorToken.type}'`,
-			errorStart,
-			errorEnd
-		);
-		finalState = state;
-
-	} while (!isEndOfFile(state));
-	state = finalState;
-
-	// parse close brace
-	if (getTokenOfType(state, [CodeTokenType.BraceClose])) {
-		state = skipTokens(state, 1);
-	}
-
-	// prepare result 
-	let end = getCursorPosition(state);
-	let result = astFactory.objectExpression(properties, start, end);
-
-	return {
-		state,
-		result
 	}
 }
 export const parseCallExpression = (state: IParserState, leftOperand: IAstNode, isMultiline: boolean): IParseResult<IAstCallExpression> => {

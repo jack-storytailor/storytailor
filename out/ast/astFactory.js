@@ -200,19 +200,9 @@ exports.astFactory = {
             isGenerator
         };
     },
-    variableDeclaration: (identifier, kind, value, start, end) => {
-        return {
-            nodeType: AstNodeType_1.AstNodeType.VariableDeclaration,
-            start,
-            end,
-            identifier,
-            kind,
-            value
-        };
-    },
     variableListDeclaration: (identifiers, kind, value, start, end) => {
         return {
-            nodeType: AstNodeType_1.AstNodeType.VariableListDeclaration,
+            nodeType: AstNodeType_1.AstNodeType.VariableDeclaration,
             start,
             end,
             identifiers,
@@ -220,13 +210,14 @@ exports.astFactory = {
             value
         };
     },
-    propertyDeclaration: (identifier, value, start, end) => {
+    propertyDeclaration: (identifier, value, initializer, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.PropertyDeclaration,
             start,
             end,
             identifier,
-            value
+            value,
+            initializer
         };
     },
     // statements
@@ -426,9 +417,9 @@ exports.astFactory = {
             expression
         };
     },
-    objectExpression: (properties, start, end) => {
+    objectLiteral: (properties, start, end) => {
         return {
-            nodeType: AstNodeType_1.AstNodeType.ObjectExpression,
+            nodeType: AstNodeType_1.AstNodeType.ObjectLiteral,
             start,
             end,
             properties

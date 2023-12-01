@@ -28,7 +28,6 @@ var AstNodeType;
     // declarations
     AstNodeType["FunctionDeclaration"] = "FunctionDeclaration";
     AstNodeType["VariableDeclaration"] = "VariableDeclaration";
-    AstNodeType["VariableListDeclaration"] = "VariableListDeclaration";
     AstNodeType["PropertyDeclaration"] = "PropertyDeclaration";
     // statements
     AstNodeType["Statement"] = "Statement";
@@ -54,7 +53,7 @@ var AstNodeType;
     AstNodeType["AwaitExpression"] = "AwaitExpression";
     AstNodeType["YieldExpression"] = "YieldExpression";
     AstNodeType["ParenExpression"] = "ParenExpression";
-    AstNodeType["ObjectExpression"] = "ObjectExpression";
+    AstNodeType["ObjectLiteral"] = "ObjectLiteral";
     AstNodeType["CallExpression"] = "CallExpression";
     AstNodeType["OperationExpression"] = "OperationExpression";
     AstNodeType["UpdateExpression"] = "UpdateExpression";

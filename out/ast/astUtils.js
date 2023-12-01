@@ -134,19 +134,13 @@ const childrenRegistry = {
         if (!ast) {
             return undefined;
         }
-        return [ast.identifier, ast.value];
-    },
-    VariableListDeclaration: (ast) => {
-        if (!ast) {
-            return undefined;
-        }
         return [...ast.identifiers, ast.value];
     },
     PropertyDeclaration: (ast) => {
         if (!ast) {
             return undefined;
         }
-        return [ast.identifier, ast.value];
+        return [ast.identifier, ast.value, ast.initializer];
     },
     Statement: (ast) => {
         if (!ast) {
@@ -836,26 +830,6 @@ exports.astUtils = {
                 });
                 break;
             }
-            case AstNodeType_1.AstNodeType.VariableListDeclaration: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.VariableListDeclaration);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        operation(child);
-                    }
-                });
-                break;
-            }
             case AstNodeType_1.AstNodeType.PropertyDeclaration: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.PropertyDeclaration);
                 if (!astNode) {
@@ -1296,8 +1270,8 @@ exports.astUtils = {
                 });
                 break;
             }
-            case AstNodeType_1.AstNodeType.ObjectExpression: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ObjectExpression);
+            case AstNodeType_1.AstNodeType.ObjectLiteral: {
+                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ObjectLiteral);
                 if (!astNode) {
                     return;
                 }
@@ -2193,30 +2167,6 @@ exports.astUtils = {
                 });
                 break;
             }
-            case AstNodeType_1.AstNodeType.VariableListDeclaration: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.VariableListDeclaration);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        let operation = operations[child.nodeType] || defaultOp;
-                        if (!operation) {
-                            return;
-                        }
-                        operation(child);
-                    }
-                });
-                break;
-            }
             case AstNodeType_1.AstNodeType.PropertyDeclaration: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.PropertyDeclaration);
                 if (!astNode) {
@@ -2745,8 +2695,8 @@ exports.astUtils = {
                 });
                 break;
             }
-            case AstNodeType_1.AstNodeType.ObjectExpression: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ObjectExpression);
+            case AstNodeType_1.AstNodeType.ObjectLiteral: {
+                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ObjectLiteral);
                 if (!astNode) {
                     return;
                 }
