@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseCompileRequest = exports.createCompilerState = exports.compileProject = exports.compile = void 0;
+exports.parseCompileRequest = exports.createCompilerState = exports.compileProject = exports.compileProjectWithAcorn = exports.compile = void 0;
 const path = require("path");
 const fs = require("fs");
 const configUtils = require("../configuration/configUtils");
@@ -11,6 +11,7 @@ const astParser = require("../parsing/astParser");
 const jsCompiler = require("../compilation/jsCompiler");
 const ICompilerState_1 = require("../shared/ICompilerState");
 const IParsingError_1 = require("../shared/IParsingError");
+const acornParser_1 = require("../acorn/acornParser");
 // import { collectBindings, ICollectBindingsRequest } from '../parsing/astBinder';
 const compile = (request) => {
     let state = undefined;
@@ -18,6 +19,7 @@ const compile = (request) => {
         console.log(`storytailor compilation started`, request);
         state = (0, exports.createCompilerState)(request);
         // compile storytailor
+        (0, exports.compileProjectWithAcorn)(state);
         state = (0, exports.compileProject)(state);
         console.log('storytailor compilation finished with status ', state.status);
         // execute compiled program to serialize requested module
@@ -45,6 +47,117 @@ const compile = (request) => {
     return state;
 };
 exports.compile = compile;
+const compileProjectWithAcorn = (state) => {
+    if (!state) {
+        return undefined;
+    }
+    if (!state.config) {
+        return state;
+    }
+    let sourceFileNames = state.sourceFileNames;
+    let jsFileNames = state.javascriptFileNames;
+    let config = state.config;
+    let sourceFileName = undefined;
+    console.time("all_files");
+    // for each file read file content, tokenize, parse and save as js/ts
+    for (let i = 0; i < sourceFileNames.length; i++) {
+        try {
+            // check source file existence
+            sourceFileName = sourceFileNames[i];
+            console.time(sourceFileName);
+            if (!fs.existsSync(sourceFileName)) {
+                console.timeEnd(sourceFileName);
+                state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Warning, `file ${sourceFileName} doesn't exists`, undefined, undefined, 1, sourceFileName);
+                continue;
+            }
+            // read source file
+            let sourceFileContent = fs.readFileSync(sourceFileName).toString();
+            const compileResult = acornParser_1.acornParser.parse(sourceFileContent);
+            // tokenize source file
+            let tokens = stsTokenizer_1.stsTokenizer.tokenizeCode(sourceFileContent);
+            if (!tokens) {
+                console.timeEnd(sourceFileName);
+                state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Warning, `can't tokenize ${sourceFileName} file;`, undefined, undefined, 1, sourceFileName);
+                continue;
+            }
+            // print compiled
+            let outputFileContent = '';
+            let outputSourceMapFileContent = '';
+            // parse sts
+            let parserConfig = {
+                indentSize: config.indentSize
+            };
+            let parseResult = astParser.parseModule(tokens, sourceFileName, parserConfig);
+            const targetFileName = jsFileNames && jsFileNames.length > i ? jsFileNames[i] : undefined;
+            if (parseResult) {
+                let astModule = parseResult.result;
+                let parsingState = parseResult.state;
+                // check if there was parsing errors
+                if (parsingState.errors) {
+                    let parsingErrors = parsingState.errors;
+                    for (let i = 0; i < parsingErrors.length; i++) {
+                        let diagnostic = parsingErrors[i];
+                        diagnostic = Object.assign(Object.assign({}, diagnostic), { source: sourceFileName });
+                        state = addDiagnostic(state, diagnostic);
+                    }
+                }
+                // // TEMP: Collect bindings
+                // let collectBindingsRequest: ICollectBindingsRequest = {
+                //   ast: astModule
+                // };
+                // let collectBindingsResult = collectBindings(collectBindingsRequest);
+                // compile ast
+                let compileResult = jsCompiler.compile({
+                    ast: [astModule],
+                    environmentPath: config.environmentPath,
+                    outputRoot: config.javascriptOutputRoot,
+                    sourceFileName: sourceFileName,
+                    sourceRoot: config.sourceRoot,
+                    targetFileName: targetFileName,
+                    isEmitSourcemaps: config.isEmitSourceMaps,
+                    indentSize: config.indentSize
+                });
+                if (compileResult) {
+                    outputFileContent = compileResult.javascript;
+                    outputSourceMapFileContent = compileResult.sourceMaps;
+                }
+            }
+            // save javascript file if needed
+            if (config.isEmitJavascript === true) {
+                const outputFileName = jsFileNames && jsFileNames.length > i ? jsFileNames[i] : undefined;
+                if (!outputFileName) {
+                    console.timeEnd(sourceFileName);
+                    state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Error, `can't create corresponding javascript file name for the file ${sourceFileName};`, undefined, undefined, 1, sourceFileName);
+                    continue;
+                }
+                try {
+                    const outputDir = path.dirname(outputFileName);
+                    fsUtils.mkDirByPathSync(outputDir);
+                    // print js file
+                    fs.writeFileSync(outputFileName, outputFileContent);
+                    // now print the source maps
+                    if (config.isEmitSourceMaps === true && outputSourceMapFileContent) {
+                        const outputSourceMapFileName = `${outputFileName}.map`;
+                        fs.writeFileSync(outputSourceMapFileName, outputSourceMapFileContent);
+                    }
+                }
+                catch (error) {
+                    console.timeEnd(sourceFileName);
+                    state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Error, `can't save file ${outputFileName}. error ${error.message}; ${error};`, undefined, undefined, 1, sourceFileName);
+                }
+            }
+        }
+        catch (error) {
+            console.timeEnd(sourceFileName);
+            state = addErrorAndLog(state, IParsingError_1.ParsingErrorType.Error, `error while compiling ${sourceFileName}. error ${error.message}; ${error};`, undefined, undefined, 1, sourceFileName);
+            continue;
+        }
+        console.timeEnd(sourceFileName);
+    }
+    console.timeEnd("all_files");
+    return state;
+};
+exports.compileProjectWithAcorn = compileProjectWithAcorn;
 const compileProject = (state) => {
     if (!state) {
         return undefined;
