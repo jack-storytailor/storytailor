@@ -294,16 +294,27 @@ export const parseObjectLine = (state: IParserState): IParseResult<IAstObjectLin
 		return undefined;
 	}
 
-	// Object Name: Prototype || Object Name = Value Expression
-
 	// identifier [tags] [= initExpression]
-	let identifierResult = parseAnyIdentifier(state);
-	if (!identifierResult) {
+	let identifier: IAstNode = undefined;
+
+	let identifierScopeResult = parseIdentifierScope(state);
+	if (identifierScopeResult) {
+		identifier = identifierScopeResult.result;
+		state = identifierScopeResult.state;
+	}
+	else {
+		let objectLineIdentifier = parseObjectLineIdentifier(state);
+		if (objectLineIdentifier) {
+			identifier = objectLineIdentifier.result;
+			state = objectLineIdentifier.state;
+		}
+	}
+
+	if (!identifier) {
 		return undefined;
 	}
-	const identifier = identifierResult.result;
+
 	const start = identifier?.start;
-	state = identifierResult.state;
 
 	// skip comments
 	state = skipComments(state, true, false);
@@ -3287,12 +3298,6 @@ export const parseLiteral = (state: IParserState): IParseResult<IAstNode> => {
 	}
 
 	// number
-	let regexLiteralResult = parseRegexLiteral(state);
-	if (regexLiteralResult) {
-		return regexLiteralResult;
-	}
-
-	// number
 	let numberResult = parseNumberLiteral(state);
 	if (numberResult) {
 		return numberResult;
@@ -3320,6 +3325,12 @@ export const parseLiteral = (state: IParserState): IParseResult<IAstNode> => {
 	let objResult = parseObjectLiteral(state);
 	if (objResult) {
 		return objResult;
+	}
+
+	// regex
+	let regexLiteralResult = parseRegexLiteral(state);
+	if (regexLiteralResult) {
+		return regexLiteralResult;
 	}
 
 	return undefined;
@@ -4044,6 +4055,49 @@ export const parseIdentifierScope = (state: IParserState): IParseResult<IAstIden
 
 	// prepare result
 	let result = astFactory.IdentifierScope(value, start, end);
+
+	return {
+		result,
+		state
+	}
+}
+export const parseObjectLineIdentifier = (state: IParserState): IParseResult<IAstIdentifier> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	let start = getCursorPosition(state);
+
+	// parse everything until the end of line or the '=' symbol
+	const resultValues = [];
+	let isEscaping: boolean = false;
+	while (!isEndOfFile(state)) {
+		const token = getToken(state);
+		if (token.type == CodeTokenType.Endline || token.type == CodeTokenType.Endfile) {
+			break;
+		}
+
+		if (!isEscaping && token.type == CodeTokenType.Equals) {
+			break;
+		}
+
+		state = skipTokens(state, 1);
+		resultValues.push(token.value ?? '');
+
+		if (!isEscaping) {
+			state = skipComments(state, false, false);
+		}
+
+		if (token.type == CodeTokenType.Slash) {
+			isEscaping = !isEscaping;
+		}
+	}
+
+	let value = resultValues.join('').trim();
+	let end = getCursorPosition(state);
+
+	// prepare result
+	let result = astFactory.identifier(value, start, end);
 
 	return {
 		result,
