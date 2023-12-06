@@ -65,7 +65,9 @@ for (const key in Separators) {
 
 export enum NodeTypes {
 	OuterTextLine = "OuterTextLine",
-	OuterDeclaration = "OuterDeclaration"
+	OuterDeclaration = "OuterDeclaration",
+	TextLineInclude = "TextLineInclude",
+	TextLineWord = "TextLineWord"
 }
 
 export interface IOuterExpression extends acorn.Node {
@@ -256,6 +258,14 @@ function storyTailor(Parser) {
 			return this.input.slice(startPos, this.pos);
 		}
 		skipComments(): boolean {
+			const ctx = this.curContext();
+
+			const isSkipSpaces: boolean = ctx.preserveSpace !== true;
+			
+			if (isSkipSpaces) {
+				this.skipSpace();
+			}
+			
 			// skip one line comment
 			while (this.skipSingleLineComment() === true) {
 				return true;
@@ -265,6 +275,8 @@ function storyTailor(Parser) {
 			let isSkipped = false;
 			while (this.skipMultilineComment() === true) {
 				isSkipped = true;
+
+				this.skipSpace();
 			}
 
 			return isSkipped;
@@ -306,6 +318,29 @@ function storyTailor(Parser) {
 			return true;
 		}
 
+		parseIndent(context, topLevel, exports) {
+			if (topLevel !== true) {
+				return undefined;
+			}
+
+			try {
+				// parse tab symbols
+				let indent = 0;
+
+				while (!this.isEndOfFile()) {
+					if (this.value == '\t') {
+						indent++;
+						this.nextToken();
+						continue;
+					}
+					break;
+				}
+
+				return indent;
+			} catch (error) {
+				return undefined;
+			}
+		}
 		parseTopLevel(node) {
 			return super.parseTopLevel(node);
 		}
@@ -422,12 +457,23 @@ function storyTailor(Parser) {
 						break;
 					}
 
-					resultValues.push(this.value);
+					const textInclude = this.parseTextLineInclude(context, topLevel, exports);
+					if (textInclude) {
+						resultValues.push(textInclude);
+					}
+					else {
+						const wordNode = {
+							type: NodeTypes.TextLineWord,
+							value: this.value
+						}
+						resultValues.push(wordNode);
+					}
+
 					this.nextToken();
 				}
 
 				result.end = this.pos;
-				result.value = resultValues.join('');
+				result.value = resultValues;
 
 				if (this.isEndOfFile()) {
 					this.nextToken();
@@ -438,29 +484,44 @@ function storyTailor(Parser) {
 				return undefined;
 			}
 		}
-		parseIndent(context, topLevel, exports) {
-			if (topLevel !== true) {
+		parseTextLineInclude(context, topLevel, exports) {
+			if (this.isEndOfFile()) {
 				return undefined;
 			}
 
+			if (this.value !== "*") {
+				return undefined;
+			}
+
+			// skip star
+			this.nextToken();
+
+			let result = undefined;
 			try {
-				// parse tab symbols
-				let indent = 0;
+				this.context.pop();
 
-				while (!this.isEndOfFile()) {
-					if (this.value == '\t') {
-						indent++;
-						this.nextToken();
-						continue;
-					}
-					break;
+				// skip comments
+				this.skipComments();
+
+				// parse expression
+				result = super.parseExpression();
+
+				// skip comments
+				this.skipComments();
+
+				// skip ;
+				if (this.value === ";") {
+					this.nextToken();
 				}
-
-				return indent;
 			} catch (error) {
-				return undefined;
+				console.error(error);
+			} finally {
+				this.context.push(this.outerLineContext);
 			}
+
+			return result;
 		}
+
 		isOuterCodeBlock(context, topLevel, exports): boolean {
 			if (topLevel !== true) {
 				return false;

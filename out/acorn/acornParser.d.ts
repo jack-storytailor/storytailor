@@ -39,7 +39,9 @@ export declare const allSeparators: any[];
 export declare const sortedSeparators: {};
 export declare enum NodeTypes {
     OuterTextLine = "OuterTextLine",
-    OuterDeclaration = "OuterDeclaration"
+    OuterDeclaration = "OuterDeclaration",
+    TextLineInclude = "TextLineInclude",
+    TextLineWord = "TextLineWord"
 }
 export interface IOuterExpression extends acorn.Node {
 }
