@@ -35,6 +35,8 @@ export declare enum AstNodeType {
     ForInStatement = "ForInStatement",
     ForOfStatement = "ForOfStatement",
     ImportStatement = "ImportStatement",
+    RawImportStatement = "RawImportStatement",
+    ImportItem = "ImportItem",
     TryStatement = "TryStatement",
     CatchStatement = "CatchStatement",
     FinallyStatement = "FinallyStatement",

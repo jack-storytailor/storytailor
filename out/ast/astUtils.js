@@ -218,7 +218,7 @@ const childrenRegistry = {
         if (!ast) {
             return undefined;
         }
-        return [ast.identifier, ast.alias, ast.path];
+        return [ast.identifier, ast.path];
     },
     TryStatement: (ast) => {
         if (!ast) {

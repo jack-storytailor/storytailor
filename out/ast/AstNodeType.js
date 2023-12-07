@@ -44,6 +44,8 @@ var AstNodeType;
     AstNodeType["ForInStatement"] = "ForInStatement";
     AstNodeType["ForOfStatement"] = "ForOfStatement";
     AstNodeType["ImportStatement"] = "ImportStatement";
+    AstNodeType["RawImportStatement"] = "RawImportStatement";
+    AstNodeType["ImportItem"] = "ImportItem";
     AstNodeType["TryStatement"] = "TryStatement";
     AstNodeType["CatchStatement"] = "CatchStatement";
     AstNodeType["FinallyStatement"] = "FinallyStatement";

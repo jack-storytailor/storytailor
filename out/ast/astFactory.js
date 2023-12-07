@@ -338,15 +338,32 @@ exports.astFactory = {
             body
         };
     },
-    importStatement: (alias, identifier, importInContext, path, start, end) => {
+    importStatement: (identifier, importInContext, path, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.ImportStatement,
             start,
             end,
-            alias,
             path,
             identifier,
             importInContext
+        };
+    },
+    rawImportStatement: (identifier, path, start, end) => {
+        return {
+            nodeType: AstNodeType_1.AstNodeType.RawImportStatement,
+            identifier,
+            path,
+            start,
+            end
+        };
+    },
+    importItem: (identifier, alias, start, end) => {
+        return {
+            nodeType: AstNodeType_1.AstNodeType.ImportItem,
+            identifier,
+            alias,
+            start,
+            end
         };
     },
     tryStatement: (body, catchClause, finallyBlock, start, end) => {

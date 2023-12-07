@@ -6,7 +6,7 @@ import { ParsingErrorType, IDiagnostic } from "../shared/IParsingError";
 import { KeywordType } from "../ast/KeywordType";
 import { VariableDeclarationKind } from "../ast/VariableDeclarationKind";
 import { OperatorType } from "../ast/OperatorType";
-import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstStringIncludeStatement, IAstBoolean, IAstArray, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstParenExpression, IAstObjectLiteral, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstRegexLiteral, IAstVariableDeclaration } from "../ast/IAstNode";
+import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstStringIncludeStatement, IAstBoolean, IAstArray, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstParenExpression, IAstObjectLiteral, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstRegexLiteral, IAstVariableDeclaration, IAstImportItem } from "../ast/IAstNode";
 import { astFactory } from "../ast/astFactory";
 import { AstNodeType } from '../ast/AstNodeType';
 import { ISymbol } from "../ast/ISymbol";
@@ -275,6 +275,18 @@ export const parseOuterStatementContent = (state: IParserState): IParseResult<IA
 		return deleteLineResult;
 	}
 
+	// parse import
+	const importResult = parseImportStatement(state, false);
+	if (importResult) {
+		return importResult;
+	}
+
+	// raw import
+	const rawImportResult = parseRawImportStatement(state, false);
+	if (rawImportResult) {
+		return rawImportResult;
+	}
+
 	// Parse Object Line Statement
 	let objectLineResult = parseObjectLine(state);
 	if (objectLineResult) {
@@ -421,11 +433,17 @@ export const parseTextLineStatement = (state: IParserState): IParseResult<IAstTe
 
 	// parse text line as string literal content
 	let content: IAstNode[] = [];
+	let isSkippedLine: boolean = false;
 	while (!isEndOfFile(state) && !getTokenOfType(state, [CodeTokenType.Endline])) {
+		const contextSymbol = getCursorPosition(state)?.symbol;
 		// skip comments
 		state = skipComments(state, false, false);
 
+		// end line ends the text line. If it's a commented line
 		if (isEndOfFile(state) || getTokenOfType(state, [CodeTokenType.Endline])) {
+			if (getCursorPosition(state)?.symbol !== contextSymbol) {
+				isSkippedLine = true;
+			}
 			break;
 		}
 
@@ -450,13 +468,14 @@ export const parseTextLineStatement = (state: IParserState): IParseResult<IAstTe
 
 	let end = getCursorPosition(state);
 
-
-	let result: IAstTextLineStatement = astFactory.textLineStatement(
-		indent,
-		content,
-		start,
-		end
-	);
+	let result: IAstTextLineStatement = isSkippedLine 
+		? undefined 
+		: astFactory.textLineStatement(
+			indent,
+			content,
+			start,
+			end
+		);
 
 	return {
 		state: state,
@@ -542,9 +561,15 @@ export const parseStatement = (state: IParserState, isMultiline: boolean): IPars
 	}
 
 	// import
-	let importResult = parseImportStatement(state);
+	let importResult = parseImportStatement(state, isMultiline);
 	if (importResult) {
 		return importResult;
+	}
+
+	// raw import
+	const rawImportResult = parseRawImportStatement(state, isMultiline);
+	if (rawImportResult) {
+		return rawImportResult;
 	}
 
 	// try
@@ -2058,7 +2083,7 @@ export const parseForOfStatement = (state: IParserState, isMultiline: boolean): 
 	}
 
 }
-export const parseImportStatement = (state: IParserState): IParseResult<IAstImportStatement> => {
+export const parseImportStatement = (state: IParserState, isMultiline: boolean): IParseResult<IAstImportStatement> => {
 	if (isEndOfFile(state)) {
 		return undefined;
 	}
@@ -2074,7 +2099,7 @@ export const parseImportStatement = (state: IParserState): IParseResult<IAstImpo
 		return undefined;
 	}
 	state = keywordResult.state;
-	state = skipComments(state, true);
+	state = skipComments(state, true, isMultiline);
 
 	// check if there is a 'in' variable next to the 'import': import in * as varname from "path"
 	let isImportInContext: boolean = false;
@@ -2085,97 +2110,37 @@ export const parseImportStatement = (state: IParserState): IParseResult<IAstImpo
 		state = skipComments(state, true);
 	}
 
-	// parse variable until $, as, from, operator
-	let variableStart: ISymbolPosition = getCursorPosition(state);
-	let variableEnd: ISymbolPosition = { ...variableStart };
-
-	let alias: IAstNode;
-
-	// parse star
-	let starToken = getTokenOfType(state, [CodeTokenType.Star]);
-	if (starToken) {
-		state = skipTokens(state, 1);
-		variableEnd = getCursorPosition(state);
-		alias = astFactory.identifier(starToken.value, variableStart, variableEnd);
-	}
-	else {
-		// if not star then parse variable
-		let variableResult = parseAnyIdentifier(state);
-		if (variableResult) {
-			state = variableResult.state;
-			alias = variableResult.result;
-		}
+	let variableResult = parseOperandIdentifier(state);//parseAnyIdentifier(state);
+	if (!variableResult) {
+		return undefined;
 	}
 
-	// parsing error if no varname
-	if (!alias) {
-		state = addParsingError(
-			state,
-			ParsingErrorType.Error,
-			"variable name expected",
-			variableEnd,
-			variableEnd
-		);
-	}
-
-	// parse alias
-	state = skipComments(state, true);
-	let aliasAst: IAstNode = undefined;
-	let asResult = getToken(state);
-	if (asResult && asResult.value === "as") {
-		state = skipTokens(state, 1);
-
-		// parse alias until $, from, operator
-		state = skipComments(state, true);
-		let varAliasResult = parseOperandIdentifier(state);
-		if (varAliasResult) {
-			state = varAliasResult.state;
-			aliasAst = varAliasResult.result;
-		}
-		else {
-			// if we have as keyword but no alias name, add parsing error
-			state = addParsingError(
-				state,
-				ParsingErrorType.Error,
-				"alias name expected",
-				getCursorPosition(state),
-				getCursorPosition(state)
-			);
-		}
-
-	}
+	state = variableResult.state;
+	const identifier = variableResult.result;
 
 	// parse from
 	state = skipComments(state, true);
 	let importPathAst: IAstNode = undefined;
-	let fromResult = getToken(state);
-	if (fromResult && fromResult.value === "from") {
-		state = skipTokens(state, 1);
-		state = skipComments(state, true);
+	let fromResult = parseKeywordOfType(state, [KeywordType.From]);
+	if (!fromResult) {
+		return undefined;
+	}
 
-		// parse import path
-		let importPathResult = parseImportPath(state);
-		if (importPathResult && importPathResult.result) {
-			state = importPathResult.state;
-			importPathAst = importPathResult.result;
-		}
-		else {
-			// no import path found
-			state = addParsingError(
-				state,
-				ParsingErrorType.Error,
-				"Import path expected",
-				getCursorPosition(state),
-				getCursorPosition(state)
-			);
-		}
+	state = fromResult.state;
+	state = skipComments(state, true, isMultiline);
+
+	// parse import path
+	let importPathResult = parseImportPath(state);
+	if (importPathResult) {
+		state = importPathResult.state;
+		importPathAst = importPathResult.result;
 	}
 	else {
-		// no from closure
+		// no import path found
 		state = addParsingError(
 			state,
 			ParsingErrorType.Error,
-			"from keyword expected",
+			"Import path expected",
 			getCursorPosition(state),
 			getCursorPosition(state)
 		);
@@ -2198,8 +2163,7 @@ export const parseImportStatement = (state: IParserState): IParseResult<IAstImpo
 
 	// prepare result
 	let result = astFactory.importStatement(
-		alias,
-		aliasAst,
+		identifier,
 		isImportInContext,
 		importPathAst,
 		start,
@@ -2252,6 +2216,151 @@ export const parseImportPath = (state: IParserState): IParseResult<IAstNode> => 
 	return {
 		result,
 		state
+	}
+}
+export const parseRawImportStatement = (state: IParserState, isMultiline: boolean) => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	const start = getCursorPosition(state);
+
+	// parse import
+	let keywordResult = parseKeywordOfType(state, [KeywordType.Import]);
+	if (!keywordResult) {
+		return undefined;
+	}
+	state = keywordResult.state;
+	state = skipComments(state, true);
+
+	// parse import item or import items
+	let identifier: IAstNode | IAstNode[] = undefined;
+	const importItemResult = parseImportItem(state, isMultiline);
+	if (importItemResult) {
+		state = importItemResult.state;
+		identifier = importItemResult.result;
+	}
+	else {
+		let scopeResult = parseScope(
+			skipComments(state, true, isMultiline),
+			(state) => parseTokenSequence(state, [CodeTokenType.BraceOpen]),
+			(state) => parseImportItem(state, isMultiline),
+			(state) => parseTokenSequence(state, [CodeTokenType.BraceClose]),
+			(state) => skipComments(state, true, isMultiline)
+		);
+
+		if (scopeResult) {
+			identifier = scopeResult.result.content;
+			state = scopeResult.state;
+		}
+	}
+
+	// skip comments
+	state = skipComments(state, true, isMultiline);
+
+	// parse from
+	const fromResult = parseKeywordOfType(state, [KeywordType.From]);
+	if (fromResult) {
+		state = fromResult.state;
+	}
+	else {
+		const errorPos = getCursorPosition(state);
+		state = addParsingError(state, ParsingErrorType.Error, "Expected 'from' keyword", errorPos, errorPos);
+	}
+
+	// skip comments
+	state = skipComments(state, true, isMultiline);
+
+	// parse path
+	let path: IAstNode = undefined;
+	const pathResult = parseImportPath(state);
+	if (pathResult) {
+		state = pathResult.state;
+		path = pathResult.result;
+	}
+
+	// done
+	const end = getCursorPosition(state);
+	const result = astFactory.rawImportStatement(identifier, path, start, end);
+	return {
+		state,
+		result
+	}
+}
+export const parseImportItem = (state: IParserState, isMultiline: boolean): IParseResult<IAstImportItem> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	const start = getCursorPosition(state);
+
+	// parse identifier
+	let identifier: IAstNode = undefined;
+	const identifierResult = parseIdentifier(state);
+	if (identifierResult) {
+		state = identifierResult.state;
+		identifier = identifierResult.result;
+	}
+	else {
+		// try to parse it as raw identifier
+		const rawIdentResult = parseRawIdentifier(state);
+		if (rawIdentResult) {
+			state = rawIdentResult.state;
+			identifier = rawIdentResult.result?.value;
+		}
+		else {
+			// not an identifier
+			// if there is no identifier, parse star
+			if (!getTokenOfType(state, [CodeTokenType.Star])) {
+				return undefined;
+			}
+
+			const starStart = getCursorPosition(state);
+			state = skipTokens(state, 1);
+			const starEnd = getCursorPosition(state);
+			identifier = astFactory.identifier('*', starStart, starEnd);
+		}
+	}
+
+	// we always parse it as raw identifier
+	identifier = astFactory.rawIndentifier(identifier, identifier?.start, identifier?.end);
+	state = skipComments(state, true, isMultiline);
+
+	// parse alias
+	let alias: IAstNode = undefined;
+	const asResult = parseKeywordOfType(state, [KeywordType.As]);
+	if (asResult) {
+		state = asResult.state;
+
+		// skip comments
+		state = skipComments(state, true, isMultiline);
+		
+		// parse alias
+		const aliasResult = parseIdentifier(state);
+		if (aliasResult) {
+			alias = aliasResult.result;
+			state = aliasResult.state;
+		}
+		else {
+			// try to parse raw identifier
+			const rawIdentifierResult = parseRawIdentifier(state);
+			if (rawIdentifierResult) {
+				alias = rawIdentifierResult.result?.value;
+			}
+		}
+
+		// we always parse the alias as raw identifier
+		if (alias) {
+			alias = astFactory.rawIndentifier(alias, alias?.start, alias?.end);
+		}
+	}
+
+	// done
+	const end = getCursorPosition(state);
+	const result: IAstImportItem = astFactory.importItem(identifier, alias, start, end);
+	return {
+		state,
+		result
 	}
 }
 export const parseTryStatement = (state: IParserState, isMultiline: boolean): IParseResult<IAstTryStatement> => {
@@ -2488,8 +2597,6 @@ export const parseThrowStatement = (state: IParserState, isMultiline: boolean): 
 		state
 	}
 }
-
-
 
 export const parseOperator = (state: IParserState): IParseResult<IAstOperator> => {
 	if (isEndOfFile(state)) {

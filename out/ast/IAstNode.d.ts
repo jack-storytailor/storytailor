@@ -151,9 +151,16 @@ export interface IAstForOfStatement extends IAstNode {
 }
 export interface IAstImportStatement extends IAstNode {
     identifier: IAstNode;
-    alias: IAstNode;
     path: IAstNode;
     importInContext: boolean;
+}
+export interface IAstRawImportStatement extends IAstNode {
+    identifier: IAstNode | IAstNode[];
+    path: IAstNode;
+}
+export interface IAstImportItem extends IAstNode {
+    identifier: IAstNode;
+    alias: IAstNode;
 }
 export interface IAstTryStatement extends IAstNode {
     body: IAstNode;

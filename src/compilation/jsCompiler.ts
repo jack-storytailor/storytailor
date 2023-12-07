@@ -1,4 +1,4 @@
-import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObjectLiteral, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstForOfStatement, IAstAwaitExpression, IAstYieldExpression, IAstRegexLiteral, IAstVariableDeclaration } from "../ast/IAstNode";
+import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObjectLiteral, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstForOfStatement, IAstAwaitExpression, IAstYieldExpression, IAstRegexLiteral, IAstVariableDeclaration, IAstRawImportStatement, IAstImportItem } from "../ast/IAstNode";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { SourceMapGenerator } from 'source-map';
 import { AstNodeType } from "../ast/AstNodeType";
@@ -566,6 +566,18 @@ export const compileAstNode = (ast: IAstNode, state: ICompilerState): ICompileRe
         return importResult;
     }
 
+	// raw import
+	const rawImportResult = compileRawImportStatement(ast, state);
+	if (rawImportResult) {
+		return rawImportResult;
+	}
+
+	// import item
+	const importItemResult = compileImportItem(ast, state);
+	if (importItemResult) {
+		return importItemResult;
+	}
+
     // for statement
     let forResult = compileForStatement(ast, state);
     if (forResult) {
@@ -897,7 +909,7 @@ export const compileStatement = (node: IAstNode, state: ICompilerState): ICompil
 }
 export const compileTextLine = (node: IAstNode, state: ICompilerState): ICompileResult<IAstTextLineStatement> => {
     let ast = astFactory.asNode<IAstTextLineStatement>(node, AstNodeType.TextLineStatement);
-    if (!ast || !state) {
+    if (!ast || !state || !ast.text) {
         return undefined;
     }
 
@@ -1838,6 +1850,93 @@ export const compileImportStatement = (node: IAstNode, state: ICompilerState): I
         state,
         result: ast
     }
+}
+export const compileRawImportStatement = (node: IAstNode, state: ICompilerState): ICompileResult<IAstRawImportStatement> => {
+	const ast = astFactory.asNode<IAstRawImportStatement>(node, AstNodeType.RawImportStatement);
+	if (!ast || !state) {
+		return undefined;
+	}
+
+	state = writeJsToken(state, 'import ');
+
+	// compile identifier as array
+	if (Array.isArray(ast.identifier)) {
+		state = writeJsToken(state, '{ ');
+
+		const identArray = ast.identifier as IAstNode[];
+
+		for (let iIndex = 0; iIndex < identArray.length; iIndex++) {
+			const element = identArray[iIndex];
+
+			if (iIndex > 0) {
+				state = writeJsToken(state, ', ');
+			}
+
+			const nodeResult = compileAstNode(element, state);
+			if (nodeResult) {
+				state = nodeResult.state;
+			}
+		}
+
+		state = writeJsToken(state, ' }');
+	}
+
+	// compile identifier as import item
+	let identItem = astFactory.asNode<IAstImportItem>(ast.identifier as IAstNode, AstNodeType.ImportItem);
+	if (identItem) {
+		const identItemResult = compileAstNode(identItem, state);
+		if (identItemResult) {
+			state = identItemResult.state;
+		}
+	}
+
+	// compile 'from' section
+	state = writeJsToken(state, ' from ');
+
+	const pathResult = compileAstNode(ast.path, state);
+	if (pathResult) {
+		state = pathResult.state;
+	}
+
+	// final semicolon
+	state = writeJsToken(state, ';');
+	state = writeEndline(state);
+
+	return {
+		state,
+		result: ast
+	}
+}
+export const compileImportItem = (node: IAstNode, state: ICompilerState): ICompileResult<IAstImportItem> => {
+	const ast = astFactory.asNode<IAstImportItem>(node, AstNodeType.ImportItem);
+	if (!ast || !state) {
+		return undefined;
+	}
+
+	const identifier = getIdentifierFromNode(ast.identifier, state);
+	if (identifier) {
+		state = addSourceMapAtCurrentPlace(state, identifier.value, identifier.start, 0, 0);
+	}
+	const identifierResult = compileAstNode(ast.identifier, state);
+	if (identifierResult) {
+		state = identifierResult.state;
+	}
+
+	state = writeJsToken(state, ' as ');
+
+	const alias = getIdentifierFromNode(ast.alias, state);
+	if (alias) {
+		state = addSourceMapAtCurrentPlace(state, alias.value, alias.start, 0, 0);
+	}
+	const aliasResult = compileAstNode(ast.alias, state);
+	if (aliasResult) {
+		state = aliasResult.state;
+	}
+
+	return {
+		state,
+		result: ast
+	}
 }
 export const compilePropertyDeclaration = (node: IAstNode, state: ICompilerState): ICompileResult<IAstPropertyDeclaration> => {
     let ast = astFactory.asNode<IAstPropertyDeclaration>(node, AstNodeType.PropertyDeclaration);

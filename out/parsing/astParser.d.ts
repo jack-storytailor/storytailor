@@ -5,7 +5,7 @@ import { CodeTokenType, CodeTokenTypeSequence } from "../shared/CodeTokenType";
 import { ParsingErrorType, IDiagnostic } from "../shared/IParsingError";
 import { KeywordType } from "../ast/KeywordType";
 import { OperatorType } from "../ast/OperatorType";
-import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstStringIncludeStatement, IAstBoolean, IAstArray, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionExpression, IAstFunctionDeclaration, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstParenExpression, IAstObjectLiteral, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstRegexLiteral, IAstVariableDeclaration } from "../ast/IAstNode";
+import { IAstToken, IAstOperator, IAstKeyword, IAstModule, IAstNode, IAstCommentLine, IAstCommentBlock, IAstNumber, IAstString, IAstStringIncludeStatement, IAstBoolean, IAstArray, IAstIdentifier, IAstIdentifierScope, IAstRawIdentifier, IAstFunctionExpression, IAstFunctionDeclaration, IAstPropertyDeclaration, IAstBreakStatement, IAstReturnStatement, IAstContinueStatement, IAstBlockStatement, IAstIfStatement, IAstSwitchStatement, IAstCaseStatement, IAstDoWhileStatement, IAstWhileStatement, IAstForStatement, IAstForInStatement, IAstImportStatement, IAstParenExpression, IAstObjectLiteral, IAstCallExpression, IAstIndexerExpression, IAstUpdateExpression, IAstBinaryExpression, IAstMemberExpression, IAstOuterStatement, IAstTextLineStatement, IAstObjectLineStatement, IAstPrototypeExpression, IAstScope, IAstTokenSequence, IAstConditionalExpression, IAstTag, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstNewExpression, IAstThrowStatement, IAstDebuggerKeyword, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstRegexLiteral, IAstVariableDeclaration, IAstImportItem } from "../ast/IAstNode";
 import { ISymbol } from "../ast/ISymbol";
 export interface IParserSymbols {
     symbols: IHash<ISymbol>;
@@ -65,8 +65,13 @@ export declare const parseForOfConditions: (state: IParserState) => IParseResult
 }>;
 export declare const parseForInStatement: (state: IParserState, isMultiline: boolean) => IParseResult<IAstForInStatement>;
 export declare const parseForOfStatement: (state: IParserState, isMultiline: boolean) => IParseResult<IAstForInStatement>;
-export declare const parseImportStatement: (state: IParserState) => IParseResult<IAstImportStatement>;
+export declare const parseImportStatement: (state: IParserState, isMultiline: boolean) => IParseResult<IAstImportStatement>;
 export declare const parseImportPath: (state: IParserState) => IParseResult<IAstNode>;
+export declare const parseRawImportStatement: (state: IParserState, isMultiline: boolean) => {
+    state: IParserState;
+    result: import("../ast/IAstNode").IAstRawImportStatement;
+};
+export declare const parseImportItem: (state: IParserState, isMultiline: boolean) => IParseResult<IAstImportItem>;
 export declare const parseTryStatement: (state: IParserState, isMultiline: boolean) => IParseResult<IAstTryStatement>;
 export declare const parseCatchStatement: (state: IParserState, isMultiline: boolean) => IParseResult<IAstCatchStatement>;
 export declare const parseFinallyStatement: (state: IParserState, isMultiline: boolean) => IParseResult<IAstFinallyStatement>;

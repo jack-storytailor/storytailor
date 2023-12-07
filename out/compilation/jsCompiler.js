@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.compileCatchStatement = exports.compileTryStatement = exports.compileIndexerExpression = exports.compileConditionalExpression = exports.compileKeyword = exports.compileUpdateExpression = exports.compileObjectLiteral = exports.compileArrayLiteral = exports.compileForOfStatement = exports.compileForInStatement = exports.compileForStatement = exports.compilePropertyDeclaration = exports.compileImportStatement = exports.compileParenExpression = exports.compileCaseStatement = exports.compileSwitchStatement = exports.compileDoWhileStatement = exports.compileWhileStatement = exports.compileIfStatement = exports.compileContinueStatement = exports.compileBreakStatement = exports.compileTypeofExpression = exports.compileDeleteExpression = exports.compileReturnStatement = exports.compileProgram = exports.compileFuncDeclaration = exports.compileFuncExpression = exports.compileVarDeclaration = exports.compileCallExpression = exports.compileStringInclude = exports.compileMemberExpression = exports.compileBinaryExpression = exports.compileContextIdentifier = exports.compileRawIdentifier = exports.compileIdentifierScope = exports.compileIdentifier = exports.compileRegexLiteral = exports.compileBoolean = exports.compileNumber = exports.compileTextLine = exports.compileStatement = exports.compileDeleteLine = exports.compileObjectLine = exports.compileBlockStatement = exports.compileOuterStatement = exports.compileAstModule = exports.compileAstNode = exports.compile = exports.compileSingleNode = exports.compilerConfig = void 0;
-exports.toStringSafe = exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.writeTargetIndent = exports.setIndent = exports.addTargetIndent = exports.isNeedToLinkSourcemap = exports.addSourceMapAtCurrentPlace = exports.addSourceMap = exports.addSourceMaps = exports.getIdentifierFullName = exports.getIdentifierFromNode = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = exports.compileYieldExpression = exports.compileAwaitExpression = exports.compileNewExpression = exports.compileThrowStatement = exports.compileDebuggerKeyword = exports.compileFinallyStatement = void 0;
+exports.compileIndexerExpression = exports.compileConditionalExpression = exports.compileKeyword = exports.compileUpdateExpression = exports.compileObjectLiteral = exports.compileArrayLiteral = exports.compileForOfStatement = exports.compileForInStatement = exports.compileForStatement = exports.compilePropertyDeclaration = exports.compileImportItem = exports.compileRawImportStatement = exports.compileImportStatement = exports.compileParenExpression = exports.compileCaseStatement = exports.compileSwitchStatement = exports.compileDoWhileStatement = exports.compileWhileStatement = exports.compileIfStatement = exports.compileContinueStatement = exports.compileBreakStatement = exports.compileTypeofExpression = exports.compileDeleteExpression = exports.compileReturnStatement = exports.compileProgram = exports.compileFuncDeclaration = exports.compileFuncExpression = exports.compileVarDeclaration = exports.compileCallExpression = exports.compileStringInclude = exports.compileMemberExpression = exports.compileBinaryExpression = exports.compileContextIdentifier = exports.compileRawIdentifier = exports.compileIdentifierScope = exports.compileIdentifier = exports.compileRegexLiteral = exports.compileBoolean = exports.compileNumber = exports.compileTextLine = exports.compileStatement = exports.compileDeleteLine = exports.compileObjectLine = exports.compileBlockStatement = exports.compileOuterStatement = exports.compileAstModule = exports.compileAstNode = exports.compile = exports.compileSingleNode = exports.compilerConfig = void 0;
+exports.toStringSafe = exports.writeJsToken = exports.writeEndline = exports.writeJavascript = exports.writeTargetIndent = exports.setIndent = exports.addTargetIndent = exports.isNeedToLinkSourcemap = exports.addSourceMapAtCurrentPlace = exports.addSourceMap = exports.addSourceMaps = exports.getIdentifierFullName = exports.getIdentifierFromNode = exports.addJavascript = exports.getAst = exports.skipAst = exports.setIndentScope = exports.addIndentScopeItem = exports.getParentScope = exports.isEndOfFile = exports.writeIndentScope = exports.compileStringLiteral = exports.compileOperator = exports.compileTokenSequence = exports.compileToken = exports.compileYieldExpression = exports.compileAwaitExpression = exports.compileNewExpression = exports.compileThrowStatement = exports.compileDebuggerKeyword = exports.compileFinallyStatement = exports.compileCatchStatement = exports.compileTryStatement = void 0;
 const source_map_1 = require("source-map");
 const AstNodeType_1 = require("../ast/AstNodeType");
 const astFactory_1 = require("../ast/astFactory");
@@ -436,6 +436,16 @@ const compileAstNode = (ast, state) => {
     if (importResult) {
         return importResult;
     }
+    // raw import
+    const rawImportResult = (0, exports.compileRawImportStatement)(ast, state);
+    if (rawImportResult) {
+        return rawImportResult;
+    }
+    // import item
+    const importItemResult = (0, exports.compileImportItem)(ast, state);
+    if (importItemResult) {
+        return importItemResult;
+    }
     // for statement
     let forResult = (0, exports.compileForStatement)(ast, state);
     if (forResult) {
@@ -724,7 +734,7 @@ const compileStatement = (node, state) => {
 exports.compileStatement = compileStatement;
 const compileTextLine = (node, state) => {
     let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.TextLineStatement);
-    if (!ast || !state) {
+    if (!ast || !state || !ast.text) {
         return undefined;
     }
     // check indent
@@ -1553,6 +1563,79 @@ const compileImportStatement = (node, state) => {
     };
 };
 exports.compileImportStatement = compileImportStatement;
+const compileRawImportStatement = (node, state) => {
+    const ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.RawImportStatement);
+    if (!ast || !state) {
+        return undefined;
+    }
+    state = (0, exports.writeJsToken)(state, 'import ');
+    // compile identifier as array
+    if (Array.isArray(ast.identifier)) {
+        state = (0, exports.writeJsToken)(state, '{ ');
+        const identArray = ast.identifier;
+        for (let iIndex = 0; iIndex < identArray.length; iIndex++) {
+            const element = identArray[iIndex];
+            if (iIndex > 0) {
+                state = (0, exports.writeJsToken)(state, ', ');
+            }
+            const nodeResult = (0, exports.compileAstNode)(element, state);
+            if (nodeResult) {
+                state = nodeResult.state;
+            }
+        }
+        state = (0, exports.writeJsToken)(state, ' }');
+    }
+    // compile identifier as import item
+    let identItem = astFactory_1.astFactory.asNode(ast.identifier, AstNodeType_1.AstNodeType.ImportItem);
+    if (identItem) {
+        const identItemResult = (0, exports.compileAstNode)(identItem, state);
+        if (identItemResult) {
+            state = identItemResult.state;
+        }
+    }
+    // compile 'from' section
+    state = (0, exports.writeJsToken)(state, ' from ');
+    const pathResult = (0, exports.compileAstNode)(ast.path, state);
+    if (pathResult) {
+        state = pathResult.state;
+    }
+    // final semicolon
+    state = (0, exports.writeJsToken)(state, ';');
+    state = (0, exports.writeEndline)(state);
+    return {
+        state,
+        result: ast
+    };
+};
+exports.compileRawImportStatement = compileRawImportStatement;
+const compileImportItem = (node, state) => {
+    const ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.ImportItem);
+    if (!ast || !state) {
+        return undefined;
+    }
+    const identifier = (0, exports.getIdentifierFromNode)(ast.identifier, state);
+    if (identifier) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, identifier.value, identifier.start, 0, 0);
+    }
+    const identifierResult = (0, exports.compileAstNode)(ast.identifier, state);
+    if (identifierResult) {
+        state = identifierResult.state;
+    }
+    state = (0, exports.writeJsToken)(state, ' as ');
+    const alias = (0, exports.getIdentifierFromNode)(ast.alias, state);
+    if (alias) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, alias.value, alias.start, 0, 0);
+    }
+    const aliasResult = (0, exports.compileAstNode)(ast.alias, state);
+    if (aliasResult) {
+        state = aliasResult.state;
+    }
+    return {
+        state,
+        result: ast
+    };
+};
+exports.compileImportItem = compileImportItem;
 const compilePropertyDeclaration = (node, state) => {
     let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.PropertyDeclaration);
     if (!ast || !state) {
