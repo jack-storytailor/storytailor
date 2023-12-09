@@ -602,7 +602,7 @@ const compileTextLine = (node, state) => {
     state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     state = (0, exports.writeIndentScope)(parentScope, state);
     // write [text]
-    state = (0, exports.writeJsToken)(state, `['${exports.compilerConfig.textFieldName}']`);
+    state = (0, exports.writeJsToken)(state, `.${exports.compilerConfig.textFieldName}`);
     // write .push(
     state = (0, exports.writeJsToken)(state, `.push(`);
     // write open `
@@ -1930,13 +1930,22 @@ const writeIndentScope = (indentScope, state, astPos) => {
     state = (0, exports.writeJsToken)(state, `${exports.compilerConfig.contextVarName}`);
     for (let i = 0; i < indentScope.length; i++) {
         const indentItem = indentScope[i];
-        state = (0, exports.writeJsToken)(state, "[\`");
+        const identifier = astFactory_1.astFactory.asNode(indentItem.identifier, AstNodeType_1.AstNodeType.Identifier);
+        const isJsIdentifier = identifier && identifier.isJsIdentifier === true;
+        if (isJsIdentifier) {
+            state = (0, exports.writeJsToken)(state, ".");
+        }
+        else {
+            state = (0, exports.writeJsToken)(state, "[\`");
+        }
         // compile indent identifier
         let itemResult = (0, exports.compileAstNode)(indentItem.identifier, state);
         if (itemResult) {
             state = itemResult.state;
         }
-        state = (0, exports.writeJsToken)(state, "\`]");
+        if (!isJsIdentifier) {
+            state = (0, exports.writeJsToken)(state, "\`]");
+        }
     }
     // done
     return state;

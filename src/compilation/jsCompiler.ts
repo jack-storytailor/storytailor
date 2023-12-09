@@ -793,7 +793,7 @@ export const compileTextLine = (node: IAstNode, state: ICompilerState): ICompile
 
 	state = writeIndentScope(parentScope, state);
 	// write [text]
-	state = writeJsToken(state, `['${compilerConfig.textFieldName}']`)
+	state = writeJsToken(state, `.${compilerConfig.textFieldName}`)
 
 	// write .push(
 	state = writeJsToken(state, `.push(`);
@@ -2280,7 +2280,16 @@ export const writeIndentScope = (indentScope: IIndentScopeItem[], state: ICompil
 
 	for (let i = 0; i < indentScope.length; i++) {
 		const indentItem = indentScope[i];
-		state = writeJsToken(state, "[\`");
+
+		const identifier = astFactory.asNode<IAstIdentifier>(indentItem.identifier, AstNodeType.Identifier);
+		const isJsIdentifier = identifier && identifier.isJsIdentifier === true; 
+
+		if (isJsIdentifier) {
+			state = writeJsToken(state, ".");
+		}
+		else {
+			state = writeJsToken(state, "[\`");
+		}
 
 		// compile indent identifier
 		let itemResult = compileAstNode(indentItem.identifier, state);
@@ -2288,7 +2297,9 @@ export const writeIndentScope = (indentScope: IIndentScopeItem[], state: ICompil
 			state = itemResult.state;
 		}
 
-		state = writeJsToken(state, "\`]");
+		if (!isJsIdentifier) {
+			state = writeJsToken(state, "\`]");
+		}
 	}
 
 	// done
