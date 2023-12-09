@@ -1,4 +1,4 @@
-import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObjectLiteral, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstForOfStatement, IAstRegexLiteral, IAstVariableDeclaration, IAstRawImportStatement, IAstImportItem } from "../ast/IAstNode";
+import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstFunctionExpression, IAstFunctionDeclaration, IAstProgram, IAstReturnStatement, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObjectLiteral, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstNewExpression, IAstDeleteExpression, IAstDeleteLineExpression, IAstContextIdentifier, IAstTypeofExpression, IAstForOfStatement, IAstRegexLiteral, IAstVariableDeclaration, IAstRawImportStatement, IAstImportItem, IAstExportStatement, IAstClassDeclaration, IAstStaticStatement } from "../ast/IAstNode";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { IHash } from "../shared/IHash";
 export interface ISourceMapToken {
@@ -76,6 +76,8 @@ export declare const compileAstNode: (ast: IAstNode, state: ICompilerState) => I
 export declare const compileAstModule: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstModule>;
 export declare const compileOuterStatement: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstOuterStatement>;
 export declare const compileBlockStatement: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstBlockStatement>;
+export declare const compileExportStatement: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstExportStatement>;
+export declare const compileClassDeclaration: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstClassDeclaration>;
 export declare const compileObjectLine: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstObjectLineStatement>;
 export declare const compileDeleteLine: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstDeleteLineExpression>;
 export declare const compileStatement: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstStatement>;
@@ -109,6 +111,7 @@ export declare const compileParenExpression: (node: IAstNode, state: ICompilerSt
 export declare const compileImportStatement: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstImportStatement>;
 export declare const compileRawImportStatement: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstRawImportStatement>;
 export declare const compileImportItem: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstImportItem>;
+export declare const compileStaticStatement: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstStaticStatement>;
 export declare const compilePropertyDeclaration: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstPropertyDeclaration>;
 export declare const compileForStatement: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstForStatement>;
 export declare const compileForInStatement: (node: IAstNode, state: ICompilerState) => ICompileResult<IAstForInStatement>;

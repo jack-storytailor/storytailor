@@ -50,6 +50,9 @@ var AstNodeType;
     AstNodeType["CatchStatement"] = "CatchStatement";
     AstNodeType["FinallyStatement"] = "FinallyStatement";
     AstNodeType["ThrowStatement"] = "ThrowStatement";
+    AstNodeType["ExportStatement"] = "ExportStatement";
+    AstNodeType["StaticStatement"] = "StaticStatement";
+    AstNodeType["ClassDeclaration"] = "ClassDeclaration";
     // expression statements
     AstNodeType["ExpressionStatement"] = "ExpressionStatement";
     AstNodeType["AwaitExpression"] = "AwaitExpression";

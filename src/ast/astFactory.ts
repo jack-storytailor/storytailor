@@ -20,9 +20,7 @@ import {
 	IAstIdentifierScope,
 	IAstFunctionExpression,
 	IAstPropertyDeclaration,
-	IAstStatement,
 	IAstBreakStatement,
-	IAstReturnStatement,
 	IAstContinueStatement,
 	IAstBlockStatement,
 	IAstIfStatement,
@@ -33,11 +31,9 @@ import {
 	IAstForStatement,
 	IAstForInStatement,
 	IAstImportStatement,
-	IAstExpressionStatement,
 	IAstParenExpression,
 	IAstObjectLiteral,
 	IAstCallExpression,
-	IAstOperationExpression,
 	IAstUpdateExpression,
 	IAstBinaryExpression,
 	IAstMemberExpression,
@@ -53,25 +49,22 @@ import {
 	IAstFinallyStatement,
 	IAstCatchStatement,
 	IAstTryStatement,
-	IAstNewExpression,
 	IAstThrowStatement,
 	IAstDebuggerKeyword,
-	IAstDeleteExpression,
 	IAstDeleteLineExpression,
 	IAstContextIdentifier,
-	IAstTag,
-	IAstTypeofExpression,
 	IAstFunctionDeclaration,
-	IAstAwaitExpression,
-	IAstYieldExpression,
 	IAstRegexLiteral,
 	IAstVariableDeclaration,
 	IAstRawImportStatement,
-	IAstImportItem
+	IAstImportItem,
+	IAstClassDeclaration,
+	IAstKeywordNode
 } from "./IAstNode";
 import { KeywordType } from "./KeywordType";
 import { OperatorType } from "./OperatorType";
 import { VariableDeclarationKind } from "./VariableDeclarationKind";
+import { ObjectPropertyKind } from "./objectPropertyKind";
 
 export const astFactory = {
 
@@ -288,9 +281,10 @@ export const astFactory = {
 			value
 		}
 	},
-	propertyDeclaration: (identifier: IAstNode, value: IAstNode, initializer: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstPropertyDeclaration => {
+	propertyDeclaration: (propertyKind: ObjectPropertyKind, identifier: IAstNode, value: IAstNode, initializer: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstPropertyDeclaration => {
 		return {
 			nodeType: AstNodeType.PropertyDeclaration,
+			propertyKind,
 			start,
 			end,
 			identifier,
@@ -298,30 +292,22 @@ export const astFactory = {
 			initializer
 		}
 	},
-
-	// statements
-
-	statement: (statement: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstStatement => {
+	classDeclaration: (name: IAstNode, contents: IAstNode[], start: ISymbolPosition, end: ISymbolPosition): IAstClassDeclaration => {
 		return {
-			nodeType: AstNodeType.Statement,
+			nodeType: AstNodeType.ClassDeclaration,
+			name,
+			contents,
 			start,
-			end,
-			statement
+			end
 		}
 	},
+
+	// statements
 	breakStatement: (start: ISymbolPosition, end: ISymbolPosition): IAstBreakStatement => {
 		return {
 			nodeType: AstNodeType.BreakStatement,
 			start,
 			end
-		}
-	},
-	returnStatement: (value: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstReturnStatement => {
-		return {
-			nodeType: AstNodeType.ReturnStatement,
-			start,
-			end,
-			value
 		}
 	},
 	continueStatement: (start: ISymbolPosition, end: ISymbolPosition): IAstContinueStatement => {
@@ -483,28 +469,14 @@ export const astFactory = {
 	},
 
 	// expression statements
-	awaitExpression: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstAwaitExpression => {
+	keywordNode: (keyword: IAstKeyword, node: IAstNode, isKeywordFirst: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstKeywordNode => {
 		return {
-			nodeType: AstNodeType.AwaitExpression,
-			expression,
+			nodeType: AstNodeType.KeywordNode,
+			keyword,
+			node,
+			isKeywordFirst,
 			start,
 			end
-		}
-	},
-	yieldExpression: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstYieldExpression => {
-		return {
-			nodeType: AstNodeType.YieldExpression,
-			expression,
-			start,
-			end
-		}
-	},
-	expressionStatement: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstExpressionStatement => {
-		return {
-			nodeType: AstNodeType.ExpressionStatement,
-			start,
-			end,
-			expression
 		}
 	},
 	parenExpression: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstParenExpression => {
@@ -530,14 +502,6 @@ export const astFactory = {
 			end,
 			args,
 			calee
-		}
-	},
-	operationExpression: (operation: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstOperationExpression => {
-		return {
-			nodeType: AstNodeType.OperationExpression,
-			start,
-			end,
-			operation
 		}
 	},
 	updateExpression: (argument: IAstNode, operator: IAstNode, prefix: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstUpdateExpression => {
@@ -588,30 +552,6 @@ export const astFactory = {
 			whenTrue,
 			colonToken,
 			questionToken
-		}
-	},
-	newExpression: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstNewExpression => {
-		return {
-			nodeType: AstNodeType.NewExpression,
-			start,
-			end,
-			expression
-		}
-	},
-	deleteExpression: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstDeleteExpression => {
-		return {
-			nodeType: AstNodeType.DeleteExpression,
-			start,
-			end,
-			expression
-		}
-	},
-	typeofExpression: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstTypeofExpression => {
-		return {
-			nodeType: AstNodeType.TypeofExpression,
-			start,
-			end,
-			expression
 		}
 	},
 
@@ -682,7 +622,7 @@ export const astFactory = {
 	},
 	tag: (content: IAstNode[], open: IAstNode, close: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstScope => {
 		return {
-			nodeType: AstNodeType.Tag,
+			nodeType: AstNodeType.Scope,
 			start,
 			end,
 			content,
@@ -690,7 +630,6 @@ export const astFactory = {
 			close
 		}
 	},
-
 
 	// casting
 	asNode: <TAst extends IAstNode>(ast: IAstNode, nodeType: AstNodeType): TAst => {

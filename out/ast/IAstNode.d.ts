@@ -4,6 +4,7 @@ import { OperatorType } from "./OperatorType";
 import { VariableDeclarationKind } from "./VariableDeclarationKind";
 import { KeywordType } from "./KeywordType";
 import { AstNodeType } from "./AstNodeType";
+import { ObjectPropertyKind } from "./objectPropertyKind";
 export interface IAstNode {
     nodeType: AstNodeType;
     start: ISymbolPosition;
@@ -90,12 +91,23 @@ export interface IAstVariableDeclaration extends IAstNode {
     kind: VariableDeclarationKind;
 }
 export interface IAstPropertyDeclaration extends IAstNode {
+    propertyKind: ObjectPropertyKind;
     identifier: IAstNode;
     value: IAstNode;
     initializer: IAstNode;
 }
+export interface IAstClassDeclaration extends IAstNode {
+    name: IAstNode;
+    contents: IAstNode[];
+}
 export interface IAstStatement extends IAstNode {
     statement: IAstNode;
+}
+export interface IAstExportStatement extends IAstNode {
+    value: IAstNode;
+}
+export interface IAstStaticStatement extends IAstNode {
+    value: IAstNode;
 }
 export interface IAstBreakStatement extends IAstNode {
 }

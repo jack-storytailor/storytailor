@@ -4,6 +4,7 @@ exports.KeywordType = void 0;
 var KeywordType;
 (function (KeywordType) {
     KeywordType["Import"] = "import";
+    KeywordType["Export"] = "export";
     KeywordType["From"] = "from";
     KeywordType["As"] = "as";
     KeywordType["Is"] = "is";
@@ -13,7 +14,10 @@ var KeywordType;
     KeywordType["While"] = "while";
     KeywordType["Class"] = "class";
     KeywordType["For"] = "for";
+    KeywordType["Get"] = "get";
+    KeywordType["Set"] = "set";
     KeywordType["Continue"] = "continue";
+    KeywordType["Static"] = "static";
     KeywordType["Do"] = "do";
     KeywordType["Switch"] = "switch";
     KeywordType["Case"] = "case";

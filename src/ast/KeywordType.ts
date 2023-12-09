@@ -1,5 +1,6 @@
 export enum KeywordType {
   Import = "import",
+  Export = "export",
   From = "from",
   As = "as",
   Is = "is",
@@ -9,7 +10,10 @@ export enum KeywordType {
   While = "while",
   Class = "class",
   For = "for",
+  Get = "get",
+  Set = 'set',
   Continue = "continue",
+  Static = "static",
   Do = "do",
   Switch = "switch",
   Case = "case",

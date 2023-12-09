@@ -210,14 +210,24 @@ exports.astFactory = {
             value
         };
     },
-    propertyDeclaration: (identifier, value, initializer, start, end) => {
+    propertyDeclaration: (propertyKind, identifier, value, initializer, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.PropertyDeclaration,
+            propertyKind,
             start,
             end,
             identifier,
             value,
             initializer
+        };
+    },
+    classDeclaration: (name, contents, start, end) => {
+        return {
+            nodeType: AstNodeType_1.AstNodeType.ClassDeclaration,
+            name,
+            contents,
+            start,
+            end
         };
     },
     // statements
@@ -227,6 +237,22 @@ exports.astFactory = {
             start,
             end,
             statement
+        };
+    },
+    exportStatement: (value, start, end) => {
+        return {
+            nodeType: AstNodeType_1.AstNodeType.ExportStatement,
+            value,
+            start,
+            end
+        };
+    },
+    staticStatement: (value, start, end) => {
+        return {
+            nodeType: AstNodeType_1.AstNodeType.StaticStatement,
+            value,
+            start,
+            end
         };
     },
     breakStatement: (start, end) => {
