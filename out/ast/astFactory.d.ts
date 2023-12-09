@@ -5,7 +5,6 @@ import { IAstToken, IAstKeyword, IAstText, IAstOperator, IAstProgram, IAstModule
 import { KeywordType } from "./KeywordType";
 import { OperatorType } from "./OperatorType";
 import { VariableDeclarationKind } from "./VariableDeclarationKind";
-import { ObjectPropertyKind } from "./objectPropertyKind";
 export declare const astFactory: {
     token: (token: ICodeToken, start: ISymbolPosition) => IAstToken;
     tokenSequence: (tokens: ICodeToken[], start: ISymbolPosition, end: ISymbolPosition) => IAstTokenSequence;
@@ -28,7 +27,7 @@ export declare const astFactory: {
     contextIndentifier: (value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstContextIdentifier;
     IdentifierScope: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstIdentifierScope;
     variableListDeclaration: (identifiers: IAstNode[], kind: VariableDeclarationKind, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstVariableDeclaration;
-    propertyDeclaration: (propertyKind: ObjectPropertyKind, identifier: IAstNode, value: IAstNode, initializer: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstPropertyDeclaration;
+    propertyDeclaration: (identifier: IAstNode, value: IAstNode, initializer: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstPropertyDeclaration;
     classDeclaration: (name: IAstNode, contents: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstClassDeclaration;
     breakStatement: (start: ISymbolPosition, end: ISymbolPosition) => IAstBreakStatement;
     continueStatement: (start: ISymbolPosition, end: ISymbolPosition) => IAstContinueStatement;

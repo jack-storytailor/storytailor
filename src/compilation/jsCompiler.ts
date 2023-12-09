@@ -61,7 +61,6 @@ import { VariableDeclarationKind } from "../ast/VariableDeclarationKind";
 import { ICodeToken } from "../shared/ICodeToken";
 import * as path from 'path';
 import { IHash } from "../shared/IHash";
-import { ObjectPropertyKind } from "../ast/objectPropertyKind";
 
 export interface ISourceMapToken {
 	generated: {
@@ -588,12 +587,17 @@ export const compileKeywordNode = (node: IAstNode, state: ICompilerState): IComp
 		}
 	}
 
+	if (ast.isKeywordFirst) {
+		state = writeJsToken(state, " ");
+	}
+
 	const nodeResult = compileAstNode(ast.node, state);
 	if (nodeResult) {
 		state = nodeResult.state;
 	}
 
 	if (!ast.isKeywordFirst) {
+		state = writeJsToken(state, " ");
 		const keywordResult = compileAstNode(ast.keyword, state);
 		if (keywordResult) {
 			state = keywordResult.state;
@@ -1696,17 +1700,6 @@ export const compilePropertyDeclaration = (node: IAstNode, state: ICompilerState
 	let ast = astFactory.asNode<IAstPropertyDeclaration>(node, AstNodeType.PropertyDeclaration);
 	if (!ast || !state) {
 		return undefined;
-	}
-
-	// write property kind
-	if (ast.propertyKind != ObjectPropertyKind.Default) {
-
-		if (ast.propertyKind === ObjectPropertyKind.Getter) {
-			state = writeJsToken(state, "get ");
-		}
-		else if (ast.propertyKind === ObjectPropertyKind.Setter) {
-			state = writeJsToken(state, "set ");
-		}
 	}
 
 	// write "identifier" : value

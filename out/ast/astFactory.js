@@ -201,10 +201,9 @@ exports.astFactory = {
             value
         };
     },
-    propertyDeclaration: (propertyKind, identifier, value, initializer, start, end) => {
+    propertyDeclaration: (identifier, value, initializer, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.PropertyDeclaration,
-            propertyKind,
             start,
             end,
             identifier,

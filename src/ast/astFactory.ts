@@ -63,7 +63,6 @@ import {
 import { KeywordType } from "./KeywordType";
 import { OperatorType } from "./OperatorType";
 import { VariableDeclarationKind } from "./VariableDeclarationKind";
-import { ObjectPropertyKind } from "./objectPropertyKind";
 
 export const astFactory = {
 
@@ -271,10 +270,9 @@ export const astFactory = {
 			value
 		}
 	},
-	propertyDeclaration: (propertyKind: ObjectPropertyKind, identifier: IAstNode, value: IAstNode, initializer: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstPropertyDeclaration => {
+	propertyDeclaration: (identifier: IAstNode, value: IAstNode, initializer: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstPropertyDeclaration => {
 		return {
 			nodeType: AstNodeType.PropertyDeclaration,
-			propertyKind,
 			start,
 			end,
 			identifier,

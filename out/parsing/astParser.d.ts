@@ -107,6 +107,7 @@ export declare const parseObject: (state: IParserState) => IParseResult<IAstObje
 export declare const parseObjectLiteralItem: (state: IParserState, isMultiline: boolean) => IParseResult<IAstNode>;
 export declare const parseObjectProperty: (state: IParserState, isMultiline: boolean) => IParseResult<IAstPropertyDeclaration>;
 export declare const parseFunction: (state: IParserState, isMultiline: boolean) => IParseResult<IAstNode>;
+export declare const parseGetterSetter: (state: IParserState, isMultiline: boolean) => IParseResult<IAstKeywordNode>;
 export declare const parseIdentifier: (state: IParserState) => IParseResult<IAstIdentifier | IAstIdentifierScope>;
 export declare const parseIdentifierScope: (state: IParserState) => IParseResult<IAstIdentifierScope>;
 export declare const parseObjectLineIdentifier: (state: IParserState) => IParseResult<IAstIdentifier>;

@@ -65,7 +65,6 @@ import {
 import { astFactory } from "../ast/astFactory";
 import { AstNodeType } from '../ast/AstNodeType';
 import { ISymbol } from "../ast/ISymbol";
-import { ObjectPropertyKind } from "../ast/objectPropertyKind";
 
 let keywords = [];
 for (const key in KeywordType) {
@@ -3798,6 +3797,7 @@ export const parseObjectLiteralItem = (state: IParserState, isMultiline: boolean
 	}
 
 	return parseNode(state, isMultiline, [
+		parseGetterSetter,
 		parseFunction,
 		parseObjectProperty,
 		parseExpression
@@ -3809,22 +3809,6 @@ export const parseObjectProperty = (state: IParserState, isMultiline: boolean): 
 	}
 
 	const start = getCursorPosition(state);
-
-	// parse get/set
-	let propertyKind: ObjectPropertyKind = ObjectPropertyKind.Default;
-	
-	let getSetResult = parseKeywordOfType(state, [KeywordType.Get, KeywordType.Set]);
-	if (getSetResult) {
-		state = getSetResult.state;
-		state = skipComments(state, true, isMultiline);
-
-		if (getSetResult.result?.keywordType === KeywordType.Get) {
-			propertyKind = ObjectPropertyKind.Getter;
-		}
-		else if (getSetResult.result?.keywordType === KeywordType.Set) {
-			propertyKind = ObjectPropertyKind.Setter;
-		}
-	}
 
 	// parse identifier
 	let identifier: IAstNode = undefined;
@@ -3882,7 +3866,7 @@ export const parseObjectProperty = (state: IParserState, isMultiline: boolean): 
 		}
 	}
 
-	let result = astFactory.propertyDeclaration(propertyKind, identifier, value, initializer, start, end);
+	let result = astFactory.propertyDeclaration(identifier, value, initializer, start, end);
 	return {
 		state,
 		result
@@ -3981,6 +3965,24 @@ export const parseFunction = (state: IParserState, isMultiline: boolean): IParse
 		state,
 		result
 	}
+}
+export const parseGetterSetter = (state: IParserState, isMultiline: boolean): IParseResult<IAstKeywordNode> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	return parseKeywordNode(
+		state, 
+		true, 
+		isMultiline, 
+		[
+			KeywordType.Get,
+			KeywordType.Set
+		],
+		[
+			parseFunction
+		]
+	)
 }
 
 // identifiers

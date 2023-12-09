@@ -7,7 +7,6 @@ const AstNodeType_1 = require("../ast/AstNodeType");
 const astFactory_1 = require("../ast/astFactory");
 const VariableDeclarationKind_1 = require("../ast/VariableDeclarationKind");
 const path = require("path");
-const objectPropertyKind_1 = require("../ast/objectPropertyKind");
 const sourceMappableAstNodes = {
     // ["Token"]: true,
     // ["TokenSequence"]: true,
@@ -425,11 +424,15 @@ const compileKeywordNode = (node, state) => {
             state = keywordResult.state;
         }
     }
+    if (ast.isKeywordFirst) {
+        state = (0, exports.writeJsToken)(state, " ");
+    }
     const nodeResult = (0, exports.compileAstNode)(ast.node, state);
     if (nodeResult) {
         state = nodeResult.state;
     }
     if (!ast.isKeywordFirst) {
+        state = (0, exports.writeJsToken)(state, " ");
         const keywordResult = (0, exports.compileAstNode)(ast.keyword, state);
         if (keywordResult) {
             state = keywordResult.state;
@@ -1393,15 +1396,6 @@ const compilePropertyDeclaration = (node, state) => {
     let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.PropertyDeclaration);
     if (!ast || !state) {
         return undefined;
-    }
-    // write property kind
-    if (ast.propertyKind != objectPropertyKind_1.ObjectPropertyKind.Default) {
-        if (ast.propertyKind === objectPropertyKind_1.ObjectPropertyKind.Getter) {
-            state = (0, exports.writeJsToken)(state, "get ");
-        }
-        else if (ast.propertyKind === objectPropertyKind_1.ObjectPropertyKind.Setter) {
-            state = (0, exports.writeJsToken)(state, "set ");
-        }
     }
     // write "identifier" : value
     // write identifier

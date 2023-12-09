@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseNumberLiteral = exports.parseLiteral = exports.parseObjectLineTags = exports.parseFunctionParameters = exports.parseCodeBlock = exports.parseCommentBlock = exports.parseCommentLine = exports.parseKeywordOfType = exports.parseDebuggerKeyword = exports.parseKeyword = exports.parseUnaryOperatorPostfix = exports.parseUnaryOperatorPrefix = exports.parseBinaryOperator = exports.parseOperatorOfType = exports.parseOperator = exports.parseThrowStatement = exports.parseFinallyStatement = exports.parseCatchStatement = exports.parseTryStatement = exports.parseImportItem = exports.parseRawImportStatement = exports.parseImportPath = exports.parseImportStatement = exports.parseForOfStatement = exports.parseForInStatement = exports.parseForOfConditions = exports.parseForInConditions = exports.parseConditionBlock = exports.parseForCoditions = exports.parseForStatement = exports.parseWhileStatement = exports.parseDoWhileStatement = exports.parseDefaultCaseStatement = exports.parseCaseStatement = exports.parseSwitchStatement = exports.parseIfStatement = exports.parseContinueStatement = exports.parseReturnStatement = exports.parseBreakStatement = exports.parseStaticStatement = exports.parseExportStatement = exports.parseStatement = exports.parseTextLineStatement = exports.parseDeleteLineExpression = exports.parseObjectLine = exports.parseOuterStatementContent = exports.parseOuterStatement = exports.parseRootStatement = exports.parseModule = exports.defaultParserConfig = void 0;
-exports.calcIndentFromWhitespace = exports.readWhitespace = exports.readString = exports.parseErrorTokens = exports.parseScope = exports.parseToken = exports.parseKeywordNode = exports.parseNode = exports.parseTag = exports.parsePrototypeExpression = exports.parseTypeofExpression = exports.parseDeleteExpression = exports.parseYieldExpression = exports.parseAwaitExpression = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseOperationExpression = exports.parseKeywordExpression = exports.parseExpression = exports.parseVariableDeclaration = exports.parseClassMember = exports.parseClassDeclaration = exports.parseOperandIdentifier = exports.parseContextIdentifier = exports.parseAnyIdentifier = exports.parseRawIdentifier = exports.parseObjectLineIdentifier = exports.parseIdentifierScope = exports.parseIdentifier = exports.parseFunction = exports.parseObjectProperty = exports.parseObjectLiteralItem = exports.parseObject = exports.parseArrayElement = exports.parseArrayLiteral = exports.parseRegexParenScope = exports.parseRegexLiteral = exports.parseBooleanLiteral = exports.parseStringInclude = exports.parseStringLiteralItem = exports.parseStringLiteral = void 0;
-exports.prepareTokens = exports.addInvalidTokenSequenceError = exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isValidJsIdentifier = exports.isEndOfFile = exports.readTokensAsString = void 0;
+exports.readWhitespace = exports.readString = exports.parseErrorTokens = exports.parseScope = exports.parseToken = exports.parseKeywordNode = exports.parseNode = exports.parseTag = exports.parsePrototypeExpression = exports.parseTypeofExpression = exports.parseDeleteExpression = exports.parseYieldExpression = exports.parseAwaitExpression = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseOperationExpression = exports.parseKeywordExpression = exports.parseExpression = exports.parseVariableDeclaration = exports.parseClassMember = exports.parseClassDeclaration = exports.parseOperandIdentifier = exports.parseContextIdentifier = exports.parseAnyIdentifier = exports.parseRawIdentifier = exports.parseObjectLineIdentifier = exports.parseIdentifierScope = exports.parseIdentifier = exports.parseGetterSetter = exports.parseFunction = exports.parseObjectProperty = exports.parseObjectLiteralItem = exports.parseObject = exports.parseArrayElement = exports.parseArrayLiteral = exports.parseRegexParenScope = exports.parseRegexLiteral = exports.parseBooleanLiteral = exports.parseStringInclude = exports.parseStringLiteralItem = exports.parseStringLiteral = void 0;
+exports.prepareTokens = exports.addInvalidTokenSequenceError = exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isValidJsIdentifier = exports.isEndOfFile = exports.readTokensAsString = exports.calcIndentFromWhitespace = void 0;
 const CodeTokenType_1 = require("../shared/CodeTokenType");
 const IParsingError_1 = require("../shared/IParsingError");
 const KeywordType_1 = require("../ast/KeywordType");
@@ -10,7 +10,6 @@ const VariableDeclarationKind_1 = require("../ast/VariableDeclarationKind");
 const OperatorType_1 = require("../ast/OperatorType");
 const astFactory_1 = require("../ast/astFactory");
 const AstNodeType_1 = require("../ast/AstNodeType");
-const objectPropertyKind_1 = require("../ast/objectPropertyKind");
 let keywords = [];
 for (const key in KeywordType_1.KeywordType) {
     if (KeywordType_1.KeywordType.hasOwnProperty(key)) {
@@ -3001,6 +3000,7 @@ const parseObjectLiteralItem = (state, isMultiline) => {
         return undefined;
     }
     return (0, exports.parseNode)(state, isMultiline, [
+        exports.parseGetterSetter,
         exports.parseFunction,
         exports.parseObjectProperty,
         exports.parseExpression
@@ -3008,24 +3008,10 @@ const parseObjectLiteralItem = (state, isMultiline) => {
 };
 exports.parseObjectLiteralItem = parseObjectLiteralItem;
 const parseObjectProperty = (state, isMultiline) => {
-    var _a, _b;
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     const start = (0, exports.getCursorPosition)(state);
-    // parse get/set
-    let propertyKind = objectPropertyKind_1.ObjectPropertyKind.Default;
-    let getSetResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Get, KeywordType_1.KeywordType.Set]);
-    if (getSetResult) {
-        state = getSetResult.state;
-        state = (0, exports.skipComments)(state, true, isMultiline);
-        if (((_a = getSetResult.result) === null || _a === void 0 ? void 0 : _a.keywordType) === KeywordType_1.KeywordType.Get) {
-            propertyKind = objectPropertyKind_1.ObjectPropertyKind.Getter;
-        }
-        else if (((_b = getSetResult.result) === null || _b === void 0 ? void 0 : _b.keywordType) === KeywordType_1.KeywordType.Set) {
-            propertyKind = objectPropertyKind_1.ObjectPropertyKind.Setter;
-        }
-    }
     // parse identifier
     let identifier = undefined;
     let literalIdentResult = (0, exports.parseStringLiteral)(state, false);
@@ -3076,7 +3062,7 @@ const parseObjectProperty = (state, isMultiline) => {
             value = valueResult.result;
         }
     }
-    let result = astFactory_1.astFactory.propertyDeclaration(propertyKind, identifier, value, initializer, start, end);
+    let result = astFactory_1.astFactory.propertyDeclaration(identifier, value, initializer, start, end);
     return {
         state,
         result
@@ -3161,6 +3147,18 @@ const parseFunction = (state, isMultiline) => {
     };
 };
 exports.parseFunction = parseFunction;
+const parseGetterSetter = (state, isMultiline) => {
+    if ((0, exports.isEndOfFile)(state)) {
+        return undefined;
+    }
+    return (0, exports.parseKeywordNode)(state, true, isMultiline, [
+        KeywordType_1.KeywordType.Get,
+        KeywordType_1.KeywordType.Set
+    ], [
+        exports.parseFunction
+    ]);
+};
+exports.parseGetterSetter = parseGetterSetter;
 // identifiers
 const parseIdentifier = (state) => {
     if ((0, exports.isEndOfFile)(state)) {

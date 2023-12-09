@@ -4,7 +4,6 @@ import { OperatorType } from "./OperatorType";
 import { VariableDeclarationKind } from "./VariableDeclarationKind";
 import { KeywordType } from "./KeywordType";
 import { AstNodeType } from "./AstNodeType";
-import { ObjectPropertyKind } from "./objectPropertyKind";
 
 // General
 export interface IAstNode {
@@ -103,7 +102,6 @@ export interface IAstVariableDeclaration extends IAstNode {
 	kind: VariableDeclarationKind;
 }
 export interface IAstPropertyDeclaration extends IAstNode {
-	propertyKind: ObjectPropertyKind;
 	identifier: IAstNode;
 	value: IAstNode;
 	initializer: IAstNode;
