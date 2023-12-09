@@ -142,12 +142,13 @@ exports.astFactory = {
             end
         };
     },
-    functionLiteral: (name, args, body, isLambda, isAsync, isGenerator, start, end) => {
+    functionLiteral: (name, args, body, isLambda, isAsync, isNoKeyword, isGenerator, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.Function,
             isLambda,
             isAsync,
             isGenerator,
+            isNoKeyword,
             name,
             args,
             body,
@@ -156,10 +157,11 @@ exports.astFactory = {
         };
     },
     // identifiers
-    identifier: (value, start, end) => {
+    identifier: (value, isJsIdentifier, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.Identifier,
             value,
+            isJsIdentifier,
             start,
             end
         };

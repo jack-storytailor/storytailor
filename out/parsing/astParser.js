@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseNumberLiteral = exports.parseLiteral = exports.parseObjectLineTags = exports.parseFunctionParameters = exports.parseCodeBlock = exports.parseCommentBlock = exports.parseCommentLine = exports.parseKeywordOfType = exports.parseDebuggerKeyword = exports.parseKeyword = exports.parseUnaryOperatorPostfix = exports.parseUnaryOperatorPrefix = exports.parseBinaryOperator = exports.parseOperatorOfType = exports.parseOperator = exports.parseThrowStatement = exports.parseFinallyStatement = exports.parseCatchStatement = exports.parseTryStatement = exports.parseImportItem = exports.parseRawImportStatement = exports.parseImportPath = exports.parseImportStatement = exports.parseForOfStatement = exports.parseForInStatement = exports.parseForOfConditions = exports.parseForInConditions = exports.parseConditionBlock = exports.parseForCoditions = exports.parseForStatement = exports.parseWhileStatement = exports.parseDoWhileStatement = exports.parseDefaultCaseStatement = exports.parseCaseStatement = exports.parseSwitchStatement = exports.parseIfStatement = exports.parseContinueStatement = exports.parseReturnStatement = exports.parseBreakStatement = exports.parseStaticStatement = exports.parseExportStatement = exports.parseStatement = exports.parseTextLineStatement = exports.parseDeleteLineExpression = exports.parseObjectLine = exports.parseOuterStatementContent = exports.parseOuterStatement = exports.parseRootStatement = exports.parseModule = exports.defaultParserConfig = void 0;
 exports.calcIndentFromWhitespace = exports.readWhitespace = exports.readString = exports.parseErrorTokens = exports.parseScope = exports.parseToken = exports.parseKeywordNode = exports.parseNode = exports.parseTag = exports.parsePrototypeExpression = exports.parseTypeofExpression = exports.parseDeleteExpression = exports.parseYieldExpression = exports.parseAwaitExpression = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseOperationExpression = exports.parseKeywordExpression = exports.parseExpression = exports.parseVariableDeclaration = exports.parseClassMember = exports.parseClassDeclaration = exports.parseOperandIdentifier = exports.parseContextIdentifier = exports.parseAnyIdentifier = exports.parseRawIdentifier = exports.parseObjectLineIdentifier = exports.parseIdentifierScope = exports.parseIdentifier = exports.parseFunction = exports.parseObjectProperty = exports.parseObjectLiteralItem = exports.parseObject = exports.parseArrayElement = exports.parseArrayLiteral = exports.parseRegexParenScope = exports.parseRegexLiteral = exports.parseBooleanLiteral = exports.parseStringInclude = exports.parseStringLiteralItem = exports.parseStringLiteral = void 0;
-exports.prepareTokens = exports.addInvalidTokenSequenceError = exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isEndOfFile = exports.readTokensAsString = void 0;
+exports.prepareTokens = exports.addInvalidTokenSequenceError = exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isValidJsIdentifier = exports.isEndOfFile = exports.readTokensAsString = void 0;
 const CodeTokenType_1 = require("../shared/CodeTokenType");
 const IParsingError_1 = require("../shared/IParsingError");
 const KeywordType_1 = require("../ast/KeywordType");
@@ -178,7 +178,7 @@ const parseOuterStatement = (state) => {
     // skip comments
     state = (0, exports.skipComments)(state, true, false);
     // any excess symbols until endline are invalid
-    state = (0, exports.parseErrorTokens)(state, (stat) => !(0, exports.getTokenOfType)(stat, [CodeTokenType_1.CodeTokenType.Endline]));
+    state = (0, exports.parseErrorTokens)(state, (stat) => (0, exports.getTokenOfType)(stat, [CodeTokenType_1.CodeTokenType.Endline]) !== undefined);
     // skip endline
     if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Endline])) {
         state = (0, exports.skipTokens)(state, 1);
@@ -511,7 +511,7 @@ const parseIfStatement = (state, isMultiline) => {
         // skip comments and whitespaces
         state = (0, exports.skipComments)(state, true, isMultiline);
         // skip everything until { or else or breakTokens
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) && !(0, exports.parseKeyword)(state));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined || (0, exports.parseKeyword)(state) !== undefined);
         // check sequence end
         if ((0, exports.getTokenOfType)(state, breakTokens)) {
             break;
@@ -526,7 +526,7 @@ const parseIfStatement = (state, isMultiline) => {
         // skip comments and whitespaces
         state = (0, exports.skipComments)(state, true, isMultiline);
         // skip everything until else or breakTokens
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, breakTokens) && !(0, exports.parseKeyword)(state));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, breakTokens) !== undefined || (0, exports.parseKeyword)(state) !== undefined);
         // parse else
         let elseResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Else]);
         if (elseResult) {
@@ -535,7 +535,7 @@ const parseIfStatement = (state, isMultiline) => {
             // skip comments and whitespaces
             state = (0, exports.skipComments)(state, true, isMultiline);
             // skip everything until { or else or breakTokens
-            state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) && !(0, exports.parseKeyword)(state));
+            state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined);
             // check sequence end
             if ((0, exports.getTokenOfType)(state, breakTokens)) {
                 break;
@@ -617,7 +617,7 @@ const parseSwitchStatement = (state, isMultiline) => {
         // skip comments and whitespaces
         state = (0, exports.skipComments)(state, true, isMultiline);
         // skip everything until { or else or breakTokens
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) && !(0, exports.parseKeyword)(state));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined || (0, exports.parseKeyword)(state) !== undefined);
         // check sequence end
         if ((0, exports.getTokenOfType)(state, breakTokens))
             break;
@@ -688,7 +688,7 @@ const parseCaseStatement = (state) => {
             break;
         // parse :
         // skip everything until : or break token
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.Colon]));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.Colon]) !== undefined);
         if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Colon])) {
             state = (0, exports.skipTokens)(state, 1);
         }
@@ -724,7 +724,7 @@ const parseCaseStatement = (state) => {
         // skip comments and whitespaces
         state = (0, exports.skipComments)(state, true, true);
         // skip everything until break tokens or keyword
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [...breakTokens]) && !(0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Case, KeywordType_1.KeywordType.Default, KeywordType_1.KeywordType.Return, KeywordType_1.KeywordType.Break]));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens]) !== undefined || (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Case, KeywordType_1.KeywordType.Default, KeywordType_1.KeywordType.Return, KeywordType_1.KeywordType.Break]) !== undefined);
         // parse consequent
         // parse retrun or break statements
         let breakStatementResult = (0, exports.parseBreakStatement)(state);
@@ -774,7 +774,7 @@ const parseDefaultCaseStatement = (state) => {
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // parse :
         // skip everything until : or break token
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.Colon]));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.Colon]) !== undefined);
         if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Colon])) {
             state = (0, exports.skipTokens)(state, 1);
         }
@@ -810,7 +810,7 @@ const parseDefaultCaseStatement = (state) => {
         // skip comments and whitespaces
         state = (0, exports.skipComments)(state, true, true);
         // skip everything until break tokens or keyword
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [...breakTokens]) && !(0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Case, KeywordType_1.KeywordType.Default, KeywordType_1.KeywordType.Return, KeywordType_1.KeywordType.Break]));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens]) !== undefined || (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Case, KeywordType_1.KeywordType.Default, KeywordType_1.KeywordType.Return, KeywordType_1.KeywordType.Break]) !== undefined);
         // parse consequent
         // parse retrun or break statements
         let breakStatementResult = (0, exports.parseBreakStatement)(state);
@@ -861,7 +861,7 @@ const parseDoWhileStatement = (state, isMultiline) => {
         // skip comments and whitespaces
         state = (0, exports.skipComments)(state, true, isMultiline);
         // skip everything until { or breakTokens or while
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) && !(0, exports.parseKeyword)(state));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined || (0, exports.parseKeyword)(state) !== undefined);
         // check sequence end
         if ((0, exports.getTokenOfType)(state, breakTokens)) {
             break;
@@ -880,7 +880,7 @@ const parseDoWhileStatement = (state, isMultiline) => {
         // skip comments and whitespaces
         state = (0, exports.skipComments)(state, true, isMultiline);
         // skip everything until ( or breakTokens or while
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.ParenOpen]) && !(0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.While]));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.ParenOpen]) !== undefined || (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.While]) !== undefined);
         // check sequence end
         if ((0, exports.getTokenOfType)(state, breakTokens)) {
             break;
@@ -897,7 +897,7 @@ const parseDoWhileStatement = (state, isMultiline) => {
             // skip comments and whitespaces
             state = (0, exports.skipComments)(state, true, isMultiline);
             // skip everything until ( or breakTokens or while
-            state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.ParenOpen]) && !(0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.While]));
+            state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.ParenOpen]) !== undefined || (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.While]) !== undefined);
             // check sequence end
             if ((0, exports.getTokenOfType)(state, breakTokens)) {
                 break;
@@ -980,7 +980,7 @@ const parseWhileStatement = (state, isMultiline) => {
         // skip comments and whitespaces
         state = (0, exports.skipComments)(state, true, isMultiline);
         // skip everything until { or else or breakTokens
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) && !(0, exports.parseKeyword)(state));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined || (0, exports.parseKeyword)(state) !== undefined);
         // check sequence end
         if ((0, exports.getTokenOfType)(state, breakTokens)) {
             break;
@@ -1075,7 +1075,7 @@ const parseForStatement = (state, isMultiline) => {
         // skip comments and whitespaces
         state = (0, exports.skipComments)(state, true, isMultiline);
         // skip everything until { or else or breakTokens
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) && !(0, exports.parseKeyword)(state));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined || (0, exports.parseKeyword)(state) !== undefined);
         // check sequence end
         if ((0, exports.getTokenOfType)(state, breakTokens)) {
             break;
@@ -1114,7 +1114,7 @@ const parseForCoditions = (state) => {
     // skip comments and whitespaces
     state = (0, exports.skipComments)(state, true, true);
     // everything until ; or ) are errors
-    state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Semicolon, CodeTokenType_1.CodeTokenType.ParenClose]));
+    state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Semicolon, CodeTokenType_1.CodeTokenType.ParenClose]) !== undefined);
     // if it's ), then return
     if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.ParenClose])) {
         return {
@@ -1380,7 +1380,7 @@ const parseForInStatement = (state, isMultiline) => {
         }
         state = (0, exports.skipComments)(state, true, true);
         // parse error tokens everything until )
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.ParenClose]));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.ParenClose]) !== undefined);
         finalState = state;
         // parse and skip ) token
         if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.ParenClose])) {
@@ -1396,7 +1396,7 @@ const parseForInStatement = (state, isMultiline) => {
         // now it's time to parse body code block
         // skip everything until code block open token
         let bodyErrorTokens = [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen];
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, bodyErrorTokens));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, bodyErrorTokens) !== undefined);
         // check break tokens
         if ((0, exports.isEndOfFile)(state) || (0, exports.getTokenOfType)(state, breakTokens)) {
             break;
@@ -1464,7 +1464,7 @@ const parseForOfStatement = (state, isMultiline) => {
         }
         state = (0, exports.skipComments)(state, true, true);
         // parse error tokens everything until )
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.ParenClose]));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.ParenClose]) !== undefined);
         finalState = state;
         // parse and skip ) token
         if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.ParenClose])) {
@@ -1480,7 +1480,7 @@ const parseForOfStatement = (state, isMultiline) => {
         // now it's time to parse body code block
         // skip everything until code block open token
         let bodyErrorTokens = [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen];
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, bodyErrorTokens));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, bodyErrorTokens) !== undefined);
         // check break tokens
         if ((0, exports.isEndOfFile)(state) || (0, exports.getTokenOfType)(state, breakTokens)) {
             break;
@@ -1681,7 +1681,7 @@ const parseImportItem = (state, isMultiline) => {
             const starStart = (0, exports.getCursorPosition)(state);
             state = (0, exports.skipTokens)(state, 1);
             const starEnd = (0, exports.getCursorPosition)(state);
-            identifier = astFactory_1.astFactory.identifier('*', starStart, starEnd);
+            identifier = astFactory_1.astFactory.identifier('*', true, starStart, starEnd);
         }
     }
     // we always parse it as raw identifier
@@ -2745,20 +2745,6 @@ const parseStringInclude = (state) => {
     state = (0, exports.skipComments)(state, true, false);
     // check for semicolon
     state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Endline, CodeTokenType_1.CodeTokenType.Semicolon]) !== undefined);
-    // // skip until ; or endline
-    // while (!isEndOfFile(state) && !getTokenOfType(state, [CodeTokenType.Semicolon, CodeTokenType.Endline])) {
-    // 	let nextToken: ICodeToken = getToken(state);
-    // 	let errorStart = getCursorPosition(state);
-    // 	state = skipTokens(state, 1);
-    // 	let errorEnd = getCursorPosition(state);
-    // 	state = addParsingError(
-    // 		state,
-    // 		ParsingErrorType.Error,
-    // 		"unexpected symbol '" + nextToken.value || nextToken.type + "'",
-    // 		errorStart,
-    // 		errorEnd
-    // 	);
-    // }
     // skip ; if any
     if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Semicolon])) {
         state = (0, exports.skipTokens)(state, 1);
@@ -3015,6 +3001,7 @@ const parseObjectLiteralItem = (state, isMultiline) => {
         return undefined;
     }
     return (0, exports.parseNode)(state, isMultiline, [
+        exports.parseFunction,
         exports.parseObjectProperty,
         exports.parseExpression
     ]);
@@ -3151,10 +3138,6 @@ const parseFunction = (state, isMultiline) => {
         state = arrowResult.state;
         state = (0, exports.addInvalidTokenSequenceError)(state, arrowResult.result);
     }
-    else if (!keywordResult && !arrowResult) {
-        // not a function
-        return undefined;
-    }
     if (arrowResult) {
         state = arrowResult.state;
         isLambda = true;
@@ -3170,7 +3153,8 @@ const parseFunction = (state, isMultiline) => {
     const body = bodyResult.result;
     // prepare result
     const end = (0, exports.getCursorPosition)(state);
-    const result = astFactory_1.astFactory.functionLiteral(name, args, body, isLambda, isAsync, isGenerator, start, end);
+    const isNoKeyword = keywordResult ? false : true;
+    const result = astFactory_1.astFactory.functionLiteral(name, args, body, isLambda, isAsync, isNoKeyword, isGenerator, start, end);
     return {
         state,
         result
@@ -3262,8 +3246,9 @@ const parseIdentifier = (state) => {
     if (variableName === undefined) {
         return undefined;
     }
+    const isJsIdentifier = (0, exports.isValidJsIdentifier)(variableName);
     // prepare result
-    let result = astFactory_1.astFactory.identifier(variableName, start, (0, exports.getCursorPosition)(state));
+    let result = astFactory_1.astFactory.identifier(variableName, isJsIdentifier, start, (0, exports.getCursorPosition)(state));
     return {
         state,
         result
@@ -3316,10 +3301,11 @@ const parseObjectLineIdentifier = (state) => {
             isEscaping = !isEscaping;
         }
     }
-    let value = resultValues.join('').trim();
-    let end = (0, exports.getCursorPosition)(state);
+    const value = resultValues.join('').trim();
+    const end = (0, exports.getCursorPosition)(state);
+    const isJsIdentifier = (0, exports.isValidJsIdentifier)(value);
     // prepare result
-    let result = astFactory_1.astFactory.identifier(value, start, end);
+    let result = astFactory_1.astFactory.identifier(value, isJsIdentifier, start, end);
     return {
         result,
         state
@@ -3720,7 +3706,7 @@ const parseParenExpression = (state) => {
     // skip comments and whitespaces
     state = (0, exports.skipComments)(state, true, true);
     // skip everything until close token )
-    state = (0, exports.parseErrorTokens)(state, (st) => !(0, exports.getTokenOfType)(st, [CodeTokenType_1.CodeTokenType.ParenClose]));
+    state = (0, exports.parseErrorTokens)(state, (st) => (0, exports.getTokenOfType)(st, [CodeTokenType_1.CodeTokenType.ParenClose]) !== undefined);
     // parse close paren
     if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.ParenClose])) {
         state = (0, exports.skipTokens)(state, 1);
@@ -3985,7 +3971,7 @@ const parseConditionalExpression = (state, condition, isMultiline) => {
         // skip comments and whitespaces
         state = (0, exports.skipComments)(state, true, isMultiline);
         // skip everything until break tokens or colon
-        state = (0, exports.parseErrorTokens)(state, (state) => !(0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.Colon]));
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.Colon]) !== undefined);
         // check sequence end
         if ((0, exports.getTokenOfType)(state, breakTokens))
             break;
@@ -4266,7 +4252,7 @@ const parseErrorTokens = (state, endSequence) => {
         }
         // otherwise there was no comments
         //check user filter and break if it doesn't pass
-        if (endSequence && !endSequence(state)) {
+        if (endSequence && endSequence(state)) {
             break;
         }
         // if we here, that means we have unexpected token
@@ -4354,6 +4340,16 @@ const isEndOfFile = (state, offset = 0) => {
     return state.tokens.length <= cursor;
 };
 exports.isEndOfFile = isEndOfFile;
+const isValidJsIdentifier = (variableName) => {
+    if (!variableName || variableName === '') {
+        return false;
+    }
+    // check is this identifier is a valid javascript identifier
+    const regex = /^[$_\p{L}][$_\p{L}\p{N}]*$/u;
+    const isJsIdentifier = regex.test(variableName);
+    return isJsIdentifier;
+};
+exports.isValidJsIdentifier = isValidJsIdentifier;
 const addItemToArray = (source, item) => {
     source = source || [];
     return [

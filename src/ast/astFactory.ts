@@ -210,12 +210,13 @@ export const astFactory = {
 			end
 		}
 	},
-	functionLiteral: (name: IAstNode, args: IAstNode[], body: IAstNode, isLambda: boolean, isAsync: boolean, isGenerator: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstFunction => {
+	functionLiteral: (name: IAstNode, args: IAstNode[], body: IAstNode, isLambda: boolean, isAsync: boolean, isNoKeyword: boolean, isGenerator: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstFunction => {
 		return {
 			nodeType: AstNodeType.Function,
 			isLambda,
 			isAsync,
 			isGenerator,
+			isNoKeyword,
 			name,
 			args,
 			body,
@@ -225,10 +226,11 @@ export const astFactory = {
 	},
 
 	// identifiers
-	identifier: (value: string, start: ISymbolPosition, end: ISymbolPosition): IAstIdentifier => {
+	identifier: (value: string, isJsIdentifier: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstIdentifier => {
 		return {
 			nodeType: AstNodeType.Identifier,
 			value,
+			isJsIdentifier,
 			start,
 			end
 		}

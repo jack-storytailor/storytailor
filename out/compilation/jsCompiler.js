@@ -669,6 +669,9 @@ const compileIdentifier = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
+    if (ast.isJsIdentifier) {
+        state = (0, exports.addSourceMapAtCurrentPlace)(state, ast.value);
+    }
     state = (0, exports.writeJsToken)(state, ast.value);
     return {
         state,
@@ -723,17 +726,27 @@ const compileContextIdentifier = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
+    const valueIdentifier = astFactory_1.astFactory.asNode(ast.value, AstNodeType_1.AstNodeType.Identifier);
+    const isJsIdentifier = valueIdentifier && valueIdentifier.isJsIdentifier === true;
     // this is not raw identifier, so add context before it
     state = (0, exports.writeJsToken)(state, `${exports.compilerConfig.contextVarName}`);
-    // ['
-    state = (0, exports.writeJsToken)(state, `[\``);
+    if (isJsIdentifier) {
+        // .
+        state = (0, exports.writeJsToken)(state, '.');
+    }
+    else {
+        // ['
+        state = (0, exports.writeJsToken)(state, `[\``);
+    }
     // write identifier
     var compileValResult = (0, exports.compileAstNode)(ast.value, state);
     if (compileValResult) {
         state = compileValResult.state;
     }
-    //']
-    state = (0, exports.writeJsToken)(state, `\`]`);
+    if (!isJsIdentifier) {
+        //']
+        state = (0, exports.writeJsToken)(state, `\`]`);
+    }
     return {
         state,
         result: ast
@@ -744,10 +757,6 @@ const compileBinaryExpression = (node, state) => {
     let ast = astFactory_1.astFactory.asNode(node, AstNodeType_1.AstNodeType.BinaryExpression);
     if (!ast || !state) {
         return undefined;
-    }
-    let leftIdentifier = (0, exports.getIdentifierFromNode)(ast.left, state);
-    if (leftIdentifier) {
-        state = (0, exports.addSourceMapAtCurrentPlace)(state, leftIdentifier.value, leftIdentifier.start);
     }
     // left operand
     let leftResult = (0, exports.compileAstNode)(ast.left, state);
@@ -785,9 +794,14 @@ const compileMemberExpression = (node, state) => {
     if (leftResult) {
         state = leftResult.state;
     }
+    const identifierParam = astFactory_1.astFactory.asNode(ast.property, AstNodeType_1.AstNodeType.Identifier);
+    const isMemberIdentifier = identifierParam && identifierParam.isJsIdentifier === true;
     // check is optional (?.)
     if (ast.optional) {
         state = (0, exports.writeJsToken)(state, '?.');
+    }
+    else if (isMemberIdentifier) {
+        state = (0, exports.writeJsToken)(state, ".");
     }
     else {
         // [
@@ -798,7 +812,7 @@ const compileMemberExpression = (node, state) => {
     if (rightResult) {
         state = rightResult.state;
     }
-    if (!ast.optional) {
+    if (!ast.optional && !isMemberIdentifier) {
         // ]
         state = (0, exports.writeJsToken)(state, `']`);
     }
@@ -938,14 +952,14 @@ const compileFunction = (node, state) => {
     if (ast.isAsync) {
         state = (0, exports.writeJsToken)(state, 'async ');
     }
-    if (!ast.isLambda) {
+    if (!ast.isLambda && !ast.isNoKeyword) {
         // write function (
         state = (0, exports.writeJsToken)(state, `function`);
     }
     if (ast.isGenerator) {
         state = (0, exports.writeJsToken)(state, '*');
     }
-    if (ast.name || ast.isGenerator) {
+    if (ast.name && !ast.isNoKeyword) {
         state = (0, exports.writeJsToken)(state, " ");
     }
     // function name (if any)
@@ -1878,7 +1892,7 @@ const compileOperator = (node, state) => {
     if (!ast || !state) {
         return undefined;
     }
-    state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
+    state = (0, exports.addSourceMapAtCurrentPlace)(state, ast.value, ast.start);
     state = (0, exports.writeJsToken)(state, ast.value || '');
     return {
         state,

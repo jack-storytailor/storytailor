@@ -22,8 +22,8 @@ export declare const astFactory: {
     regexLiteral: (value: string, start: ISymbolPosition, end: ISymbolPosition) => IAstRegexLiteral;
     booleanLiteral: (value: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstBoolean;
     arrayLiteral: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstArray;
-    functionLiteral: (name: IAstNode, args: IAstNode[], body: IAstNode, isLambda: boolean, isAsync: boolean, isGenerator: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstFunction;
-    identifier: (value: string, start: ISymbolPosition, end: ISymbolPosition) => IAstIdentifier;
+    functionLiteral: (name: IAstNode, args: IAstNode[], body: IAstNode, isLambda: boolean, isAsync: boolean, isNoKeyword: boolean, isGenerator: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstFunction;
+    identifier: (value: string, isJsIdentifier: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstIdentifier;
     rawIndentifier: (value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstRawIdentifier;
     contextIndentifier: (value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstContextIdentifier;
     IdentifierScope: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstIdentifierScope;

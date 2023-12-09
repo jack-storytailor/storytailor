@@ -107,7 +107,7 @@ export declare const parseObject: (state: IParserState) => IParseResult<IAstObje
 export declare const parseObjectLiteralItem: (state: IParserState, isMultiline: boolean) => IParseResult<IAstNode>;
 export declare const parseObjectProperty: (state: IParserState, isMultiline: boolean) => IParseResult<IAstPropertyDeclaration>;
 export declare const parseFunction: (state: IParserState, isMultiline: boolean) => IParseResult<IAstNode>;
-export declare const parseIdentifier: (state: IParserState) => IParseResult<IAstIdentifier>;
+export declare const parseIdentifier: (state: IParserState) => IParseResult<IAstIdentifier | IAstIdentifierScope>;
 export declare const parseIdentifierScope: (state: IParserState) => IParseResult<IAstIdentifierScope>;
 export declare const parseObjectLineIdentifier: (state: IParserState) => IParseResult<IAstIdentifier>;
 export declare const parseRawIdentifier: (state: IParserState) => IParseResult<IAstRawIdentifier>;
@@ -150,6 +150,7 @@ export declare const readWhitespace: (state: IParserState) => IParseResult<strin
 export declare const calcIndentFromWhitespace: (whitespace: string) => number;
 export declare const readTokensAsString: (state: IParserState, tokenTypes: CodeTokenType[]) => IParseResult<string>;
 export declare const isEndOfFile: (state: IParserState, offset?: number) => boolean;
+export declare const isValidJsIdentifier: (variableName: string) => boolean;
 export declare const addItemToArray: <T = any>(source: T[], item: T) => T[];
 export declare const addItemToHash: <T = any>(source: IHash<T>, key: string, item: T) => IHash<T>;
 export declare const getToken: (state: IParserState, offset?: number) => ICodeToken;

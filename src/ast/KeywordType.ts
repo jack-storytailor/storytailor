@@ -18,7 +18,6 @@ export enum KeywordType {
   Switch = "switch",
   Case = "case",
   New = "new",
-  This = "this",
   Return = "return",
   Default = "default",
   True = "true",

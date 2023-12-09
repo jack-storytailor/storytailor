@@ -865,6 +865,9 @@ export const compileIdentifier = (node: IAstNode, state: ICompilerState): ICompi
 		return undefined;
 	}
 
+	if (ast.isJsIdentifier) {
+		state = addSourceMapAtCurrentPlace(state, ast.value);
+	}
 	state = writeJsToken(state, ast.value);
 
 	return {
@@ -922,17 +925,30 @@ export const compileContextIdentifier = (node: IAstNode, state: ICompilerState):
 		return undefined;
 	}
 
+	const valueIdentifier = astFactory.asNode<IAstIdentifier>(ast.value, AstNodeType.Identifier);
+	const isJsIdentifier: boolean = valueIdentifier && valueIdentifier.isJsIdentifier === true;
+
 	// this is not raw identifier, so add context before it
 	state = writeJsToken(state, `${compilerConfig.contextVarName}`);
-	// ['
-	state = writeJsToken(state, `[\``);
+	
+	if (isJsIdentifier) {
+		// .
+		state = writeJsToken(state, '.');
+	}
+	else {
+		// ['
+		state = writeJsToken(state, `[\``);
+	}
 	// write identifier
 	var compileValResult = compileAstNode(ast.value, state);
 	if (compileValResult) {
 		state = compileValResult.state;
 	}
-	//']
-	state = writeJsToken(state, `\`]`);
+	
+	if (!isJsIdentifier) {
+		//']
+		state = writeJsToken(state, `\`]`);
+	}
 
 	return {
 		state,
@@ -943,11 +959,6 @@ export const compileBinaryExpression = (node: IAstNode, state: ICompilerState): 
 	let ast = astFactory.asNode<IAstBinaryExpression>(node, AstNodeType.BinaryExpression);
 	if (!ast || !state) {
 		return undefined;
-	}
-
-	let leftIdentifier = getIdentifierFromNode(ast.left, state);
-	if (leftIdentifier) {
-		state = addSourceMapAtCurrentPlace(state, leftIdentifier.value, leftIdentifier.start);
 	}
 
 	// left operand
@@ -992,9 +1003,15 @@ export const compileMemberExpression = (node: IAstNode, state: ICompilerState): 
 		state = leftResult.state;
 	}
 
+	const identifierParam = astFactory.asNode<IAstIdentifier>(ast.property, AstNodeType.Identifier);
+	const isMemberIdentifier = identifierParam && identifierParam.isJsIdentifier === true;
+
 	// check is optional (?.)
 	if (ast.optional) {
 		state = writeJsToken(state, '?.');
+	}
+	else if (isMemberIdentifier) {
+		state = writeJsToken(state, ".");
 	}
 	else {
 		// [
@@ -1007,7 +1024,7 @@ export const compileMemberExpression = (node: IAstNode, state: ICompilerState): 
 		state = rightResult.state;
 	}
 
-	if (!ast.optional) {
+	if (!ast.optional && !isMemberIdentifier) {
 		// ]
 		state = writeJsToken(state, `']`);
 	}
@@ -1167,7 +1184,7 @@ export const compileFunction = (node: IAstNode, state: ICompilerState): ICompile
 		state = writeJsToken(state, 'async ');
 	}
 
-	if (!ast.isLambda) {
+	if (!ast.isLambda && !ast.isNoKeyword) {
 		// write function (
 		state = writeJsToken(state, `function`);
 	}
@@ -1176,7 +1193,7 @@ export const compileFunction = (node: IAstNode, state: ICompilerState): ICompile
 		state = writeJsToken(state, '*');
 	}
 
-	if (ast.name || ast.isGenerator) {
+	if (ast.name && !ast.isNoKeyword) {
 		state = writeJsToken(state, " ");
 	}
 
@@ -2219,7 +2236,7 @@ export const compileOperator = (node: IAstNode, state: ICompilerState): ICompile
 		return undefined;
 	}
 
-	state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
+	state = addSourceMapAtCurrentPlace(state, ast.value, ast.start);
 	state = writeJsToken(state, ast.value || '');
 	return {
 		state,

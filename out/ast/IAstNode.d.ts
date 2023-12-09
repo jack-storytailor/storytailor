@@ -71,12 +71,14 @@ export interface IAstFunction extends IAstNode {
     isLambda: boolean;
     isAsync: boolean;
     isGenerator: boolean;
+    isNoKeyword: boolean;
     name: IAstNode;
     args: IAstNode[];
     body: IAstNode;
 }
 export interface IAstIdentifier extends IAstNode {
     value: string;
+    isJsIdentifier: boolean;
 }
 export interface IAstRawIdentifier extends IAstNode {
     value: IAstNode;

@@ -22,7 +22,6 @@ var KeywordType;
     KeywordType["Switch"] = "switch";
     KeywordType["Case"] = "case";
     KeywordType["New"] = "new";
-    KeywordType["This"] = "this";
     KeywordType["Return"] = "return";
     KeywordType["Default"] = "default";
     KeywordType["True"] = "true";
