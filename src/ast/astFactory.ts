@@ -18,7 +18,6 @@ import {
 	IAstIdentifier,
 	IAstRawIdentifier,
 	IAstIdentifierScope,
-	IAstFunctionExpression,
 	IAstPropertyDeclaration,
 	IAstBreakStatement,
 	IAstContinueStatement,
@@ -32,7 +31,7 @@ import {
 	IAstForInStatement,
 	IAstImportStatement,
 	IAstParenExpression,
-	IAstObjectLiteral,
+	IAstObject,
 	IAstCallExpression,
 	IAstUpdateExpression,
 	IAstBinaryExpression,
@@ -53,13 +52,13 @@ import {
 	IAstDebuggerKeyword,
 	IAstDeleteLineExpression,
 	IAstContextIdentifier,
-	IAstFunctionDeclaration,
 	IAstRegexLiteral,
 	IAstVariableDeclaration,
 	IAstRawImportStatement,
 	IAstImportItem,
 	IAstClassDeclaration,
-	IAstKeywordNode
+	IAstKeywordNode,
+	IAstFunction
 } from "./IAstNode";
 import { KeywordType } from "./KeywordType";
 import { OperatorType } from "./OperatorType";
@@ -211,6 +210,19 @@ export const astFactory = {
 			end
 		}
 	},
+	functionLiteral: (name: IAstNode, args: IAstNode[], body: IAstNode, isLambda: boolean, isAsync: boolean, isGenerator: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstFunction => {
+		return {
+			nodeType: AstNodeType.Function,
+			isLambda,
+			isAsync,
+			isGenerator,
+			name,
+			args,
+			body,
+			start,
+			end
+		}
+	},
 
 	// identifiers
 	identifier: (value: string, start: ISymbolPosition, end: ISymbolPosition): IAstIdentifier => {
@@ -247,30 +259,6 @@ export const astFactory = {
 	},
 
 	// declarations
-	functionExpression: (args: IAstNode[], body: IAstNode, isLambda: boolean, isAsync: boolean, isGenerator: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstFunctionExpression => {
-		return {
-			nodeType: AstNodeType.FunctionExpression,
-			start,
-			end,
-			args,
-			body,
-			isLambda,
-			isAsync,
-			isGenerator
-		}
-	},
-	functionDeclaration: (identifier: IAstNode, args: IAstNode[], body: IAstNode, isAsync: boolean, isGenerator: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstFunctionDeclaration => {
-		return {
-			nodeType: AstNodeType.FunctionDeclaration,
-			start,
-			end,
-			args,
-			body,
-			isAsync,
-			identifier,
-			isGenerator
-		}
-	},
 	variableListDeclaration: (identifiers: IAstNode[], kind: VariableDeclarationKind, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstVariableDeclaration => {
 		return {
 			nodeType: AstNodeType.VariableDeclaration,
@@ -487,9 +475,9 @@ export const astFactory = {
 			expression
 		}
 	},
-	objectLiteral: (properties: IAstNode[], start: ISymbolPosition, end: ISymbolPosition): IAstObjectLiteral => {
+	objectLiteral: (properties: IAstNode[], start: ISymbolPosition, end: ISymbolPosition): IAstObject => {	
 		return {
-			nodeType: AstNodeType.ObjectLiteral,
+			nodeType: AstNodeType.Object,
 			start,
 			end,
 			properties

@@ -16,13 +16,14 @@ export enum AstNodeType {
   RegexLiteral = "RegexLiteral",
   Boolean = "Boolean",
   Array = "Array",
+  Object = "Object",
+  Function = "Function",
   // identifiers
   Identifier = "Identifier",
   IdentifierScope = "IdentifierScope",
   RawIdentifier = "RawIdentifier",
   ContextIdentifier = "ContextIdentifier",
   // declarations
-  FunctionDeclaration = "FunctionDeclaration",
   VariableDeclaration = "VariableDeclaration",
   PropertyDeclaration = "PropertyDeclaration",
   // statements
@@ -49,14 +50,12 @@ export enum AstNodeType {
   // expression statements
   KeywordNode = "KeywordNode",
   ParenExpression = "ParenExpression",
-  ObjectLiteral = "ObjectLiteral",
   CallExpression = "CallExpression",
   UpdateExpression = "UpdateExpression",
   BinaryExpression = "BinaryExpression",
   MemberExpression = "MemberExpression",
   IndexerExpression = "IndexerExpression",
   ConditionalExpression = "ConditionalExpression",
-  FunctionExpression = "FunctionExpression",
   // storytailor-specific
   OuterStatement = "OuterStatement",
   TextLineStatement = "TextLineStatement",

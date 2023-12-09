@@ -68,8 +68,16 @@ export interface IAstBoolean extends IAstNode {
 export interface IAstArray extends IAstNode {
 	value: IAstNode[];
 }
-export interface IAstObjectLiteral extends IAstNode {
+export interface IAstObject extends IAstNode {
 	properties: IAstNode[];
+}
+export interface IAstFunction extends IAstNode {
+	isLambda: boolean;
+	isAsync: boolean;
+	isGenerator: boolean;
+	name: IAstNode;
+	args: IAstNode[];
+	body: IAstNode;
 }
 
 // Identifiers
@@ -87,20 +95,6 @@ export interface IAstIdentifierScope extends IAstNode {
 }
 
 // Declarations
-export interface IAstFunctionExpression extends IAstNode {
-	isLambda: boolean;
-	isAsync: boolean;
-	isGenerator: boolean;
-	args: IAstNode[];
-	body: IAstNode;
-}
-export interface IAstFunctionDeclaration extends IAstNode {
-	identifier: IAstNode;
-	isAsync: boolean;
-	isGenerator: boolean;
-	args: IAstNode[];
-	body: IAstNode;
-}
 export interface IAstVariableDeclaration extends IAstNode {
 	identifiers: IAstNode[];
 	value: IAstNode;

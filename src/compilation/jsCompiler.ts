@@ -17,8 +17,6 @@ import {
 	IAstMemberExpression, 
 	IAstStringIncludeStatement, 
 	IAstCallExpression, 
-	IAstFunctionExpression, 
-	IAstFunctionDeclaration, 
 	IAstProgram, 
 	IAstIfStatement, 
 	IAstWhileStatement, 
@@ -33,7 +31,7 @@ import {
 	IAstForStatement, 
 	IAstForInStatement, 
 	IAstArray, 
-	IAstObjectLiteral, 
+	IAstObject, 
 	IAstUpdateExpression, 
 	IAstTokenSequence, 
 	IAstKeyword, 
@@ -52,7 +50,8 @@ import {
 	IAstRawImportStatement, 
 	IAstImportItem, 
 	IAstClassDeclaration, 
-	IAstKeywordNode
+	IAstKeywordNode,
+	IAstFunction as IAstFunction
 } from "../ast/IAstNode";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { SourceMapGenerator } from 'source-map';
@@ -420,8 +419,7 @@ export const compileAstNode = (ast: IAstNode, state: ICompilerState): ICompileRe
 		compileOperator,
 		compileVarDeclaration,
 		compileProgram,
-		compileFuncDeclaration,
-		compileFuncExpression,
+		compileFunction,
 		compileIfStatement,
 		compileWhileStatement,
 		compileDoWhileStatement,
@@ -1157,8 +1155,8 @@ export const compileVarDeclaration = (node: IAstNode, state: ICompilerState): IC
 		result: ast
 	}
 }
-export const compileFuncExpression = (node: IAstNode, state: ICompilerState): ICompileResult<IAstFunctionExpression> => {
-	let ast = astFactory.asNode<IAstFunctionExpression>(node, AstNodeType.FunctionExpression);
+export const compileFunction = (node: IAstNode, state: ICompilerState): ICompileResult<IAstFunction> => {
+	let ast = astFactory.asNode<IAstFunction>(node, AstNodeType.Function);
 	if (!ast || !state) {
 		return undefined;
 	}
@@ -1176,6 +1174,16 @@ export const compileFuncExpression = (node: IAstNode, state: ICompilerState): IC
 
 	if (ast.isGenerator) {
 		state = writeJsToken(state, '*');
+	}
+
+	if (ast.name || ast.isGenerator) {
+		state = writeJsToken(state, " ");
+	}
+
+	// function name (if any)
+	const nameResult = compileAstNode(ast.name, state);
+	if (nameResult) {
+		state = nameResult.state;
 	}
 
 	state = writeJsToken(state, '(');
@@ -1203,67 +1211,6 @@ export const compileFuncExpression = (node: IAstNode, state: ICompilerState): IC
 	if (ast.isLambda) {
 		state = writeJsToken(state, '=> ');
 	}
-
-	// write function body
-	let bodyResult = compileAstNode(ast.body, state);
-	if (bodyResult) {
-		state = bodyResult.state;
-	}
-
-	// result
-	return {
-		state,
-		result: ast
-	}
-}
-export const compileFuncDeclaration = (node: IAstNode, state: ICompilerState): ICompileResult<IAstFunctionDeclaration> => {
-	let ast = astFactory.asNode<IAstFunctionDeclaration>(node, AstNodeType.FunctionDeclaration);
-	if (!ast || !state) {
-		return undefined;
-	}
-
-	state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
-
-	if (ast.isAsync) {
-		// write async
-		state = writeJsToken(state, 'async ');
-	}
-
-	// write function
-	state = writeJsToken(state, `function`);
-
-	if (ast.isGenerator) {
-		state = writeJsToken(state, '*');
-	}
-
-	state = writeJsToken(state, ' ');
-
-	const identifierResult = compileAstNode(ast.identifier, state);
-	if (identifierResult) {
-		state = identifierResult.state;
-	}
-
-	state = writeJsToken(state, '(');
-
-	// write all the params
-	let params = ast.args;
-	if (params && params.length > 0) {
-		for (let i = 0; i < params.length; i++) {
-			// if it's not first item, add separator before
-			if (i > 0) {
-				state = writeJsToken(state, `, `);
-			}
-
-			const param = params[i];
-			let paramResult = compileAstNode(param, state);
-			if (paramResult) {
-				state = paramResult.state;
-			}
-		}
-	}
-
-	// write )
-	state = writeJsToken(state, `) `);
 
 	// write function body
 	let bodyResult = compileAstNode(ast.body, state);
@@ -1942,8 +1889,8 @@ export const compileArrayLiteral = (node: IAstNode, state: ICompilerState): ICom
 		result: ast
 	}
 }
-export const compileObjectLiteral = (node: IAstNode, state: ICompilerState): ICompileResult<IAstObjectLiteral> => {
-	let ast = astFactory.asNode<IAstObjectLiteral>(node, AstNodeType.ObjectLiteral);
+export const compileObjectLiteral = (node: IAstNode, state: ICompilerState): ICompileResult<IAstObject> => {
+	let ast = astFactory.asNode<IAstObject>(node, AstNodeType.Object);
 	if (!ast || !state) {
 		return undefined;
 	}

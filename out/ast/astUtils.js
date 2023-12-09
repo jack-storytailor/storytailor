@@ -118,18 +118,6 @@ const childrenRegistry = {
         }
         return [ast.value];
     },
-    FunctionExpression: (ast) => {
-        if (!ast) {
-            return undefined;
-        }
-        return [...ast.args, ast.body];
-    },
-    FunctionDeclaration: (ast) => {
-        if (!ast) {
-            return undefined;
-        }
-        return [ast.identifier, ...ast.args, ast.body];
-    },
     VariableDeclaration: (ast) => {
         if (!ast) {
             return undefined;
@@ -142,19 +130,7 @@ const childrenRegistry = {
         }
         return [ast.identifier, ast.value, ast.initializer];
     },
-    Statement: (ast) => {
-        if (!ast) {
-            return undefined;
-        }
-        return [ast.statement];
-    },
     BreakStatement: (ast) => {
-        if (!ast) {
-            return undefined;
-        }
-        return undefined;
-    },
-    ReturnStatement: (ast) => {
         if (!ast) {
             return undefined;
         }
@@ -244,24 +220,6 @@ const childrenRegistry = {
         }
         return [ast.expression];
     },
-    ExpressionStatement: (ast) => {
-        if (!ast) {
-            return undefined;
-        }
-        return [ast.expression];
-    },
-    AwaitExpression: (ast) => {
-        if (!ast) {
-            return undefined;
-        }
-        return [ast.expression];
-    },
-    YieldExpression: (ast) => {
-        if (!ast) {
-            return undefined;
-        }
-        return [ast.expression];
-    },
     ParenExpression: (ast) => {
         if (!ast) {
             return undefined;
@@ -279,12 +237,6 @@ const childrenRegistry = {
             return undefined;
         }
         return [ast.calee, ...ast.args];
-    },
-    OperationExpression: (ast) => {
-        if (!ast) {
-            return undefined;
-        }
-        return [ast.operation];
     },
     UpdateExpression: (ast) => {
         if (!ast) {
@@ -320,18 +272,6 @@ const childrenRegistry = {
             return undefined;
         }
         return [ast.condition, ast.whenTrue, ast.whenFalse];
-    },
-    NewExpression: (ast) => {
-        if (!ast) {
-            return undefined;
-        }
-        return [ast.expression];
-    },
-    DeleteExpression: (ast) => {
-        if (!ast) {
-            return undefined;
-        }
-        return [ast.expression];
     },
     OuterStatement: (ast) => {
         if (!ast) {
@@ -375,12 +315,6 @@ const childrenRegistry = {
         }
         return [ast.open, ...ast.content, ast.close];
     },
-    Tag: (ast) => {
-        if (!ast) {
-            return undefined;
-        }
-        return [ast.open, ...ast.content, ast.close];
-    }
 };
 exports.astUtils = {
     childrenRegistry,
@@ -770,46 +704,6 @@ exports.astUtils = {
                 });
                 break;
             }
-            case AstNodeType_1.AstNodeType.FunctionExpression: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.FunctionExpression);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.FunctionDeclaration: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.FunctionDeclaration);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        operation(child);
-                    }
-                });
-                break;
-            }
             case AstNodeType_1.AstNodeType.VariableDeclaration: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.VariableDeclaration);
                 if (!astNode) {
@@ -850,48 +744,8 @@ exports.astUtils = {
                 });
                 break;
             }
-            case AstNodeType_1.AstNodeType.Statement: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.Statement);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        operation(child);
-                    }
-                });
-                break;
-            }
             case AstNodeType_1.AstNodeType.BreakStatement: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.BreakStatement);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.ReturnStatement: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ReturnStatement);
                 if (!astNode) {
                     return;
                 }
@@ -1190,26 +1044,6 @@ exports.astUtils = {
                 });
                 break;
             }
-            case AstNodeType_1.AstNodeType.ExpressionStatement: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ExpressionStatement);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        operation(child);
-                    }
-                });
-                break;
-            }
             case AstNodeType_1.AstNodeType.ParenExpression: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ParenExpression);
                 if (!astNode) {
@@ -1230,48 +1064,8 @@ exports.astUtils = {
                 });
                 break;
             }
-            case AstNodeType_1.AstNodeType.AwaitExpression: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.AwaitExpression);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.YieldExpression: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.YieldExpression);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.ObjectLiteral: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ObjectLiteral);
+            case AstNodeType_1.AstNodeType.Object: {
+                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.Object);
                 if (!astNode) {
                     return;
                 }
@@ -1292,26 +1086,6 @@ exports.astUtils = {
             }
             case AstNodeType_1.AstNodeType.CallExpression: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.CallExpression);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.OperationExpression: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.OperationExpression);
                 if (!astNode) {
                     return;
                 }
@@ -1412,46 +1186,6 @@ exports.astUtils = {
             }
             case AstNodeType_1.AstNodeType.ConditionalExpression: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ConditionalExpression);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.NewExpression: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.NewExpression);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.DeleteExpression: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.DeleteExpression);
                 if (!astNode) {
                     return;
                 }
@@ -1592,26 +1326,6 @@ exports.astUtils = {
             }
             case AstNodeType_1.AstNodeType.Scope: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.Scope);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.Tag: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.Tag);
                 if (!astNode) {
                     return;
                 }
@@ -2095,54 +1809,6 @@ exports.astUtils = {
                 });
                 break;
             }
-            case AstNodeType_1.AstNodeType.FunctionExpression: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.FunctionExpression);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        let operation = operations[child.nodeType] || defaultOp;
-                        if (!operation) {
-                            return;
-                        }
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.FunctionDeclaration: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.FunctionDeclaration);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        let operation = operations[child.nodeType] || defaultOp;
-                        if (!operation) {
-                            return;
-                        }
-                        operation(child);
-                    }
-                });
-                break;
-            }
             case AstNodeType_1.AstNodeType.VariableDeclaration: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.VariableDeclaration);
                 if (!astNode) {
@@ -2191,56 +1857,8 @@ exports.astUtils = {
                 });
                 break;
             }
-            case AstNodeType_1.AstNodeType.Statement: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.Statement);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        let operation = operations[child.nodeType] || defaultOp;
-                        if (!operation) {
-                            return;
-                        }
-                        operation(child);
-                    }
-                });
-                break;
-            }
             case AstNodeType_1.AstNodeType.BreakStatement: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.BreakStatement);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        let operation = operations[child.nodeType] || defaultOp;
-                        if (!operation) {
-                            return;
-                        }
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.ReturnStatement: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ReturnStatement);
                 if (!astNode) {
                     return;
                 }
@@ -2599,30 +2217,6 @@ exports.astUtils = {
                 });
                 break;
             }
-            case AstNodeType_1.AstNodeType.ExpressionStatement: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ExpressionStatement);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        let operation = operations[child.nodeType] || defaultOp;
-                        if (!operation) {
-                            return;
-                        }
-                        operation(child);
-                    }
-                });
-                break;
-            }
             case AstNodeType_1.AstNodeType.ParenExpression: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ParenExpression);
                 if (!astNode) {
@@ -2647,56 +2241,8 @@ exports.astUtils = {
                 });
                 break;
             }
-            case AstNodeType_1.AstNodeType.AwaitExpression: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.AwaitExpression);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        let operation = operations[child.nodeType] || defaultOp;
-                        if (!operation) {
-                            return;
-                        }
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.YieldExpression: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.YieldExpression);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        let operation = operations[child.nodeType] || defaultOp;
-                        if (!operation) {
-                            return;
-                        }
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.ObjectLiteral: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ObjectLiteral);
+            case AstNodeType_1.AstNodeType.Object: {
+                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.Object);
                 if (!astNode) {
                     return;
                 }
@@ -2721,30 +2267,6 @@ exports.astUtils = {
             }
             case AstNodeType_1.AstNodeType.CallExpression: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.CallExpression);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        let operation = operations[child.nodeType] || defaultOp;
-                        if (!operation) {
-                            return;
-                        }
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.OperationExpression: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.OperationExpression);
                 if (!astNode) {
                     return;
                 }
@@ -2865,54 +2387,6 @@ exports.astUtils = {
             }
             case AstNodeType_1.AstNodeType.ConditionalExpression: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.ConditionalExpression);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        let operation = operations[child.nodeType] || defaultOp;
-                        if (!operation) {
-                            return;
-                        }
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.NewExpression: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.NewExpression);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        let operation = operations[child.nodeType] || defaultOp;
-                        if (!operation) {
-                            return;
-                        }
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.DeleteExpression: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.DeleteExpression);
                 if (!astNode) {
                     return;
                 }
@@ -3081,30 +2555,6 @@ exports.astUtils = {
             }
             case AstNodeType_1.AstNodeType.Scope: {
                 let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.Scope);
-                if (!astNode) {
-                    return;
-                }
-                let getChildren = childrenRegistry[rootNodeType];
-                if (!getChildren) {
-                    return;
-                }
-                let children = getChildren(astNode);
-                if (!children) {
-                    return;
-                }
-                children.forEach(child => {
-                    if (child) {
-                        let operation = operations[child.nodeType] || defaultOp;
-                        if (!operation) {
-                            return;
-                        }
-                        operation(child);
-                    }
-                });
-                break;
-            }
-            case AstNodeType_1.AstNodeType.Tag: {
-                let astNode = astFactory_1.astFactory.asNode(root, AstNodeType_1.AstNodeType.Tag);
                 if (!astNode) {
                     return;
                 }

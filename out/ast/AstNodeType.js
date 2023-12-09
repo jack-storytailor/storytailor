@@ -20,19 +20,18 @@ var AstNodeType;
     AstNodeType["RegexLiteral"] = "RegexLiteral";
     AstNodeType["Boolean"] = "Boolean";
     AstNodeType["Array"] = "Array";
+    AstNodeType["Object"] = "Object";
+    AstNodeType["Function"] = "Function";
     // identifiers
     AstNodeType["Identifier"] = "Identifier";
     AstNodeType["IdentifierScope"] = "IdentifierScope";
     AstNodeType["RawIdentifier"] = "RawIdentifier";
     AstNodeType["ContextIdentifier"] = "ContextIdentifier";
     // declarations
-    AstNodeType["FunctionDeclaration"] = "FunctionDeclaration";
     AstNodeType["VariableDeclaration"] = "VariableDeclaration";
     AstNodeType["PropertyDeclaration"] = "PropertyDeclaration";
     // statements
-    AstNodeType["Statement"] = "Statement";
     AstNodeType["BreakStatement"] = "BreakStatement";
-    AstNodeType["ReturnStatement"] = "ReturnStatement";
     AstNodeType["ContinueStatement"] = "ContinueStatement";
     AstNodeType["BlockStatement"] = "BlockStatement";
     AstNodeType["IfStatement"] = "IfStatement";
@@ -51,25 +50,16 @@ var AstNodeType;
     AstNodeType["FinallyStatement"] = "FinallyStatement";
     AstNodeType["ThrowStatement"] = "ThrowStatement";
     AstNodeType["ExportStatement"] = "ExportStatement";
-    AstNodeType["StaticStatement"] = "StaticStatement";
     AstNodeType["ClassDeclaration"] = "ClassDeclaration";
     // expression statements
-    AstNodeType["ExpressionStatement"] = "ExpressionStatement";
-    AstNodeType["AwaitExpression"] = "AwaitExpression";
-    AstNodeType["YieldExpression"] = "YieldExpression";
+    AstNodeType["KeywordNode"] = "KeywordNode";
     AstNodeType["ParenExpression"] = "ParenExpression";
-    AstNodeType["ObjectLiteral"] = "ObjectLiteral";
     AstNodeType["CallExpression"] = "CallExpression";
-    AstNodeType["OperationExpression"] = "OperationExpression";
     AstNodeType["UpdateExpression"] = "UpdateExpression";
     AstNodeType["BinaryExpression"] = "BinaryExpression";
     AstNodeType["MemberExpression"] = "MemberExpression";
     AstNodeType["IndexerExpression"] = "IndexerExpression";
     AstNodeType["ConditionalExpression"] = "ConditionalExpression";
-    AstNodeType["NewExpression"] = "NewExpression";
-    AstNodeType["DeleteExpression"] = "DeleteExpression";
-    AstNodeType["TypeofExpression"] = "TypeofExpression";
-    AstNodeType["FunctionExpression"] = "FunctionExpression";
     // storytailor-specific
     AstNodeType["OuterStatement"] = "OuterStatement";
     AstNodeType["TextLineStatement"] = "TextLineStatement";
@@ -78,5 +68,4 @@ var AstNodeType;
     AstNodeType["PrototypeExpression"] = "PrototypeExpression";
     AstNodeType["DeleteLineExpression"] = "DeleteLineExpression";
     AstNodeType["Scope"] = "Scope";
-    AstNodeType["Tag"] = "Tag";
 })(AstNodeType || (exports.AstNodeType = AstNodeType = {}));

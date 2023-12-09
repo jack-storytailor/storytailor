@@ -43,6 +43,11 @@ export interface IAstCommentLine extends IAstNode {
 export interface IAstCommentBlock extends IAstNode {
     text: string;
 }
+export interface IAstKeywordNode extends IAstNode {
+    keyword: IAstKeyword;
+    node: IAstNode;
+    isKeywordFirst: boolean;
+}
 export interface IAstNumber extends IAstNode {
     value: number;
 }
@@ -59,6 +64,17 @@ export interface IAstBoolean extends IAstNode {
 export interface IAstArray extends IAstNode {
     value: IAstNode[];
 }
+export interface IAstObject extends IAstNode {
+    properties: IAstNode[];
+}
+export interface IAstFunction extends IAstNode {
+    isLambda: boolean;
+    isAsync: boolean;
+    isGenerator: boolean;
+    name: IAstNode;
+    args: IAstNode[];
+    body: IAstNode;
+}
 export interface IAstIdentifier extends IAstNode {
     value: string;
 }
@@ -70,20 +86,6 @@ export interface IAstContextIdentifier extends IAstNode {
 }
 export interface IAstIdentifierScope extends IAstNode {
     value: IAstNode[];
-}
-export interface IAstFunctionExpression extends IAstNode {
-    isLambda: boolean;
-    isAsync: boolean;
-    isGenerator: boolean;
-    args: IAstNode[];
-    body: IAstNode;
-}
-export interface IAstFunctionDeclaration extends IAstNode {
-    identifier: IAstNode;
-    isAsync: boolean;
-    isGenerator: boolean;
-    args: IAstNode[];
-    body: IAstNode;
 }
 export interface IAstVariableDeclaration extends IAstNode {
     identifiers: IAstNode[];
@@ -100,19 +102,7 @@ export interface IAstClassDeclaration extends IAstNode {
     name: IAstNode;
     contents: IAstNode[];
 }
-export interface IAstStatement extends IAstNode {
-    statement: IAstNode;
-}
-export interface IAstExportStatement extends IAstNode {
-    value: IAstNode;
-}
-export interface IAstStaticStatement extends IAstNode {
-    value: IAstNode;
-}
 export interface IAstBreakStatement extends IAstNode {
-}
-export interface IAstReturnStatement extends IAstNode {
-    value: IAstNode;
 }
 export interface IAstContinueStatement extends IAstNode {
 }
@@ -186,20 +176,8 @@ export interface IAstCatchStatement extends IAstNode {
 export interface IAstFinallyStatement extends IAstNode {
     body: IAstNode;
 }
-export interface IAstAwaitExpression extends IAstNode {
-    expression: IAstNode;
-}
-export interface IAstYieldExpression extends IAstNode {
-    expression: IAstNode;
-}
 export interface IAstParenExpression extends IAstNode {
     expression: IAstNode;
-}
-export interface IAstExpressionStatement extends IAstNode {
-    expression: IAstNode;
-}
-export interface IAstObjectLiteral extends IAstNode {
-    properties: IAstNode[];
 }
 export interface IAstCallExpression extends IAstNode {
     calee: IAstNode;
@@ -209,9 +187,6 @@ export interface IAstUpdateExpression extends IAstNode {
     operator: IAstNode;
     argument: IAstNode;
     prefix: boolean;
-}
-export interface IAstOperationExpression extends IAstNode {
-    operation: IAstNode;
 }
 export interface IAstBinaryExpression extends IAstNode {
     left: IAstNode;
@@ -232,15 +207,6 @@ export interface IAstConditionalExpression extends IAstNode {
     whenTrue: IAstNode;
     colonToken: IAstNode;
     whenFalse: IAstNode;
-}
-export interface IAstNewExpression extends IAstNode {
-    expression: IAstNode;
-}
-export interface IAstDeleteExpression extends IAstNode {
-    expression: IAstNode;
-}
-export interface IAstTypeofExpression extends IAstNode {
-    expression: IAstNode;
 }
 export interface IAstOuterStatement extends IAstNode {
     indent: number;
@@ -268,6 +234,4 @@ export interface IAstScope extends IAstNode {
     content: IAstNode[];
     open: IAstNode;
     close: IAstNode;
-}
-export interface IAstTag extends IAstScope {
 }

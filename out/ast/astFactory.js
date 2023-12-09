@@ -142,6 +142,19 @@ exports.astFactory = {
             end
         };
     },
+    functionLiteral: (name, args, body, isLambda, isAsync, isGenerator, start, end) => {
+        return {
+            nodeType: AstNodeType_1.AstNodeType.Function,
+            isLambda,
+            isAsync,
+            isGenerator,
+            name,
+            args,
+            body,
+            start,
+            end
+        };
+    },
     // identifiers
     identifier: (value, start, end) => {
         return {
@@ -176,30 +189,6 @@ exports.astFactory = {
         };
     },
     // declarations
-    functionExpression: (args, body, isLambda, isAsync, isGenerator, start, end) => {
-        return {
-            nodeType: AstNodeType_1.AstNodeType.FunctionExpression,
-            start,
-            end,
-            args,
-            body,
-            isLambda,
-            isAsync,
-            isGenerator
-        };
-    },
-    functionDeclaration: (identifier, args, body, isAsync, isGenerator, start, end) => {
-        return {
-            nodeType: AstNodeType_1.AstNodeType.FunctionDeclaration,
-            start,
-            end,
-            args,
-            body,
-            isAsync,
-            identifier,
-            isGenerator
-        };
-    },
     variableListDeclaration: (identifiers, kind, value, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.VariableDeclaration,
@@ -231,43 +220,11 @@ exports.astFactory = {
         };
     },
     // statements
-    statement: (statement, start, end) => {
-        return {
-            nodeType: AstNodeType_1.AstNodeType.Statement,
-            start,
-            end,
-            statement
-        };
-    },
-    exportStatement: (value, start, end) => {
-        return {
-            nodeType: AstNodeType_1.AstNodeType.ExportStatement,
-            value,
-            start,
-            end
-        };
-    },
-    staticStatement: (value, start, end) => {
-        return {
-            nodeType: AstNodeType_1.AstNodeType.StaticStatement,
-            value,
-            start,
-            end
-        };
-    },
     breakStatement: (start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.BreakStatement,
             start,
             end
-        };
-    },
-    returnStatement: (value, start, end) => {
-        return {
-            nodeType: AstNodeType_1.AstNodeType.ReturnStatement,
-            start,
-            end,
-            value
         };
     },
     continueStatement: (start, end) => {
@@ -428,28 +385,14 @@ exports.astFactory = {
         };
     },
     // expression statements
-    awaitExpression: (expression, start, end) => {
+    keywordNode: (keyword, node, isKeywordFirst, start, end) => {
         return {
-            nodeType: AstNodeType_1.AstNodeType.AwaitExpression,
-            expression,
+            nodeType: AstNodeType_1.AstNodeType.KeywordNode,
+            keyword,
+            node,
+            isKeywordFirst,
             start,
             end
-        };
-    },
-    yieldExpression: (expression, start, end) => {
-        return {
-            nodeType: AstNodeType_1.AstNodeType.YieldExpression,
-            expression,
-            start,
-            end
-        };
-    },
-    expressionStatement: (expression, start, end) => {
-        return {
-            nodeType: AstNodeType_1.AstNodeType.ExpressionStatement,
-            start,
-            end,
-            expression
         };
     },
     parenExpression: (expression, start, end) => {
@@ -462,7 +405,7 @@ exports.astFactory = {
     },
     objectLiteral: (properties, start, end) => {
         return {
-            nodeType: AstNodeType_1.AstNodeType.ObjectLiteral,
+            nodeType: AstNodeType_1.AstNodeType.Object,
             start,
             end,
             properties
@@ -475,14 +418,6 @@ exports.astFactory = {
             end,
             args,
             calee
-        };
-    },
-    operationExpression: (operation, start, end) => {
-        return {
-            nodeType: AstNodeType_1.AstNodeType.OperationExpression,
-            start,
-            end,
-            operation
         };
     },
     updateExpression: (argument, operator, prefix, start, end) => {
@@ -533,30 +468,6 @@ exports.astFactory = {
             whenTrue,
             colonToken,
             questionToken
-        };
-    },
-    newExpression: (expression, start, end) => {
-        return {
-            nodeType: AstNodeType_1.AstNodeType.NewExpression,
-            start,
-            end,
-            expression
-        };
-    },
-    deleteExpression: (expression, start, end) => {
-        return {
-            nodeType: AstNodeType_1.AstNodeType.DeleteExpression,
-            start,
-            end,
-            expression
-        };
-    },
-    typeofExpression: (expression, start, end) => {
-        return {
-            nodeType: AstNodeType_1.AstNodeType.TypeofExpression,
-            start,
-            end,
-            expression
         };
     },
     // storytailor-specific
@@ -624,7 +535,7 @@ exports.astFactory = {
     },
     tag: (content, open, close, start, end) => {
         return {
-            nodeType: AstNodeType_1.AstNodeType.Tag,
+            nodeType: AstNodeType_1.AstNodeType.Scope,
             start,
             end,
             content,

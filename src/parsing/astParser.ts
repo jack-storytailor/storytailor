@@ -22,8 +22,6 @@ import {
 	IAstIdentifier, 
 	IAstIdentifierScope, 
 	IAstRawIdentifier, 
-	IAstFunctionExpression, 
-	IAstFunctionDeclaration, 
 	IAstProgram, 
 	IAstPropertyDeclaration, 
 	IAstBreakStatement, 
@@ -38,7 +36,7 @@ import {
 	IAstForInStatement, 
 	IAstImportStatement, 
 	IAstParenExpression, 
-	IAstObjectLiteral, 
+	IAstObject, 
 	IAstCallExpression, 
 	IAstIndexerExpression, 
 	IAstUpdateExpression, 
@@ -440,6 +438,8 @@ export const parseDeleteLineExpression = (state: IParserState): IParseResult<IAs
 		return undefined;
 	}
 
+	const start = getCursorPosition(state);
+
 	// delete Object Name
 
 	// parse delete keyword
@@ -448,21 +448,18 @@ export const parseDeleteLineExpression = (state: IParserState): IParseResult<IAs
 		return undefined;
 	}
 
-	const start = getCursorPosition(state);
 	state = deleteResult.state;
-
-	// skip whitespace
 	state = skipComments(state, true, false);
 
 	// parse identifier
 	let identifier: IAstNode = undefined;
-	let identifierResult = parseOperandIdentifier(state);
+	const identifierResult = parseOperandIdentifier(state);
 	if (identifierResult) {
 		identifier = identifierResult.result;
 		state = identifierResult.state;
 	}
 
-	let end = getCursorPosition(state);
+	const end = getCursorPosition(state);
 
 	// create result ast node
 	let result = astFactory.deleteLineExpression(
@@ -553,7 +550,6 @@ export const parseStatement = (state: IParserState, isMultiline: boolean): IPars
 		parseStaticStatement,
 		parseClassDeclaration,
 		parseVariableDeclaration,
-		parseFunctionDeclaration,
 		parseBreakStatement,
 		parseReturnStatement,
 		parseContinueStatement,
@@ -627,24 +623,6 @@ export const parseReturnStatement = (state: IParserState, isMultiline: boolean):
 		true, 
 		isMultiline, 
 		[KeywordType.Return],
-		[parseExpression]
-	);
-}
-export const parseDeleteExpression = (state: IParserState, isMultiline: boolean): IParseResult<IAstKeywordNode> => {
-	return parseKeywordNode(
-		state, 
-		true, 
-		isMultiline, 
-		[KeywordType.Delete],
-		[parseExpression]
-	);
-}
-export const parseTypeofExpression = (state: IParserState, isMultiline: boolean): IParseResult<IAstKeywordNode> => {
-	return parseKeywordNode(
-		state, 
-		true, 
-		isMultiline, 
-		[KeywordType.Typeof],
 		[parseExpression]
 	);
 }
@@ -3250,7 +3228,7 @@ export const parseCodeBlock = (state: IParserState, isMultiline: boolean): IPars
 		result: astFactory.blockStatement(content, scopeResult.result?.start, scopeResult.result?.end)		
 	}
 }
-export const parseFunctionParametersScope = (state: IParserState, isMultiline: boolean) : IParseResult<IAstNode[]> => {
+export const parseFunctionParameters = (state: IParserState, isMultiline: boolean) : IParseResult<IAstNode[]> => {
 	if (isEndOfFile(state)) {
 		return undefined;
 	}
@@ -3272,14 +3250,11 @@ export const parseFunctionParametersScope = (state: IParserState, isMultiline: b
 
 	// extract function arguments
 	state = scopeResult.state;
-	let args: IAstNode[] = [];
-	if (scopeResult.result) {
-		args = scopeResult.result.content || [];
-	}
+	const result: IAstNode[] = scopeResult.result?.content ?? [];
 
 	return {
 		state,
-		result: args
+		result
 	}
 }
 export const parseObjectLineTags = (state: IParserState, isMultiline: boolean): IParseResult<IAstNode[]> => {
@@ -3316,51 +3291,14 @@ export const parseLiteral = (state: IParserState, isMultiline: boolean): IParseR
 	}
 
 	return parseNode(state, isMultiline, [
+		parseFunction,
 		parseNumberLiteral,
 		parseBooleanLiteral,
 		parseStringLiteral,
 		parseArrayLiteral,
-		parseObjectLiteral,
+		parseObject,
 		parseRegexLiteral
 	]);
-
-	// // number
-	// let numberResult = parseNumberLiteral(state);
-	// if (numberResult) {
-	// 	return numberResult;
-	// }
-
-	// // boolean
-	// let booleanResult = parseBooleanLiteral(state);
-	// if (booleanResult) {
-	// 	return booleanResult;
-	// }
-
-	// // string
-	// let stringResult = parseStringLiteral(state);
-	// if (stringResult) {
-	// 	return stringResult;
-	// }
-
-	// // array
-	// let arrayResult = parseArrayLiteral(state, true);
-	// if (arrayResult) {
-	// 	return arrayResult;
-	// }
-
-	// // object literal
-	// let objResult = parseObjectLiteral(state);
-	// if (objResult) {
-	// 	return objResult;
-	// }
-
-	// // regex
-	// let regexLiteralResult = parseRegexLiteral(state);
-	// if (regexLiteralResult) {
-	// 	return regexLiteralResult;
-	// }
-
-	// return undefined;
 }
 export const parseNumberLiteral = (state: IParserState): IParseResult<IAstNumber> => {
 	if (isEndOfFile(state)) {
@@ -3837,7 +3775,7 @@ export const parseArrayElement = (state: IParserState, isMultiline: boolean, all
 
 	return undefined;
 }
-export const parseObjectLiteral = (state: IParserState): IParseResult<IAstObjectLiteral> => {
+export const parseObject = (state: IParserState): IParseResult<IAstObject> => {
 	if (isEndOfFile(state)) {
 		return undefined;
 	}
@@ -3874,23 +3812,10 @@ export const parseObjectLiteralItem = (state: IParserState, isMultiline: boolean
 		return undefined;
 	}
 
-	// parse operation
-	let operationResult = parseOperationExpression(state, isMultiline);
-	if (operationResult) {
-		return operationResult;
-	}
-
-	let propertyResult = parseObjectProperty(state, isMultiline);
-	if (propertyResult) {
-		return propertyResult;
-	}
-
-	let expressionResult = parseExpression(state, isMultiline);
-	if (expressionResult) {
-		return expressionResult;
-	}
-
-	return undefined;
+	return parseNode(state, isMultiline, [
+		parseObjectProperty,
+		parseExpression
+	]);
 }
 export const parseObjectProperty = (state: IParserState, isMultiline: boolean): IParseResult<IAstPropertyDeclaration> => {
 	if (isEndOfFile(state)) {
@@ -3972,6 +3897,103 @@ export const parseObjectProperty = (state: IParserState, isMultiline: boolean): 
 	}
 
 	let result = astFactory.propertyDeclaration(propertyKind, identifier, value, initializer, start, end);
+	return {
+		state,
+		result
+	}
+}
+export const parseFunction = (state: IParserState, isMultiline: boolean): IParseResult<IAstNode> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	// [async] function ([args]) {[operations]}
+	// or
+	// [async] ([args]) => {[operations]}
+
+	// save start point
+	const start = getCursorPosition(state);
+
+	// parse async
+	let isAsync: boolean = false;
+	const asyncResult = parseKeywordOfType(state, [KeywordType.Async]);
+	if (asyncResult) {
+		state = asyncResult.state;
+		isAsync = true;
+	}
+
+	state = skipComments(state, true, isMultiline);
+
+	// skip comments and whitespaces
+	// parse keyword
+	const keywordResult = parseKeywordOfType(state, [KeywordType.Function]);
+	if (keywordResult) {
+		state = keywordResult.state;
+	}
+
+	let isGenerator = false;
+	if (getTokenOfType(state, [CodeTokenType.Star])) {
+		isGenerator = true;
+		state = skipTokens(state, 1);
+	}
+
+	// skip comments and whitespaces
+	state = skipComments(state, true, isMultiline);
+
+	// parse function name
+	let name: IAstNode;
+	const nameResult = parseIdentifier(state);
+	if (nameResult) {
+		name = nameResult.result;
+		state = nameResult.state;
+		state = skipComments(state, true, isMultiline);
+	}
+
+	// parse function parameters
+	let parametersResult = parseFunctionParameters(state, true);
+	if (!parametersResult) {
+		return undefined;
+	}
+	state = parametersResult.state;
+	const args: IAstNode[] = parametersResult.result || [];
+
+	// skip comments and whitespaces
+	state = skipComments(state, true, isMultiline);
+
+	// parse =>
+	let isLambda = false;
+	const arrowResult = parseTokenSequence(state, [CodeTokenType.Equals, CodeTokenType.TupleClose]);
+
+	if (keywordResult && arrowResult) {
+		// it's lambda and 'function' function!
+		state = arrowResult.state;
+		state = addInvalidTokenSequenceError(state, arrowResult.result);
+	}
+	else if (!keywordResult && !arrowResult) {
+		// not a function
+		return undefined;
+	}
+
+	if (arrowResult) {
+		state = arrowResult.state;
+		isLambda = true;
+	}
+
+	// skip comments and whitespaces
+	state = skipComments(state, true, isMultiline);
+
+	// parse function body
+	let bodyResult = parseCodeBlock(state, true);
+	if (!bodyResult) {
+		return undefined;
+	}
+	state = bodyResult.state;
+	const body = bodyResult.result;
+
+	// prepare result
+	const end = getCursorPosition(state);
+	const result = astFactory.functionLiteral(name, args, body, isLambda, isAsync, isGenerator, start, end);
+
 	return {
 		state,
 		result
@@ -4203,22 +4225,11 @@ export const parseAnyIdentifier = (state: IParserState): IParseResult<IAstNode> 
 		return undefined;
 	}
 
-	let rawIndentifierResult = parseRawIdentifier(state);
-	if (rawIndentifierResult) {
-		return rawIndentifierResult;
-	}
-
-	let identifierScopeResult = parseIdentifierScope(state);
-	if (identifierScopeResult) {
-		return identifierScopeResult;
-	}
-
-	let identifierResult = parseIdentifier(state);
-	if (identifierResult) {
-		return identifierResult;
-	}
-
-	return undefined;
+	return parseNode(state, false, [
+		parseRawIdentifier,
+		parseIdentifierScope,
+		parseIdentifier
+	]);
 }
 export const parseContextIdentifier = (state: IParserState): IParseResult<IAstContextIdentifier> => {
 	if (isEndOfFile(state)) {
@@ -4246,23 +4257,10 @@ export const parseContextIdentifier = (state: IParserState): IParseResult<IAstCo
  * Operand identifier means: if no '@' symbol before identifier, it's context identifier (context['identifier'])
  */
 export const parseOperandIdentifier = (state: IParserState): IParseResult<IAstNode> => {
-	if (isEndOfFile(state)) {
-		return undefined;
-	}
-
-	// raw identifier
-	let rawResult = parseRawIdentifier(state);
-	if (rawResult) {
-		return rawResult;
-	}
-
-	// context identifier
-	let contextResult = parseContextIdentifier(state);
-	if (contextResult) {
-		return contextResult;
-	}
-
-	return undefined;
+	return parseNode(state, false, [
+		parseRawIdentifier,
+		parseContextIdentifier
+	]);
 }
 
 // declarations
@@ -4384,7 +4382,7 @@ export const parseVariableDeclaration = (state: IParserState, isMultiline: boole
 		} 
 		else {
 			// parse object expression
-			let objResult = parseObjectLiteral(state);
+			let objResult = parseObject(state);
 			if (objResult) {
 				state = objResult.state;
 				identifiers.push(objResult.result);
@@ -4434,86 +4432,6 @@ export const parseVariableDeclaration = (state: IParserState, isMultiline: boole
 		result
 	}
 }
-export const parseFunctionDeclaration = (state: IParserState, isMultiline: boolean): IParseResult<IAstFunctionDeclaration> => {
-	if (isEndOfFile(state)) {
-		return undefined;
-	}
-
-	const start = getCursorPosition(state);
-
-	let isAsync = false;
-	const asyncResult = parseKeywordOfType(state, [KeywordType.Async]);
-	if (asyncResult) {
-		state = asyncResult.state;
-		isAsync = true; 
-	}
-
-	// skip comments
-	state = skipComments(state, true, isMultiline);
-
-	// parse 'function' keyword
-	const keywordResult = parseKeywordOfType(state, [KeywordType.Function]);
-	if (!keywordResult) {
-		return undefined;
-	}
-
-	state = keywordResult.state;
-
-	let isGenerator = false;
-	if (getTokenOfType(state, [CodeTokenType.Star])) {
-		isGenerator = true;
-		state = skipTokens(state, 1);
-	}
-
-	// skip comments
-	state = skipComments(state, true, isMultiline);
-
-	// parse identifier
-	const identifierResult = parseAnyIdentifier(state);
-	if (!identifierResult) {
-		return undefined;
-	}
-
-	state = identifierResult.state;
-
-	// skip comments
-	state = skipComments(state, true, isMultiline);
-
-	// parse function parameters
-	const paramsResult = parseFunctionParametersScope(state, true);
-	if (!paramsResult) {
-		return undefined;
-	}
-
-	state = paramsResult.state;
-
-	// skip comments
-	state = skipComments(state, true, isMultiline);
-
-	// parse function body
-	const bodyResult = parseCodeBlock(state, true);
-	if (!bodyResult) {
-		return undefined;
-	}
-
-	state = bodyResult.state;
-	const end = bodyResult.result?.end;
-
-	let result = astFactory.functionDeclaration(
-		identifierResult.result, 
-		paramsResult.result, 
-		bodyResult.result, 
-		isAsync, 
-		isGenerator, 
-		start, 
-		end
-	);
-
-	return {
-		state,
-		result
-	}
-}
 
 // expression statements
 export const parseExpression = (state: IParserState, isMultiline: boolean): IParseResult<IAstNode> => {
@@ -4522,122 +4440,28 @@ export const parseExpression = (state: IParserState, isMultiline: boolean): IPar
 	}
 
 	return parseNode(state, isMultiline, [
-		parseNewExpression,
-		parseAwaitExpression,
-		parseYieldExpression,
-		parseDeleteExpression,
-		parseTypeofExpression,
-		parseFunctionExpression,
+		parseKeywordExpression,
 		parseOperationExpression
 	]);
+}
+export const parseKeywordExpression = (state: IParserState, isMultiline: boolean): IParseResult<IAstKeywordNode> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
 
-	// // parse new expression
-	// let newExpressionResult = parseNewExpression(state, isMultiline);
-	// if (newExpressionResult) {
-	// 	return newExpressionResult;
-	// }
-
-	// // await expression
-	// let awaitExpressionResult = parseAwaitExpression(state, isMultiline);
-	// if (awaitExpressionResult) {
-	// 	return awaitExpressionResult;
-	// }
-
-	// // yield expression
-	// let yieldExpressionResult = parseYieldExpression(state, isMultiline);
-	// if (yieldExpressionResult) {
-	// 	return yieldExpressionResult;
-	// }
-
-	// // delete expression
-	// let deleteResult = parseDeleteExpression(state, isMultiline);
-	// if (deleteResult) {
-	// 	return deleteResult;
-	// }
-
-	// // typeof expression
-	// let typeofResult = parseTypeofExpression(state, isMultiline);
-	// if (typeofResult) {
-	// 	return typeofResult;
-	// }
-
-	// // lambda expression
-	// let functionExpression = parseFunctionExpression(state, isMultiline);
-	// if (functionExpression) {
-	// 	return functionExpression;
-	// }
-
-	// // operation expression
-	// const operationExpression = parseOperationExpression(state, isMultiline);
-	// if (operationExpression) {
-	// 	return operationExpression;
-	// }
-
-	// return undefined;
-
-	// // // prefix
-	// // let prefixStart = getCursorPosition(state);
-
-	// // // parse unary prefix
-	// // let prefixOperatorResult = parseUnaryOperatorPrefix(state);
-	// // if (prefixOperatorResult) {
-	// // 	state = prefixOperatorResult.state;
-	// // }
-
-	// // // parse first operand
-	// // let operandResult = parseOperand(state, isMultiline);
-	// // if (!operandResult) {
-	// // 	return undefined;
-	// // }
-	// // state = operandResult.state;
-	// // let result = operandResult.result;
-
-	// // // check is there unary prefix
-	// // if (prefixOperatorResult) {
-	// // 	let prefixOperator = prefixOperatorResult.result;
-	// // 	let prefixEnd = getCursorPosition(state);
-	// // 	result = astFactory.updateExpression(result, prefixOperator, true, prefixStart, prefixEnd);
-	// // }
-
-	// // // parse operation
-	// // let breakTokens = [CodeTokenType.Semicolon, CodeTokenType.Comma, CodeTokenType.BracketClose, CodeTokenType.ParenClose, CodeTokenType.BraceClose, CodeTokenType.Colon];
-	// // if (!isMultiline) {
-	// // 	breakTokens = [...breakTokens, CodeTokenType.Endline];
-	// // }
-
-	// // let finalState = state;
-	// // while (!isEndOfFile(state)) {
-	// // 	if (getTokenOfType(state, breakTokens)) {
-	// // 		break;
-	// // 	}
-
-	// // 	// skip comments
-	// // 	let curPos = state.cursor;
-	// // 	state = skipComments(state, true, isMultiline);
-	// // 	if (state.cursor !== curPos) {
-	// // 		continue;
-	// // 	}
-
-	// // 	// parse operation
-	// // 	let operationResult = parseOperation(state, result, isMultiline);
-	// // 	if (operationResult) {
-	// // 		state = operationResult.state;
-	// // 		result = operationResult.result;
-	// // 		finalState = state;
-
-	// // 		continue;
-	// // 	}
-
-	// // 	// if we here that means we've found some token that is not an operator and expression should terminate
-	// // 	break;
-	// // }
-
-	// // state = finalState;
-
-	// // return {
-	// // 	result,
-	// // 	state
-	// // }
+	return parseKeywordNode(
+		state, 
+		true, 
+		isMultiline, 
+		[
+			KeywordType.New,
+			KeywordType.Await,
+			KeywordType.Yield,
+			KeywordType.Delete,
+			KeywordType.Typeof
+		],
+		[parseExpression]
+	);
 }
 export const parseOperationExpression = (state: IParserState, isMultiline: boolean): IParseResult<IAstNode> => {
 	// prefix
@@ -4671,11 +4495,7 @@ export const parseOperationExpression = (state: IParserState, isMultiline: boole
 	}
 
 	let finalState = state;
-	while (!isEndOfFile(state)) {
-		if (getTokenOfType(state, breakTokens)) {
-			break;
-		}
-
+	while (!isEndOfFile(state) || getTokenOfType(state, breakTokens)) {
 		// skip comments
 		let curPos = state.cursor;
 		state = skipComments(state, true, isMultiline);
@@ -4704,94 +4524,7 @@ export const parseOperationExpression = (state: IParserState, isMultiline: boole
 		state
 	}
 }
-export const parseFunctionExpression = (state: IParserState, isMultiline: boolean): IParseResult<IAstFunctionExpression> => {
-	if (isEndOfFile(state)) {
-		return undefined;
-	}
 
-	// [async] function ([args]) {[operations]}
-	// or
-	// [async] ([args]) => {[operations]}
-
-	// save start point
-	const start = getCursorPosition(state);
-
-	// parse async
-	let isAsync: boolean = false;
-	const asyncResult = parseKeywordOfType(state, [KeywordType.Async]);
-	if (asyncResult) {
-		state = asyncResult.state;
-		isAsync = true;
-	}
-
-	state = skipComments(state, true, isMultiline);
-
-	// skip comments and whitespaces
-	// parse keyword
-	const keywordResult = parseKeywordOfType(state, [KeywordType.Function]);
-	if (keywordResult) {
-		state = keywordResult.state;
-	}
-
-	let isGenerator = false;
-	if (getTokenOfType(state, [CodeTokenType.Star])) {
-		isGenerator = true;
-		state = skipTokens(state, 1);
-	}
-
-	// skip comments and whitespaces
-	state = skipComments(state, true, isMultiline);
-
-	// parse function parameters
-	let parametersResult = parseFunctionParametersScope(state, true);
-	if (!parametersResult) {
-		return undefined;
-	}
-	state = parametersResult.state;
-	const args: IAstNode[] = parametersResult.result || [];
-
-	// skip comments and whitespaces
-	state = skipComments(state, true, isMultiline);
-
-	// parse =>
-	let isLambda = false;
-	const arrowResult = parseTokenSequence(state, [CodeTokenType.Equals, CodeTokenType.TupleClose]);
-
-	if (keywordResult && arrowResult) {
-		// it's lambda and 'function' function!
-		state = arrowResult.state;
-		state = addInvalidTokenSequenceError(state, arrowResult.result);
-	}
-	else if (!keywordResult && !arrowResult) {
-		// not a function
-		return undefined;
-	}
-
-	if (arrowResult) {
-		state = arrowResult.state;
-		isLambda = true;
-	}
-
-	// skip comments and whitespaces
-	state = skipComments(state, true, isMultiline);
-
-	// parse function body
-	let bodyResult = parseCodeBlock(state, true);
-	if (!bodyResult) {
-		return undefined;
-	}
-	state = bodyResult.state;
-	const body = bodyResult.result;
-
-	// prepare result
-	const end = getCursorPosition(state);
-	const result = astFactory.functionExpression(args, body, isLambda, isAsync, isGenerator, start, end);
-
-	return {
-		state,
-		result
-	}
-}
 export const parseOperand = (state: IParserState, isMultiline: boolean): IParseResult<IAstNode> => {
 	if (isEndOfFile(state)) {
 		return undefined;
@@ -4799,7 +4532,6 @@ export const parseOperand = (state: IParserState, isMultiline: boolean): IParseR
 
 	return parseNode(state, isMultiline, [
 		parseLiteral,
-		parseFunctionExpression,
 		parseParenExpression,
 		parseOperandIdentifier,
 		(state) => parseKeywordOfType(state, [KeywordType.Null, KeywordType.Undefined])
@@ -5312,6 +5044,24 @@ export const parseYieldExpression = (state: IParserState, isMultiline: boolean):
 		true, 
 		isMultiline, 
 		[KeywordType.Yield],
+		[parseExpression]
+	);
+}
+export const parseDeleteExpression = (state: IParserState, isMultiline: boolean): IParseResult<IAstKeywordNode> => {
+	return parseKeywordNode(
+		state, 
+		true, 
+		isMultiline, 
+		[KeywordType.Delete],
+		[parseExpression]
+	);
+}
+export const parseTypeofExpression = (state: IParserState, isMultiline: boolean): IParseResult<IAstKeywordNode> => {
+	return parseKeywordNode(
+		state, 
+		true, 
+		isMultiline, 
+		[KeywordType.Typeof],
 		[parseExpression]
 	);
 }
