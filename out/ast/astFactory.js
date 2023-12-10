@@ -220,10 +220,11 @@ exports.astFactory = {
             end
         };
     },
-    classDeclaration: (name, contents, start, end) => {
+    classDeclaration: (name, contents, parent, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.ClassDeclaration,
             name,
+            parent,
             contents,
             start,
             end

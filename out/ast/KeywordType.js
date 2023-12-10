@@ -13,6 +13,7 @@ var KeywordType;
     KeywordType["Of"] = "of";
     KeywordType["While"] = "while";
     KeywordType["Class"] = "class";
+    KeywordType["Extends"] = "extends";
     KeywordType["For"] = "for";
     KeywordType["Get"] = "get";
     KeywordType["Set"] = "set";

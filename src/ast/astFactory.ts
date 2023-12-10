@@ -290,10 +290,11 @@ export const astFactory = {
 			end
 		}
 	},
-	classDeclaration: (name: IAstNode, contents: IAstNode[], start: ISymbolPosition, end: ISymbolPosition): IAstClassDeclaration => {
+	classDeclaration: (name: IAstNode, contents: IAstNode[], parent: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstClassDeclaration => {
 		return {
 			nodeType: AstNodeType.ClassDeclaration,
 			name,
+			parent,
 			contents,
 			start,
 			end

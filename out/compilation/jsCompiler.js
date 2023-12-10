@@ -465,6 +465,14 @@ const compileClassDeclaration = (node, state) => {
     if (classNameResult) {
         state = classNameResult.state;
     }
+    // write parent
+    if (ast.parent) {
+        state = (0, exports.writeJsToken)(state, " extends ");
+        const parentResult = (0, exports.compileAstNode)(ast.parent, state);
+        if (parentResult) {
+            state = parentResult.state;
+        }
+    }
     // write {
     state = (0, exports.writeJsToken)(state, " {");
     state = (0, exports.writeEndline)(state);
@@ -472,6 +480,7 @@ const compileClassDeclaration = (node, state) => {
     state = (0, exports.addTargetIndent)(state, 1);
     if (ast.contents && ast.contents.length > 0) {
         for (let cIndex = 0; cIndex < ast.contents.length; cIndex++) {
+            state = (0, exports.writeTargetIndent)(state);
             const contentItem = ast.contents[cIndex];
             const itemResult = (0, exports.compileAstNode)(contentItem, state);
             if (itemResult) {

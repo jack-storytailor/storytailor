@@ -9,6 +9,7 @@ export enum KeywordType {
   Of = "of",
   While = "while",
   Class = "class",
+  Extends = "extends",
   For = "for",
   Get = "get",
   Set = 'set',

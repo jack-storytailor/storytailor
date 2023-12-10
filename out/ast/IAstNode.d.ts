@@ -101,6 +101,7 @@ export interface IAstPropertyDeclaration extends IAstNode {
 export interface IAstClassDeclaration extends IAstNode {
     name: IAstNode;
     contents: IAstNode[];
+    parent: IAstNode;
 }
 export interface IAstDeconstructingAssignment extends IAstNode {
     variables: IAstNode;

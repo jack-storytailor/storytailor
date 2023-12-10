@@ -29,7 +29,7 @@ export declare const astFactory: {
     variableListDeclaration: (identifiers: IAstNode[], kind: VariableDeclarationKind, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstVariableDeclaration;
     propertyDeclaration: (identifier: IAstNode, value: IAstNode, initializer: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstPropertyDeclaration;
     deconstructionAssignment: (variables: IAstNode, initializer: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstDeconstructingAssignment;
-    classDeclaration: (name: IAstNode, contents: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstClassDeclaration;
+    classDeclaration: (name: IAstNode, contents: IAstNode[], parent: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstClassDeclaration;
     breakStatement: (start: ISymbolPosition, end: ISymbolPosition) => IAstBreakStatement;
     continueStatement: (start: ISymbolPosition, end: ISymbolPosition) => IAstContinueStatement;
     blockStatement: (content: IAstNode[], start: ISymbolPosition, end: ISymbolPosition, withoutBraces?: boolean) => IAstBlockStatement;

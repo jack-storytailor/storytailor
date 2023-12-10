@@ -3491,7 +3491,7 @@ export const parseStringInclude = (state: IParserState, options: IParserOptions)
 
 	// parse expression
 	let expression: IAstNode = undefined;
-	let expressionResult = parseExpression(state, {...options, isMultiline: false, allowContextIdentifiers: true});
+	let expressionResult = parseExpression(state, {...options, isMultiline: false});
 	if (expressionResult) {
 		expression = expressionResult.result;
 		state = expressionResult.state;
@@ -4304,6 +4304,21 @@ export const parseClassDeclaration = (state: IParserState, options: IParserOptio
 	state = nameResult.state;
 	state = skipComments(state, true, options);
 
+	// parse extends
+	let parent: IAstNode;
+	const extendsResult = parseKeywordOfType(state, options, [KeywordType.Extends]);
+	if (extendsResult) {
+		state = extendsResult.state;
+		state = skipComments(state, true, options);
+
+		const parentResult = parseExpression(state, options);
+		if (parentResult) {
+			parent = parentResult.result;
+			state = parentResult.state;
+			state = skipComments(state, true, options);
+		}
+	}
+
 	// parse contents
 	const contentsResult = parseScope(
 		state,
@@ -4320,7 +4335,7 @@ export const parseClassDeclaration = (state: IParserState, options: IParserOptio
 	}
 
 	const end = getCursorPosition(state);
-	const result = astFactory.classDeclaration(name, contents, start, end);
+	const result = astFactory.classDeclaration(name, contents, parent, start, end);
 	return {
 		state,
 		result

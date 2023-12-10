@@ -634,6 +634,15 @@ export const compileClassDeclaration = (node: IAstNode, state: ICompilerState): 
 		state = classNameResult.state;
 	}
 
+	// write parent
+	if (ast.parent) {
+		state = writeJsToken(state, " extends ")
+		const parentResult = compileAstNode(ast.parent, state);
+		if (parentResult) {
+			state = parentResult.state;
+		}
+	}
+
 	// write {
 	state = writeJsToken(state, " {");
 	state = writeEndline(state);
@@ -643,6 +652,8 @@ export const compileClassDeclaration = (node: IAstNode, state: ICompilerState): 
 
 	if (ast.contents && ast.contents.length > 0) {
 		for (let cIndex = 0; cIndex < ast.contents.length; cIndex++) {
+			state = writeTargetIndent(state);
+
 			const contentItem = ast.contents[cIndex];
 			const itemResult = compileAstNode(contentItem, state);
 			if (itemResult) {

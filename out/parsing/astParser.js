@@ -2740,7 +2740,7 @@ const parseStringInclude = (state, options) => {
     }
     // parse expression
     let expression = undefined;
-    let expressionResult = (0, exports.parseExpression)(state, Object.assign(Object.assign({}, options), { isMultiline: false, allowContextIdentifiers: true }));
+    let expressionResult = (0, exports.parseExpression)(state, Object.assign(Object.assign({}, options), { isMultiline: false }));
     if (expressionResult) {
         expression = expressionResult.result;
         state = expressionResult.state;
@@ -3425,6 +3425,19 @@ const parseClassDeclaration = (state, options) => {
     const name = nameResult.result;
     state = nameResult.state;
     state = (0, exports.skipComments)(state, true, options);
+    // parse extends
+    let parent;
+    const extendsResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Extends]);
+    if (extendsResult) {
+        state = extendsResult.state;
+        state = (0, exports.skipComments)(state, true, options);
+        const parentResult = (0, exports.parseExpression)(state, options);
+        if (parentResult) {
+            parent = parentResult.result;
+            state = parentResult.state;
+            state = (0, exports.skipComments)(state, true, options);
+        }
+    }
     // parse contents
     const contentsResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceOpen]), (state) => (0, exports.parseClassMember)(state, Object.assign(Object.assign({}, options), { isMultiline: true })), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => (0, exports.skipComments)(state, true, options));
     let contents = [];
@@ -3433,7 +3446,7 @@ const parseClassDeclaration = (state, options) => {
         contents = (_b = (_a = contentsResult.result) === null || _a === void 0 ? void 0 : _a.content) !== null && _b !== void 0 ? _b : [];
     }
     const end = (0, exports.getCursorPosition)(state);
-    const result = astFactory_1.astFactory.classDeclaration(name, contents, start, end);
+    const result = astFactory_1.astFactory.classDeclaration(name, contents, parent, start, end);
     return {
         state,
         result
