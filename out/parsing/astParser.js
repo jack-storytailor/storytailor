@@ -3471,7 +3471,11 @@ const parseClassDeclaration = (state, options) => {
         }
     }
     // parse contents
-    const contentsResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceOpen]), (state) => (0, exports.parseClassMember)(state, Object.assign(Object.assign({}, options), { isMultiline: true })), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => (0, exports.skipComments)(state, true, options));
+    const contentsResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceOpen]), (state) => (0, exports.parseClassMember)(state, Object.assign(Object.assign({}, options), { isMultiline: true })), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => {
+        state = (0, exports.skipComments)(state, true, options);
+        state = (0, exports.skipTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Semicolon, CodeTokenType_1.CodeTokenType.Comma]);
+        return state;
+    }, undefined, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Semicolon, CodeTokenType_1.CodeTokenType.Colon, CodeTokenType_1.CodeTokenType.Endline]));
     let contents = [];
     if (contentsResult) {
         state = contentsResult.state;
@@ -3489,6 +3493,13 @@ const parseClassMember = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
+    // const staticResult = parseKeywordNode(state, true, options,
+    // 	[KeywordType.Static],
+    // 	[parseExpression]
+    // );
+    // if (staticResult) {
+    // 	return staticResult;
+    // }
     // parse object literal item
     const itemResult = (0, exports.parseObjectLiteralItem)(state, options);
     if (itemResult) {

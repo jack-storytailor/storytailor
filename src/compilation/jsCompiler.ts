@@ -658,6 +658,7 @@ export const compileClassDeclaration = (node: IAstNode, state: ICompilerState): 
 			const itemResult = compileAstNode(contentItem, state);
 			if (itemResult) {
 				state = itemResult.state;
+				state = writeJsToken(state, ";");
 				state = writeEndline(state);
 			}
 		}

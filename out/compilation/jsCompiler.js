@@ -485,6 +485,7 @@ const compileClassDeclaration = (node, state) => {
             const itemResult = (0, exports.compileAstNode)(contentItem, state);
             if (itemResult) {
                 state = itemResult.state;
+                state = (0, exports.writeJsToken)(state, ";");
                 state = (0, exports.writeEndline)(state);
             }
         }

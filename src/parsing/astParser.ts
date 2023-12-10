@@ -4362,7 +4362,13 @@ export const parseClassDeclaration = (state: IParserState, options: IParserOptio
 		(state) => parseTokenSequence(state, [CodeTokenType.BraceOpen]),
 		(state) => parseClassMember(state, {...options, isMultiline: true}),
 		(state) => parseTokenSequence(state, [CodeTokenType.BraceClose]),
-		(state) => skipComments(state, true, options)
+		(state) => {
+			state = skipComments(state, true, options);
+			state = skipTokenOfType(state, [CodeTokenType.Semicolon, CodeTokenType.Comma]);
+			return state;
+		},
+		undefined,
+		(state) => parseTokenSequence(state, [CodeTokenType.Semicolon, CodeTokenType.Colon, CodeTokenType.Endline])
 	);
 
 	let contents: IAstNode[] = [];
