@@ -91,6 +91,8 @@ export declare const parseDebuggerKeyword: (state: IParserState, options: IParse
 export declare const parseKeywordOfType: (state: IParserState, options: IParserOptions, keywordTypes: KeywordType[]) => IParseResult<IAstKeyword>;
 export declare const parseCommentLine: (state: IParserState, options: IParserOptions) => IParseResult<IAstCommentLine>;
 export declare const parseCommentBlock: (state: IParserState, options: IParserOptions) => IParseResult<IAstCommentBlock>;
+export declare const parseRawCodeBlock: (state: IParserState, options: IParserOptions) => IParseResult<IAstBlockStatement>;
+export declare const parseRegularCodeBlock: (state: IParserState, options: IParserOptions) => IParseResult<IAstBlockStatement>;
 export declare const parseCodeBlock: (state: IParserState, options: IParserOptions) => IParseResult<IAstBlockStatement>;
 export declare const parseFunctionParameters: (state: IParserState, options: IParserOptions) => IParseResult<IAstNode[]>;
 export declare const parseObjectLineTags: (state: IParserState, options: IParserOptions) => IParseResult<IAstNode[]>;

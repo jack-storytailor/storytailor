@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseNumberLiteral = exports.parseLiteral = exports.parseObjectLineTags = exports.parseFunctionParameters = exports.parseCodeBlock = exports.parseCommentBlock = exports.parseCommentLine = exports.parseKeywordOfType = exports.parseDebuggerKeyword = exports.parseKeyword = exports.parseUnaryOperatorPostfix = exports.parseUnaryOperatorPrefix = exports.parseBinaryOperator = exports.parseOperatorOfType = exports.parseOperator = exports.parseThrowStatement = exports.parseFinallyStatement = exports.parseCatchStatement = exports.parseTryStatement = exports.parseImportItem = exports.parseRawImportStatement = exports.parseImportPath = exports.parseImportStatement = exports.parseForOfStatement = exports.parseForInStatement = exports.parseForOfConditions = exports.parseForInConditions = exports.parseConditionBlock = exports.parseForCoditions = exports.parseForStatement = exports.parseWhileStatement = exports.parseDoWhileStatement = exports.parseDefaultCaseStatement = exports.parseCaseStatement = exports.parseSwitchStatement = exports.parseIfStatement = exports.parseContinueStatement = exports.parseReturnStatement = exports.parseBreakStatement = exports.parseStaticStatement = exports.parseExportStatement = exports.parseStatement = exports.parseTextLineStatement = exports.parseDeleteLineExpression = exports.parseObjectLine = exports.parseOuterStatementContent = exports.parseOuterStatement = exports.parseRootStatement = exports.parseModule = exports.defaultParserConfig = void 0;
-exports.readWhitespace = exports.readString = exports.parseErrorTokens = exports.parseScope = exports.parseToken = exports.parseKeywordNode = exports.parseNode = exports.parseTag = exports.parseTypeofExpression = exports.parseDeleteExpression = exports.parseYieldExpression = exports.parseAwaitExpression = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseOperationExpression = exports.parseKeywordExpression = exports.parseExpression = exports.parseVariableDeclaration = exports.parseDeconstructionAssignment = exports.parseClassMember = exports.parseClassDeclaration = exports.parseOperandIdentifier = exports.parseContextIdentifier = exports.parseAnyIdentifier = exports.parseRawIdentifier = exports.parseObjectLineIdentifier = exports.parseIdentifierScope = exports.parseIdentifier = exports.parseGetterSetter = exports.parseFunction = exports.parseObjectProperty = exports.parseObjectLiteralItem = exports.parseObject = exports.parseArrayElement = exports.parseArrayLiteral = exports.parseRegexParenScope = exports.parseRegexLiteral = exports.parseBooleanLiteral = exports.parseStringInclude = exports.parseStringLiteralItem = exports.parseStringLiteral = void 0;
-exports.optionsCodeBlock = exports.optionsOuterLine = exports.emptyOptions = exports.prepareTokens = exports.addInvalidTokenSequenceError = exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isValidJsIdentifier = exports.isEndOfFile = exports.readTokensAsString = exports.calcIndentFromWhitespace = void 0;
+exports.parseObjectLineTags = exports.parseFunctionParameters = exports.parseCodeBlock = exports.parseRegularCodeBlock = exports.parseRawCodeBlock = exports.parseCommentBlock = exports.parseCommentLine = exports.parseKeywordOfType = exports.parseDebuggerKeyword = exports.parseKeyword = exports.parseUnaryOperatorPostfix = exports.parseUnaryOperatorPrefix = exports.parseBinaryOperator = exports.parseOperatorOfType = exports.parseOperator = exports.parseThrowStatement = exports.parseFinallyStatement = exports.parseCatchStatement = exports.parseTryStatement = exports.parseImportItem = exports.parseRawImportStatement = exports.parseImportPath = exports.parseImportStatement = exports.parseForOfStatement = exports.parseForInStatement = exports.parseForOfConditions = exports.parseForInConditions = exports.parseConditionBlock = exports.parseForCoditions = exports.parseForStatement = exports.parseWhileStatement = exports.parseDoWhileStatement = exports.parseDefaultCaseStatement = exports.parseCaseStatement = exports.parseSwitchStatement = exports.parseIfStatement = exports.parseContinueStatement = exports.parseReturnStatement = exports.parseBreakStatement = exports.parseStaticStatement = exports.parseExportStatement = exports.parseStatement = exports.parseTextLineStatement = exports.parseDeleteLineExpression = exports.parseObjectLine = exports.parseOuterStatementContent = exports.parseOuterStatement = exports.parseRootStatement = exports.parseModule = exports.defaultParserConfig = void 0;
+exports.parseErrorTokens = exports.parseScope = exports.parseToken = exports.parseKeywordNode = exports.parseNode = exports.parseTag = exports.parseTypeofExpression = exports.parseDeleteExpression = exports.parseYieldExpression = exports.parseAwaitExpression = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseOperationExpression = exports.parseKeywordExpression = exports.parseExpression = exports.parseVariableDeclaration = exports.parseDeconstructionAssignment = exports.parseClassMember = exports.parseClassDeclaration = exports.parseOperandIdentifier = exports.parseContextIdentifier = exports.parseAnyIdentifier = exports.parseRawIdentifier = exports.parseObjectLineIdentifier = exports.parseIdentifierScope = exports.parseIdentifier = exports.parseGetterSetter = exports.parseFunction = exports.parseObjectProperty = exports.parseObjectLiteralItem = exports.parseObject = exports.parseArrayElement = exports.parseArrayLiteral = exports.parseRegexParenScope = exports.parseRegexLiteral = exports.parseBooleanLiteral = exports.parseStringInclude = exports.parseStringLiteralItem = exports.parseStringLiteral = exports.parseNumberLiteral = exports.parseLiteral = void 0;
+exports.optionsCodeBlock = exports.optionsOuterLine = exports.emptyOptions = exports.prepareTokens = exports.addInvalidTokenSequenceError = exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isValidJsIdentifier = exports.isEndOfFile = exports.readTokensAsString = exports.calcIndentFromWhitespace = exports.readWhitespace = exports.readString = void 0;
 const CodeTokenType_1 = require("../shared/CodeTokenType");
 const IParsingError_1 = require("../shared/IParsingError");
 const KeywordType_1 = require("../ast/KeywordType");
@@ -200,7 +200,7 @@ const parseOuterStatementContent = (state, options) => {
         return undefined;
     }
     // Parse Block
-    let codeLineResult = (0, exports.parseCodeBlock)(state, Object.assign(Object.assign({}, options), { isMultiline: true, allowContextIdentifiers: false }));
+    let codeLineResult = (0, exports.parseCodeBlock)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
     if (codeLineResult) {
         return codeLineResult;
     }
@@ -2520,7 +2520,24 @@ const parseCommentBlock = (state, options) => {
     };
 };
 exports.parseCommentBlock = parseCommentBlock;
-const parseCodeBlock = (state, options) => {
+const parseRawCodeBlock = (state, options) => {
+    if ((0, exports.isEndOfFile)(state)) {
+        return undefined;
+    }
+    // parse @
+    const atResult = (0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.AtSign]);
+    if (!atResult) {
+        return undefined;
+    }
+    state = (0, exports.skipTokens)(state, 1);
+    const codeBlockResult = (0, exports.parseCodeBlock)(state, Object.assign(Object.assign({}, options), { isMultiline: true, allowContextIdentifiers: false }));
+    if (codeBlockResult) {
+        return codeBlockResult;
+    }
+    return undefined;
+};
+exports.parseRawCodeBlock = parseRawCodeBlock;
+const parseRegularCodeBlock = (state, options) => {
     var _a, _b, _c;
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
@@ -2535,6 +2552,21 @@ const parseCodeBlock = (state, options) => {
         state,
         result: astFactory_1.astFactory.blockStatement(content, (_b = scopeResult.result) === null || _b === void 0 ? void 0 : _b.start, (_c = scopeResult.result) === null || _c === void 0 ? void 0 : _c.end)
     };
+};
+exports.parseRegularCodeBlock = parseRegularCodeBlock;
+const parseCodeBlock = (state, options) => {
+    if ((0, exports.isEndOfFile)(state)) {
+        return undefined;
+    }
+    const rawCodeBlock = (0, exports.parseRawCodeBlock)(state, options);
+    if (rawCodeBlock) {
+        return rawCodeBlock;
+    }
+    const regularCodeBlock = (0, exports.parseRegularCodeBlock)(state, options);
+    if (regularCodeBlock) {
+        return regularCodeBlock;
+    }
+    return undefined;
 };
 exports.parseCodeBlock = parseCodeBlock;
 const parseFunctionParameters = (state, options) => {
@@ -3136,7 +3168,7 @@ const parseFunction = (state, options) => {
     // skip comments and whitespaces
     state = (0, exports.skipComments)(state, true, options);
     // parse function body
-    let bodyResult = (0, exports.parseCodeBlock)(state, Object.assign(Object.assign({}, options), { isMultiline: true, allowContextIdentifiers: false }));
+    let bodyResult = (0, exports.parseCodeBlock)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
     if (!bodyResult) {
         return undefined;
     }

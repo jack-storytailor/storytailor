@@ -333,7 +333,7 @@ export const parseOuterStatementContent = (state: IParserState, options: IParser
 	}
 
 	// Parse Block
-	let codeLineResult = parseCodeBlock(state, {...options, isMultiline: true, allowContextIdentifiers: false});
+	let codeLineResult = parseCodeBlock(state, {...options, isMultiline: true});
 	if (codeLineResult) {
 		return codeLineResult;
 	}
@@ -3211,7 +3211,27 @@ export const parseCommentBlock = (state: IParserState, options: IParserOptions):
 		state
 	}
 }
-export const parseCodeBlock = (state: IParserState, options: IParserOptions): IParseResult<IAstBlockStatement> => {
+export const parseRawCodeBlock = (state: IParserState, options: IParserOptions): IParseResult<IAstBlockStatement> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	// parse @
+	const atResult = getTokenOfType(state, [CodeTokenType.AtSign]);
+	if (!atResult) {
+		return undefined;
+	}
+
+	state = skipTokens(state, 1);
+
+	const codeBlockResult = parseCodeBlock(state, {...options, isMultiline: true, allowContextIdentifiers: false});
+	if (codeBlockResult) {
+		return codeBlockResult;
+	}
+
+	return undefined;
+}
+export const parseRegularCodeBlock = (state: IParserState, options: IParserOptions): IParseResult<IAstBlockStatement> => {
 	if (isEndOfFile(state)) {
 		return undefined;
 	}
@@ -3237,6 +3257,23 @@ export const parseCodeBlock = (state: IParserState, options: IParserOptions): IP
 		state,
 		result: astFactory.blockStatement(content, scopeResult.result?.start, scopeResult.result?.end)		
 	}
+}
+export const parseCodeBlock = (state: IParserState, options: IParserOptions): IParseResult<IAstBlockStatement> => {
+	if (isEndOfFile(state)) {
+		return undefined;
+	}
+
+	const rawCodeBlock = parseRawCodeBlock(state, options);
+	if (rawCodeBlock) {
+		return rawCodeBlock;
+	}
+
+	const regularCodeBlock = parseRegularCodeBlock(state, options);
+	if (regularCodeBlock) {
+		return regularCodeBlock;
+	}
+
+	return undefined;
 }
 export const parseFunctionParameters = (state: IParserState, options: IParserOptions) : IParseResult<IAstNode[]> => {
 	if (isEndOfFile(state)) {
@@ -3960,7 +3997,7 @@ export const parseFunction = (state: IParserState, options: IParserOptions): IPa
 	state = skipComments(state, true, options);
 
 	// parse function body
-	let bodyResult = parseCodeBlock(state, {...options, isMultiline: true, allowContextIdentifiers: false});
+	let bodyResult = parseCodeBlock(state, {...options, isMultiline: true});
 	if (!bodyResult) {
 		return undefined;
 	}
