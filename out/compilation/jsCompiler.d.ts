@@ -1,6 +1,7 @@
 import { IAstNode, IAstModule, IAstObjectLineStatement, IAstOuterStatement, IAstBlockStatement, IAstTextLineStatement, IAstNumber, IAstBoolean, IAstIdentifier, IAstString, IAstToken, IAstRawIdentifier, IAstIdentifierScope, IAstBinaryExpression, IAstOperator, IAstMemberExpression, IAstStringIncludeStatement, IAstCallExpression, IAstProgram, IAstIfStatement, IAstWhileStatement, IAstDoWhileStatement, IAstSwitchStatement, IAstCaseStatement, IAstBreakStatement, IAstContinueStatement, IAstParenExpression, IAstImportStatement, IAstPropertyDeclaration, IAstForStatement, IAstForInStatement, IAstArray, IAstObject, IAstUpdateExpression, IAstTokenSequence, IAstKeyword, IAstConditionalExpression, IAstIndexerExpression, IAstTryStatement, IAstCatchStatement, IAstFinallyStatement, IAstDebuggerKeyword, IAstThrowStatement, IAstDeleteLineExpression, IAstContextIdentifier, IAstForOfStatement, IAstRegexLiteral, IAstVariableDeclaration, IAstRawImportStatement, IAstImportItem, IAstClassDeclaration, IAstKeywordNode, IAstFunction as IAstFunction, IAstDeconstructingAssignment } from "../ast/IAstNode";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { IHash } from "../shared/IHash";
+import { JavascriptMode } from "../shared/JavascrptMode";
 export interface ISourceMapToken {
     generated: {
         line: number;
@@ -45,6 +46,7 @@ export interface ICompileFileRequest {
     ast: IAstNode[];
     isEmitSourcemaps?: boolean;
     indentSize: number;
+    jsMode: JavascriptMode;
 }
 export interface ICompileFileResult {
     request: ICompileFileRequest;

@@ -118,6 +118,7 @@ export interface IParserState {
 	errors: IDiagnostic[];
 	indent: number;
 	imports: IAstImportStatement[];
+	exports: IAstKeywordNode[];
 	symbols: IParserSymbols;
 }
 
@@ -176,6 +177,7 @@ export const parseModule = (tokens: ICodeToken[], modulePath: string, config: IP
 		indent: 0,
 		tokens: tokens,
 		imports: [],
+		exports: [],
 		symbols: symbols
 	};
 
@@ -208,7 +210,7 @@ export const parseModule = (tokens: ICodeToken[], modulePath: string, config: IP
 		moduleEnd = { ...programContent[programContent.length - 1].end }
 	}
 	let astProgram = astFactory.program(programContent, moduleStart, moduleEnd);
-	let astModule = astFactory.module(tokens, astProgram, state.imports, modulePath);
+	let astModule = astFactory.module(tokens, astProgram, state.imports, state.exports, modulePath);
 
 	var result: IParseResult<IAstModule> = {
 		result: astModule,
@@ -582,13 +584,27 @@ export const parseStatement = (state: IParserState, options: IParserOptions): IP
 	]);
 }
 export const parseExportStatement = (state: IParserState, options: IParserOptions): IParseResult<IAstKeywordNode> => {
-	return parseKeywordNode(
+	const exportResult = parseKeywordNode(
 		state, 
 		true, 
 		options, 
 		[KeywordType.Export],
 		[parseStatement]
 	);
+
+	if (!exportResult) {
+		return undefined;
+	}
+
+	const exportNode = exportResult.result;
+	state = exportResult.state;
+	state.exports = state.exports || [];
+	state.exports.push(exportNode);
+
+	return {
+		result: exportNode,
+		state
+	}
 }
 export const parseStaticStatement = (state: IParserState, options: IParserOptions): IParseResult<IAstKeywordNode> => {
 	return parseKeywordNode(

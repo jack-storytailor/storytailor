@@ -118,7 +118,7 @@ export const astFactory = {
 			value
 		}
 	},
-	module: (tokens: ICodeToken[], content: IAstProgram, imports: IAstImportStatement[], modulePath: string): IAstModule => {
+	module: (tokens: ICodeToken[], content: IAstProgram, imports: IAstImportStatement[], exports: IAstKeywordNode[], modulePath: string): IAstModule => {
 		let start: ISymbolPosition = {
 			symbol: 0,
 			line: 0,
@@ -138,6 +138,7 @@ export const astFactory = {
 			tokens,
 			content,
 			imports,
+			exports,
 			modulePath,
 			start,
 			end

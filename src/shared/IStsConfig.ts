@@ -1,3 +1,5 @@
+import { JavascriptMode } from "./JavascrptMode";
+
 export interface IStsConfig {
   /**
    * in a config file this path should be relative to the config file's path.
@@ -22,6 +24,8 @@ export interface IStsConfig {
   isEmitSourceMaps?: boolean;
 
   indentSize?: number;
+
+  jsMode: JavascriptMode;
 
   environmentPath?: string;
 

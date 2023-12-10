@@ -77,6 +77,7 @@ const parseModule = (tokens, modulePath, config) => {
         indent: 0,
         tokens: tokens,
         imports: [],
+        exports: [],
         symbols: symbols
     };
     let programContent = [];
@@ -103,7 +104,7 @@ const parseModule = (tokens, modulePath, config) => {
         moduleEnd = Object.assign({}, programContent[programContent.length - 1].end);
     }
     let astProgram = astFactory_1.astFactory.program(programContent, moduleStart, moduleEnd);
-    let astModule = astFactory_1.astFactory.module(tokens, astProgram, state.imports, modulePath);
+    let astModule = astFactory_1.astFactory.module(tokens, astProgram, state.imports, state.exports, modulePath);
     var result = {
         result: astModule,
         state: state
@@ -402,7 +403,18 @@ const parseStatement = (state, options) => {
 };
 exports.parseStatement = parseStatement;
 const parseExportStatement = (state, options) => {
-    return (0, exports.parseKeywordNode)(state, true, options, [KeywordType_1.KeywordType.Export], [exports.parseStatement]);
+    const exportResult = (0, exports.parseKeywordNode)(state, true, options, [KeywordType_1.KeywordType.Export], [exports.parseStatement]);
+    if (!exportResult) {
+        return undefined;
+    }
+    const exportNode = exportResult.result;
+    state = exportResult.state;
+    state.exports = state.exports || [];
+    state.exports.push(exportNode);
+    return {
+        result: exportNode,
+        state
+    };
 };
 exports.parseExportStatement = parseExportStatement;
 const parseStaticStatement = (state, options) => {
@@ -3493,13 +3505,6 @@ const parseClassMember = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
-    // const staticResult = parseKeywordNode(state, true, options,
-    // 	[KeywordType.Static],
-    // 	[parseExpression]
-    // );
-    // if (staticResult) {
-    // 	return staticResult;
-    // }
     // parse object literal item
     const itemResult = (0, exports.parseObjectLiteralItem)(state, options);
     if (itemResult) {

@@ -19,6 +19,7 @@ export interface IParserState {
     errors: IDiagnostic[];
     indent: number;
     imports: IAstImportStatement[];
+    exports: IAstKeywordNode[];
     symbols: IParserSymbols;
 }
 export interface IParseResult<TResult = any> {

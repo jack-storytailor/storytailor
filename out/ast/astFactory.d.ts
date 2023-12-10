@@ -12,7 +12,7 @@ export declare const astFactory: {
     debuggerKeyword: (keywordType: KeywordType, start: ISymbolPosition, end: ISymbolPosition) => IAstDebuggerKeyword;
     text: (text: string, start: ISymbolPosition, end: ISymbolPosition) => IAstText;
     operator: (operatorType: OperatorType, value: string, start: ISymbolPosition, end: ISymbolPosition) => IAstOperator;
-    module: (tokens: ICodeToken[], content: IAstProgram, imports: IAstImportStatement[], modulePath: string) => IAstModule;
+    module: (tokens: ICodeToken[], content: IAstProgram, imports: IAstImportStatement[], exports: IAstKeywordNode[], modulePath: string) => IAstModule;
     program: (content: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstProgram;
     commentLine: (text: string, start: ISymbolPosition, end: ISymbolPosition) => IAstCommentLine;
     commentBlock: (text: string, start: ISymbolPosition, end: ISymbolPosition) => IAstCommentBlock;

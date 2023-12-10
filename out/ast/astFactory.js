@@ -53,7 +53,7 @@ exports.astFactory = {
             value
         };
     },
-    module: (tokens, content, imports, modulePath) => {
+    module: (tokens, content, imports, exports, modulePath) => {
         let start = {
             symbol: 0,
             line: 0,
@@ -71,6 +71,7 @@ exports.astFactory = {
             tokens,
             content,
             imports,
+            exports,
             modulePath,
             start,
             end

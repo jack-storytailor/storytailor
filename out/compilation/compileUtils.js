@@ -11,7 +11,6 @@ const astParser = require("../parsing/astParser");
 const jsCompiler = require("../compilation/jsCompiler");
 const ICompilerState_1 = require("../shared/ICompilerState");
 const IParsingError_1 = require("../shared/IParsingError");
-// import { collectBindings, ICollectBindingsRequest } from '../parsing/astBinder';
 const compile = (request) => {
     let state = undefined;
     try {
@@ -112,7 +111,8 @@ const compileProject = (state) => {
                     sourceRoot: config.sourceRoot,
                     targetFileName: targetFileName,
                     isEmitSourcemaps: config.isEmitSourceMaps,
-                    indentSize: config.indentSize
+                    indentSize: config.indentSize,
+                    jsMode: config.jsMode
                 });
                 if (compileResult) {
                     outputFileContent = compileResult.javascript;

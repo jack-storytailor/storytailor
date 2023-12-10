@@ -32,6 +32,7 @@ export interface IAstModule extends IAstNode {
     modulePath: string;
     content: IAstProgram;
     imports: IAstImportStatement[];
+    exports: IAstKeywordNode[];
 }
 export interface IAstProgram extends IAstNode {
     content: IAstNode[];

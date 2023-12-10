@@ -7,6 +7,7 @@ const AstNodeType_1 = require("../ast/AstNodeType");
 const astFactory_1 = require("../ast/astFactory");
 const VariableDeclarationKind_1 = require("../ast/VariableDeclarationKind");
 const path = require("path");
+const JavascrptMode_1 = require("../shared/JavascrptMode");
 const sourceMappableAstNodes = {
     // ["Token"]: true,
     // ["TokenSequence"]: true,
@@ -214,7 +215,15 @@ const compile = (request) => {
     state = (0, exports.writeEndline)(state);
     state = (0, exports.writeJsToken)(state, `// INFO: this trick is for making this file node module`);
     state = (0, exports.writeEndline)(state);
-    state = (0, exports.writeJsToken)(state, `Object.assign(module.exports, ${exports.compilerConfig.contextVarName});`);
+    switch (request.jsMode) {
+        case JavascrptMode_1.JavascriptMode.ECMAScript:
+            // we already have declared a context for export
+            state = (0, exports.writeJsToken)(state, `export default ${exports.compilerConfig.contextVarName});`);
+            break;
+        default:
+            state = (0, exports.writeJsToken)(state, `Object.assign(module.exports, ${exports.compilerConfig.contextVarName});`);
+            break;
+    }
     state = (0, exports.writeEndline)(state);
     // prepare result
     let javascriptLines = state.targetState.javascript;
@@ -1338,14 +1347,14 @@ const compileImportStatement = (node, state) => {
         state = (0, exports.writeEndline)(state);
         // __context = { ...[identifier], ...__context };
         // __context = { ...
-        state = (0, exports.writeJsToken)(state, `${exports.compilerConfig.contextVarName} = { ...`);
+        state = (0, exports.writeJsToken)(state, `${exports.compilerConfig.contextVarName} = { ...${exports.compilerConfig.contextVarName}, ...`);
         // identifier
         const identResult = (0, exports.compileAstNode)(ast.identifier, state);
         if (identResult) {
             state = identResult.state;
         }
-        // , ...__context };
-        state = (0, exports.writeJsToken)(state, `, ...${exports.compilerConfig.contextVarName} }`);
+        // , __text };
+        state = (0, exports.writeJsToken)(state, `, ${exports.compilerConfig.textFieldName} }`);
     }
     // add ; and endline 
     state = (0, exports.writeJsToken)(state, ";");

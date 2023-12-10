@@ -10,7 +10,6 @@ import { ICompileRequest } from '../shared/ICompileRequest';
 import { ICompilerState, CompileStatus } from '../shared/ICompilerState';
 import { IDiagnostic, ParsingErrorType } from '../shared/IParsingError';
 import { ISymbolPosition } from '../shared/ISymbolPosition';
-// import { collectBindings, ICollectBindingsRequest } from '../parsing/astBinder';
 
 export const compile = (request: ICompileRequest): ICompilerState => {
 	let state: ICompilerState = undefined;
@@ -159,7 +158,8 @@ export const compileProject = (state: ICompilerState): ICompilerState => {
 					sourceRoot: config.sourceRoot,
 					targetFileName: targetFileName,
 					isEmitSourcemaps: config.isEmitSourceMaps,
-					indentSize: config.indentSize
+					indentSize: config.indentSize,
+					jsMode: config.jsMode
 				});
 				if (compileResult) {
 					outputFileContent = compileResult.javascript;

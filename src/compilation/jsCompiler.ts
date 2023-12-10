@@ -62,6 +62,7 @@ import { VariableDeclarationKind } from "../ast/VariableDeclarationKind";
 import { ICodeToken } from "../shared/ICodeToken";
 import * as path from 'path';
 import { IHash } from "../shared/IHash";
+import { JavascriptMode } from "../shared/JavascrptMode";
 
 export interface ISourceMapToken {
 	generated: {
@@ -111,6 +112,7 @@ export interface ICompileFileRequest {
 	ast: IAstNode[];
 	isEmitSourcemaps?: boolean;
 	indentSize: number;
+	jsMode: JavascriptMode;
 }
 
 export interface ICompileFileResult {
@@ -357,7 +359,18 @@ export const compile = (request: ICompileFileRequest): ICompileFileResult => {
 	state = writeEndline(state);
 	state = writeJsToken(state, `// INFO: this trick is for making this file node module`);
 	state = writeEndline(state);
-	state = writeJsToken(state, `Object.assign(module.exports, ${compilerConfig.contextVarName});`);
+
+	switch (request.jsMode) {
+		case JavascriptMode.ECMAScript:
+			// we already have declared a context for export
+			state = writeJsToken(state, `export default ${compilerConfig.contextVarName});`);
+			break;
+
+		default:
+			state = writeJsToken(state, `Object.assign(module.exports, ${compilerConfig.contextVarName});`);
+			break;
+	}
+
 	state = writeEndline(state);
 
 	// prepare result
@@ -1628,10 +1641,10 @@ export const compileImportStatement = (node: IAstNode, state: ICompilerState): I
 		state = writeJsToken(state, `;`);
 		state = writeEndline(state);
 
-		// __context = { ...[identifier], ...__context };
+		// __context = { ...__context, ...[identifier], __text };
 
 		// __context = { ...
-		state = writeJsToken(state, `${compilerConfig.contextVarName} = { ...`);
+		state = writeJsToken(state, `${compilerConfig.contextVarName} = { ...${compilerConfig.contextVarName}, ...`);
 
 		// identifier
 		const identResult = compileAstNode(ast.identifier, state);
@@ -1639,8 +1652,8 @@ export const compileImportStatement = (node: IAstNode, state: ICompilerState): I
 			state = identResult.state;
 		}
 
-		// , ...__context };
-		state = writeJsToken(state, `, ...${compilerConfig.contextVarName} }`);
+		// , __text };
+		state = writeJsToken(state, `, ${compilerConfig.textFieldName} }`);
 	}
 
 	// add ; and endline 

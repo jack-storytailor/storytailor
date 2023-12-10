@@ -34,6 +34,7 @@ export interface IAstModule extends IAstNode {
 	modulePath: string;
 	content: IAstProgram;
 	imports: IAstImportStatement[];
+	exports: IAstKeywordNode[]; // if it's empty, we do regular export
 }
 export interface IAstProgram extends IAstNode {
 	content: IAstNode[];
