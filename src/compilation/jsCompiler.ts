@@ -51,7 +51,8 @@ import {
 	IAstImportItem, 
 	IAstClassDeclaration, 
 	IAstKeywordNode,
-	IAstFunction as IAstFunction
+	IAstFunction as IAstFunction,
+	IAstDeconstructingAssignment
 } from "../ast/IAstNode";
 import { ISymbolPosition } from "../shared/ISymbolPosition";
 import { SourceMapGenerator } from 'source-map';
@@ -323,8 +324,11 @@ export const compile = (request: ICompileFileRequest): ICompileFileResult => {
 	let environmentPath = getEnvPath(request);
 	state = writeJsToken(state, `let ${compilerConfig.environmentVarName} = require(\`${environmentPath}\`);`);
 	state = writeEndline(state);
+	// __text
+	state = writeJsToken(state, `let ${compilerConfig.textFieldName} = [];`);
+	state = writeEndline(state);
 	// context
-	state = writeJsToken(state, `let ${compilerConfig.contextVarName} = { ${compilerConfig.textFieldName}: [] };`);
+	state = writeJsToken(state, `let ${compilerConfig.contextVarName} = { ${compilerConfig.textFieldName} };`);
 	state = writeEndline(state);
 	// serializer
 	state = writeJsToken(state, `let ${compilerConfig.serializerVarName} = ${compilerConfig.environmentVarName}.${compilerConfig.getSerializerFuncName}();`);
@@ -417,6 +421,7 @@ export const compileAstNode = (ast: IAstNode, state: ICompilerState): ICompileRe
 		compileTokenSequence,
 		compileOperator,
 		compileVarDeclaration,
+		compileDeconstrutingAssignment,
 		compileProgram,
 		compileFunction,
 		compileIfStatement,
@@ -1171,6 +1176,32 @@ export const compileVarDeclaration = (node: IAstNode, state: ICompilerState): IC
 	}
 
 	// result
+	return {
+		state,
+		result: ast
+	}
+}
+export const compileDeconstrutingAssignment = (node: IAstNode, state: ICompilerState): ICompileResult<IAstDeconstructingAssignment> => {
+	const ast = astFactory.asNode<IAstDeconstructingAssignment>(node, AstNodeType.DeconstructionAssignment);
+	if (!ast || !state) {
+		return undefined;
+	}
+
+	// write variables
+	const varsResult = compileAstNode(ast.variables, state);
+	if (varsResult) {
+		state = varsResult.state;
+	}
+
+	// write =
+	state = writeJsToken(state, " = ");
+
+	// write initializer
+	const initResult = compileAstNode(ast.initializer, state);
+	if (initResult) {
+		state = initResult.state;
+	}
+
 	return {
 		state,
 		result: ast

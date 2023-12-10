@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseNumberLiteral = exports.parseLiteral = exports.parseObjectLineTags = exports.parseFunctionParameters = exports.parseCodeBlock = exports.parseCommentBlock = exports.parseCommentLine = exports.parseKeywordOfType = exports.parseDebuggerKeyword = exports.parseKeyword = exports.parseUnaryOperatorPostfix = exports.parseUnaryOperatorPrefix = exports.parseBinaryOperator = exports.parseOperatorOfType = exports.parseOperator = exports.parseThrowStatement = exports.parseFinallyStatement = exports.parseCatchStatement = exports.parseTryStatement = exports.parseImportItem = exports.parseRawImportStatement = exports.parseImportPath = exports.parseImportStatement = exports.parseForOfStatement = exports.parseForInStatement = exports.parseForOfConditions = exports.parseForInConditions = exports.parseConditionBlock = exports.parseForCoditions = exports.parseForStatement = exports.parseWhileStatement = exports.parseDoWhileStatement = exports.parseDefaultCaseStatement = exports.parseCaseStatement = exports.parseSwitchStatement = exports.parseIfStatement = exports.parseContinueStatement = exports.parseReturnStatement = exports.parseBreakStatement = exports.parseStaticStatement = exports.parseExportStatement = exports.parseStatement = exports.parseTextLineStatement = exports.parseDeleteLineExpression = exports.parseObjectLine = exports.parseOuterStatementContent = exports.parseOuterStatement = exports.parseRootStatement = exports.parseModule = exports.defaultParserConfig = void 0;
-exports.readWhitespace = exports.readString = exports.parseErrorTokens = exports.parseScope = exports.parseToken = exports.parseKeywordNode = exports.parseNode = exports.parseTag = exports.parsePrototypeExpression = exports.parseTypeofExpression = exports.parseDeleteExpression = exports.parseYieldExpression = exports.parseAwaitExpression = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseOperationExpression = exports.parseKeywordExpression = exports.parseExpression = exports.parseVariableDeclaration = exports.parseClassMember = exports.parseClassDeclaration = exports.parseOperandIdentifier = exports.parseContextIdentifier = exports.parseAnyIdentifier = exports.parseRawIdentifier = exports.parseObjectLineIdentifier = exports.parseIdentifierScope = exports.parseIdentifier = exports.parseGetterSetter = exports.parseFunction = exports.parseObjectProperty = exports.parseObjectLiteralItem = exports.parseObject = exports.parseArrayElement = exports.parseArrayLiteral = exports.parseRegexParenScope = exports.parseRegexLiteral = exports.parseBooleanLiteral = exports.parseStringInclude = exports.parseStringLiteralItem = exports.parseStringLiteral = void 0;
-exports.prepareTokens = exports.addInvalidTokenSequenceError = exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isValidJsIdentifier = exports.isEndOfFile = exports.readTokensAsString = exports.calcIndentFromWhitespace = void 0;
+exports.readWhitespace = exports.readString = exports.parseErrorTokens = exports.parseScope = exports.parseToken = exports.parseKeywordNode = exports.parseNode = exports.parseTag = exports.parseTypeofExpression = exports.parseDeleteExpression = exports.parseYieldExpression = exports.parseAwaitExpression = exports.parseNewExpression = exports.parseConditionalExpression = exports.parseMemberExpression = exports.parseBinaryExpression = exports.parseUpdateExpressionPostfix = exports.parseIndexerExpression = exports.parseCallArguments = exports.parseCallExpression = exports.parseParenExpression = exports.parseOperation = exports.parseOperand = exports.parseOperationExpression = exports.parseKeywordExpression = exports.parseExpression = exports.parseVariableDeclaration = exports.parseDeconstructionAssignment = exports.parseClassMember = exports.parseClassDeclaration = exports.parseOperandIdentifier = exports.parseContextIdentifier = exports.parseAnyIdentifier = exports.parseRawIdentifier = exports.parseObjectLineIdentifier = exports.parseIdentifierScope = exports.parseIdentifier = exports.parseGetterSetter = exports.parseFunction = exports.parseObjectProperty = exports.parseObjectLiteralItem = exports.parseObject = exports.parseArrayElement = exports.parseArrayLiteral = exports.parseRegexParenScope = exports.parseRegexLiteral = exports.parseBooleanLiteral = exports.parseStringInclude = exports.parseStringLiteralItem = exports.parseStringLiteral = void 0;
+exports.optionsCodeBlock = exports.optionsOuterLine = exports.emptyOptions = exports.prepareTokens = exports.addInvalidTokenSequenceError = exports.addInvalidTokenError = exports.addParsingError = exports.skipTokens = exports.parseTokenSequences = exports.checkTokenSequences = exports.parseTokenSequence = exports.checkTokenSequence = exports.skipUntil = exports.skipTokensOfType = exports.skipTokenOfType = exports.skipWhitespace = exports.skipCommentBlock = exports.skipCommentLine = exports.skipComments = exports.getCursorPosition = exports.getTokenOfType = exports.getToken = exports.addItemToHash = exports.addItemToArray = exports.isValidJsIdentifier = exports.isEndOfFile = exports.readTokensAsString = exports.calcIndentFromWhitespace = void 0;
 const CodeTokenType_1 = require("../shared/CodeTokenType");
 const IParsingError_1 = require("../shared/IParsingError");
 const KeywordType_1 = require("../ast/KeywordType");
@@ -116,9 +116,13 @@ const parseRootStatement = (state) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
+    const options = {
+        isMultiline: false,
+        allowContextIdentifiers: true
+    };
     // parses any content that can be in the root of module
     // skip comments
-    const newState = (0, exports.skipComments)(state, false, false);
+    const newState = (0, exports.skipComments)(state, false, Object.assign(Object.assign({}, options), { isMultiline: false }));
     // skip the fully commented line
     if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Endfile]) && newState.cursor > state.cursor) {
         return {
@@ -128,12 +132,12 @@ const parseRootStatement = (state) => {
     }
     // if we're here, that means it's not the end of line and we've skipped all the comments already
     // parse outer expression
-    let outerExpressionResult = (0, exports.parseOuterStatement)(state);
+    let outerExpressionResult = (0, exports.parseOuterStatement)(state, options);
     if (outerExpressionResult) {
         return outerExpressionResult;
     }
     // parse text line
-    let textLineResult = (0, exports.parseTextLineStatement)(state);
+    let textLineResult = (0, exports.parseTextLineStatement)(state, options);
     if (textLineResult) {
         return textLineResult;
     }
@@ -141,7 +145,7 @@ const parseRootStatement = (state) => {
     return undefined;
 };
 exports.parseRootStatement = parseRootStatement;
-const parseOuterStatement = (state) => {
+const parseOuterStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -160,10 +164,10 @@ const parseOuterStatement = (state) => {
     }
     state = openSeqResult.state;
     // skip comments
-    state = (0, exports.skipComments)(state, true, false);
+    state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: false }));
     // parse statement
     let statement = undefined;
-    let contentResult = (0, exports.parseOuterStatementContent)(state);
+    let contentResult = (0, exports.parseOuterStatementContent)(state, options);
     if (contentResult) {
         state = contentResult.state;
         statement = contentResult.result;
@@ -175,7 +179,7 @@ const parseOuterStatement = (state) => {
         }
     }
     // skip comments
-    state = (0, exports.skipComments)(state, true, false);
+    state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: false }));
     // any excess symbols until endline are invalid
     state = (0, exports.parseErrorTokens)(state, (stat) => (0, exports.getTokenOfType)(stat, [CodeTokenType_1.CodeTokenType.Endline]) !== undefined);
     // skip endline
@@ -191,56 +195,56 @@ const parseOuterStatement = (state) => {
     };
 };
 exports.parseOuterStatement = parseOuterStatement;
-const parseOuterStatementContent = (state) => {
+const parseOuterStatementContent = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // Parse Block
-    let codeLineResult = (0, exports.parseCodeBlock)(state, true);
+    let codeLineResult = (0, exports.parseCodeBlock)(state, Object.assign(Object.assign({}, options), { isMultiline: true, allowContextIdentifiers: false }));
     if (codeLineResult) {
         return codeLineResult;
     }
-    let deleteLineResult = (0, exports.parseDeleteLineExpression)(state);
+    let deleteLineResult = (0, exports.parseDeleteLineExpression)(state, options);
     if (deleteLineResult) {
         return deleteLineResult;
     }
     // parse import
-    const importResult = (0, exports.parseImportStatement)(state, false);
+    const importResult = (0, exports.parseImportStatement)(state, Object.assign(Object.assign({}, options), { isMultiline: false }));
     if (importResult) {
         return importResult;
     }
     // raw import
-    const rawImportResult = (0, exports.parseRawImportStatement)(state, false);
+    const rawImportResult = (0, exports.parseRawImportStatement)(state, Object.assign(Object.assign({}, options), { isMultiline: false }));
     if (rawImportResult) {
         return rawImportResult;
     }
     // Parse Object Line Statement
-    let objectLineResult = (0, exports.parseObjectLine)(state);
+    let objectLineResult = (0, exports.parseObjectLine)(state, options);
     if (objectLineResult) {
         return objectLineResult;
     }
     // Parse Statement
-    let statementResult = (0, exports.parseStatement)(state, false);
+    let statementResult = (0, exports.parseStatement)(state, Object.assign(Object.assign({}, options), { isMultiline: false }));
     if (statementResult) {
         return statementResult;
     }
     return undefined;
 };
 exports.parseOuterStatementContent = parseOuterStatementContent;
-const parseObjectLine = (state) => {
+const parseObjectLine = (state, options) => {
     var _a;
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // identifier [tags] [= initExpression]
     let identifier = undefined;
-    let identifierScopeResult = (0, exports.parseIdentifierScope)(state);
+    let identifierScopeResult = (0, exports.parseIdentifierScope)(state, options);
     if (identifierScopeResult) {
         identifier = identifierScopeResult.result;
         state = identifierScopeResult.state;
     }
     else {
-        let objectLineIdentifier = (0, exports.parseObjectLineIdentifier)(state);
+        let objectLineIdentifier = (0, exports.parseObjectLineIdentifier)(state, options);
         if (objectLineIdentifier) {
             identifier = objectLineIdentifier.result;
             state = objectLineIdentifier.state;
@@ -251,24 +255,24 @@ const parseObjectLine = (state) => {
     }
     const start = identifier === null || identifier === void 0 ? void 0 : identifier.start;
     // skip comments
-    state = (0, exports.skipComments)(state, true, false);
+    state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: false }));
     // parse tags
     let tags = undefined;
-    const tagsResult = (0, exports.parseObjectLineTags)(state, false);
+    const tagsResult = (0, exports.parseObjectLineTags)(state, Object.assign(Object.assign({}, options), { isMultiline: false }));
     if (tagsResult) {
         state = tagsResult.state;
         tags = tagsResult.result;
     }
     // skip comments
-    state = (0, exports.skipComments)(state, true, false);
+    state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: false }));
     // read init operation
     let initValue = undefined;
     if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Equals])) {
         state = (0, exports.skipTokens)(state, 1);
         // skip comments
-        state = (0, exports.skipComments)(state, true, false);
+        state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: false }));
         // read init value
-        let initValueResult = (0, exports.parseExpression)(state, false);
+        let initValueResult = (0, exports.parseExpression)(state, Object.assign(Object.assign({}, options), { isMultiline: false }));
         if (initValueResult) {
             state = initValueResult.state;
             initValue = initValueResult.result;
@@ -284,22 +288,22 @@ const parseObjectLine = (state) => {
     };
 };
 exports.parseObjectLine = parseObjectLine;
-const parseDeleteLineExpression = (state) => {
+const parseDeleteLineExpression = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     const start = (0, exports.getCursorPosition)(state);
     // delete Object Name
     // parse delete keyword
-    let deleteResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Delete]);
+    let deleteResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Delete]);
     if (!deleteResult) {
         return undefined;
     }
     state = deleteResult.state;
-    state = (0, exports.skipComments)(state, true, false);
+    state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: false }));
     // parse identifier
     let identifier = undefined;
-    const identifierResult = (0, exports.parseOperandIdentifier)(state);
+    const identifierResult = (0, exports.parseOperandIdentifier)(state, options);
     if (identifierResult) {
         identifier = identifierResult.result;
         state = identifierResult.state;
@@ -313,7 +317,7 @@ const parseDeleteLineExpression = (state) => {
     };
 };
 exports.parseDeleteLineExpression = parseDeleteLineExpression;
-const parseTextLineStatement = (state) => {
+const parseTextLineStatement = (state, options) => {
     var _a, _b;
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
@@ -332,7 +336,7 @@ const parseTextLineStatement = (state) => {
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Endline])) {
         const contextSymbol = (_a = (0, exports.getCursorPosition)(state)) === null || _a === void 0 ? void 0 : _a.symbol;
         // skip comments
-        state = (0, exports.skipComments)(state, false, false);
+        state = (0, exports.skipComments)(state, false, options);
         // end line ends the text line. If it's a commented line
         if ((0, exports.isEndOfFile)(state) || (0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Endline])) {
             if (((_b = (0, exports.getCursorPosition)(state)) === null || _b === void 0 ? void 0 : _b.symbol) !== contextSymbol) {
@@ -341,7 +345,7 @@ const parseTextLineStatement = (state) => {
             break;
         }
         // parse word
-        let stringItem = (0, exports.parseStringLiteralItem)(state);
+        let stringItem = (0, exports.parseStringLiteralItem)(state, options);
         if (stringItem) {
             state = stringItem.state;
             content = [
@@ -350,7 +354,7 @@ const parseTextLineStatement = (state) => {
             ];
         }
         // skip comments
-        state = (0, exports.skipComments)(state, false, false);
+        state = (0, exports.skipComments)(state, false, Object.assign(Object.assign({}, options), { isMultiline: false }));
         continue;
     }
     if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Endline])) {
@@ -366,15 +370,16 @@ const parseTextLineStatement = (state) => {
     };
 };
 exports.parseTextLineStatement = parseTextLineStatement;
-const parseStatement = (state, isMultiline) => {
+const parseStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
-    return (0, exports.parseNode)(state, isMultiline, [
+    return (0, exports.parseNode)(state, options, [
         exports.parseExportStatement,
         exports.parseStaticStatement,
         exports.parseClassDeclaration,
         exports.parseVariableDeclaration,
+        exports.parseDeconstructionAssignment,
         exports.parseBreakStatement,
         exports.parseReturnStatement,
         exports.parseContinueStatement,
@@ -396,27 +401,27 @@ const parseStatement = (state, isMultiline) => {
     ]);
 };
 exports.parseStatement = parseStatement;
-const parseExportStatement = (state, isMultiline) => {
-    return (0, exports.parseKeywordNode)(state, true, isMultiline, [KeywordType_1.KeywordType.Export], [exports.parseStatement]);
+const parseExportStatement = (state, options) => {
+    return (0, exports.parseKeywordNode)(state, true, options, [KeywordType_1.KeywordType.Export], [exports.parseStatement]);
 };
 exports.parseExportStatement = parseExportStatement;
-const parseStaticStatement = (state, isMultiline) => {
-    return (0, exports.parseKeywordNode)(state, true, isMultiline, [KeywordType_1.KeywordType.Static], [exports.parseStatement]);
+const parseStaticStatement = (state, options) => {
+    return (0, exports.parseKeywordNode)(state, true, options, [KeywordType_1.KeywordType.Static], [exports.parseStatement]);
 };
 exports.parseStaticStatement = parseStaticStatement;
-const parseBreakStatement = (state) => {
+const parseBreakStatement = (state, options) => {
     var _a, _b;
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // parse keyword
-    const keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Break]);
+    const keywordResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Break]);
     if (!keywordResult) {
         return undefined;
     }
     state = keywordResult.state;
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, false);
+    state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: false }));
     // next should be endline or semicolon
     const endTokens = [CodeTokenType_1.CodeTokenType.Semicolon, CodeTokenType_1.CodeTokenType.Endline];
     if ((0, exports.getTokenOfType)(state, endTokens)) {
@@ -431,23 +436,23 @@ const parseBreakStatement = (state) => {
     };
 };
 exports.parseBreakStatement = parseBreakStatement;
-const parseReturnStatement = (state, isMultiline) => {
-    return (0, exports.parseKeywordNode)(state, true, isMultiline, [KeywordType_1.KeywordType.Return], [exports.parseExpression]);
+const parseReturnStatement = (state, options) => {
+    return (0, exports.parseKeywordNode)(state, true, options, [KeywordType_1.KeywordType.Return], [exports.parseExpression]);
 };
 exports.parseReturnStatement = parseReturnStatement;
-const parseContinueStatement = (state) => {
+const parseContinueStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     let start = (0, exports.getCursorPosition)(state);
     // parse keyword
-    let keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Continue]);
+    let keywordResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Continue]);
     if (!keywordResult) {
         return undefined;
     }
     state = keywordResult.state;
     // skip whitespace
-    state = (0, exports.skipWhitespace)(state, false);
+    state = (0, exports.skipWhitespace)(state, Object.assign(Object.assign({}, options), { isMultiline: false }));
     // skip until ; or endline
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Semicolon, CodeTokenType_1.CodeTokenType.Endline])) {
         let nextToken = (0, exports.getToken)(state);
@@ -468,7 +473,7 @@ const parseContinueStatement = (state) => {
     };
 };
 exports.parseContinueStatement = parseContinueStatement;
-const parseIfStatement = (state, isMultiline) => {
+const parseIfStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -476,7 +481,7 @@ const parseIfStatement = (state, isMultiline) => {
     let thenProgram = undefined;
     let elseProgram = undefined;
     let finalState = undefined;
-    let ifResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.If]);
+    let ifResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.If]);
     if (!ifResult) {
         return undefined;
     }
@@ -484,12 +489,12 @@ const parseIfStatement = (state, isMultiline) => {
     state = ifResult.state;
     finalState = state;
     // prepare break tokens that will break the statement
-    let breakTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
+    let breakTokens = options.isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     breakTokens = [...breakTokens, CodeTokenType_1.CodeTokenType.Semicolon];
     // parse until break tokens
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // parse condition
-        let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseExpression)(state, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, isMultiline));
+        let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, options), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseExpression)(state, options), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, options));
         if (conditionScopeResult) {
             state = conditionScopeResult.state;
             finalState = state;
@@ -508,31 +513,31 @@ const parseIfStatement = (state, isMultiline) => {
             break;
         }
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // skip everything until { or else or breakTokens
-        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined || (0, exports.parseKeyword)(state) !== undefined);
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined || (0, exports.parseKeyword)(state, options) !== undefined);
         // check sequence end
         if ((0, exports.getTokenOfType)(state, breakTokens)) {
             break;
         }
         // parse then body
-        let codeBlockResult = (0, exports.parseCodeBlock)(state, isMultiline);
+        let codeBlockResult = (0, exports.parseCodeBlock)(state, options);
         if (codeBlockResult) {
             thenProgram = codeBlockResult.result;
             state = codeBlockResult.state;
             finalState = state;
         }
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // skip everything until else or breakTokens
-        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, breakTokens) !== undefined || (0, exports.parseKeyword)(state) !== undefined);
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, breakTokens) !== undefined || (0, exports.parseKeyword)(state, options) !== undefined);
         // parse else
-        let elseResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Else]);
+        let elseResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Else]);
         if (elseResult) {
             state = elseResult.state;
             finalState = state;
             // skip comments and whitespaces
-            state = (0, exports.skipComments)(state, true, isMultiline);
+            state = (0, exports.skipComments)(state, true, options);
             // skip everything until { or else or breakTokens
             state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined);
             // check sequence end
@@ -540,9 +545,9 @@ const parseIfStatement = (state, isMultiline) => {
                 break;
             }
             // parse else body
-            if ((0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.If])) {
+            if ((0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.If])) {
                 // this is nested if statement
-                let nestedIfResult = (0, exports.parseIfStatement)(state, isMultiline);
+                let nestedIfResult = (0, exports.parseIfStatement)(state, options);
                 if (nestedIfResult) {
                     state = nestedIfResult.state;
                     finalState = state;
@@ -556,7 +561,7 @@ const parseIfStatement = (state, isMultiline) => {
             else {
                 // if there was no nested if
                 // parse else program 
-                let codeBlockResult = (0, exports.parseCodeBlock)(state, isMultiline);
+                let codeBlockResult = (0, exports.parseCodeBlock)(state, options);
                 if (codeBlockResult) {
                     elseProgram = codeBlockResult.result;
                     state = codeBlockResult.state;
@@ -576,14 +581,14 @@ const parseIfStatement = (state, isMultiline) => {
     };
 };
 exports.parseIfStatement = parseIfStatement;
-const parseSwitchStatement = (state, isMultiline) => {
+const parseSwitchStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     let condition = undefined;
     let cases;
     let finalState = undefined;
-    let switchResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Switch]);
+    let switchResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Switch]);
     if (!switchResult) {
         return undefined;
     }
@@ -591,12 +596,12 @@ const parseSwitchStatement = (state, isMultiline) => {
     state = switchResult.state;
     finalState = state;
     // prepare break tokens that will break the statement
-    let breakTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
+    let breakTokens = options.isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     breakTokens = [...breakTokens, CodeTokenType_1.CodeTokenType.Semicolon];
     // parse until break tokens
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // parse condition
-        let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseExpression)(state, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, isMultiline));
+        let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, options), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseExpression)(state, options), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, options));
         if (conditionScopeResult) {
             state = conditionScopeResult.state;
             finalState = state;
@@ -614,28 +619,28 @@ const parseSwitchStatement = (state, isMultiline) => {
         if ((0, exports.getTokenOfType)(state, breakTokens))
             break;
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // skip everything until { or else or breakTokens
-        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined || (0, exports.parseKeyword)(state) !== undefined);
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined || (0, exports.parseKeyword)(state, options) !== undefined);
         // check sequence end
         if ((0, exports.getTokenOfType)(state, breakTokens))
             break;
         // parse swich body
-        let bodyResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, true), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceOpen]), (state) => {
+        let bodyResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true })), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceOpen]), (state) => {
             // skip comments and whitespaces
-            state = (0, exports.skipComments)(state, true, true);
+            state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
             // case
-            let caseResult = (0, exports.parseCaseStatement)(state);
+            let caseResult = (0, exports.parseCaseStatement)(state, options);
             if (caseResult) {
                 return caseResult;
             }
             // default case
-            let defaultCaseResult = (0, exports.parseDefaultCaseStatement)(state);
+            let defaultCaseResult = (0, exports.parseDefaultCaseStatement)(state, options);
             if (defaultCaseResult) {
                 return defaultCaseResult;
             }
             return undefined;
-        }, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => (0, exports.skipComments)(state, true, isMultiline));
+        }, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => (0, exports.skipComments)(state, true, options));
         if (bodyResult) {
             state = bodyResult.state;
             finalState = bodyResult.state;
@@ -655,12 +660,12 @@ const parseSwitchStatement = (state, isMultiline) => {
     };
 };
 exports.parseSwitchStatement = parseSwitchStatement;
-const parseCaseStatement = (state) => {
+const parseCaseStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // parse case keyword
-    let caseResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Case]);
+    let caseResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Case]);
     if (!caseResult) {
         return undefined;
     }
@@ -671,11 +676,11 @@ const parseCaseStatement = (state) => {
     let start = (0, exports.getCursorPosition)(state);
     state = caseResult.state;
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, true);
+    state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
     let finalState = state;
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // parse condition
-        let conditionResult = (0, exports.parseExpression)(state, true);
+        let conditionResult = (0, exports.parseExpression)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
         if (conditionResult) {
             state = conditionResult.state;
             finalState = state;
@@ -692,9 +697,9 @@ const parseCaseStatement = (state) => {
             state = (0, exports.skipTokens)(state, 1);
         }
         // parse statements until break token or case or default or return keywords
-        while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens) && !(0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Case, KeywordType_1.KeywordType.Default, KeywordType_1.KeywordType.Return, KeywordType_1.KeywordType.Break])) {
+        while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens) && !(0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Case, KeywordType_1.KeywordType.Default, KeywordType_1.KeywordType.Return, KeywordType_1.KeywordType.Break])) {
             // parse body statement
-            let bodyStatementResult = (0, exports.parseStatement)(state, true);
+            let bodyStatementResult = (0, exports.parseStatement)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
             if (bodyStatementResult) {
                 state = bodyStatementResult.state;
                 finalState = state;
@@ -708,7 +713,7 @@ const parseCaseStatement = (state) => {
                 continue;
             }
             // skip comments and whitespaces
-            state = (0, exports.skipComments)(state, true, true);
+            state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
             if (state.cursor !== finalState.cursor) {
                 continue;
             }
@@ -721,19 +726,19 @@ const parseCaseStatement = (state) => {
         if ((0, exports.getTokenOfType)(state, breakTokens))
             break;
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, true);
+        state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
         // skip everything until break tokens or keyword
-        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens]) !== undefined || (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Case, KeywordType_1.KeywordType.Default, KeywordType_1.KeywordType.Return, KeywordType_1.KeywordType.Break]) !== undefined);
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens]) !== undefined || (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Case, KeywordType_1.KeywordType.Default, KeywordType_1.KeywordType.Return, KeywordType_1.KeywordType.Break]) !== undefined);
         // parse consequent
         // parse retrun or break statements
-        let breakStatementResult = (0, exports.parseBreakStatement)(state);
+        let breakStatementResult = (0, exports.parseBreakStatement)(state, options);
         if (breakStatementResult) {
             consequent = breakStatementResult.result;
             state = breakStatementResult.state;
             finalState = state;
         }
         else {
-            let returnStatementResult = (0, exports.parseReturnStatement)(state, true);
+            let returnStatementResult = (0, exports.parseReturnStatement)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
             if (returnStatementResult) {
                 consequent = returnStatementResult.result;
                 state = returnStatementResult.state;
@@ -752,12 +757,12 @@ const parseCaseStatement = (state) => {
     };
 };
 exports.parseCaseStatement = parseCaseStatement;
-const parseDefaultCaseStatement = (state) => {
+const parseDefaultCaseStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // parse default keyword
-    let defaultResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Default]);
+    let defaultResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Default]);
     if (!defaultResult) {
         return undefined;
     }
@@ -768,7 +773,7 @@ const parseDefaultCaseStatement = (state) => {
     let start = (0, exports.getCursorPosition)(state);
     state = defaultResult.state;
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, true);
+    state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
     let finalState = state;
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // parse :
@@ -778,9 +783,9 @@ const parseDefaultCaseStatement = (state) => {
             state = (0, exports.skipTokens)(state, 1);
         }
         // parse statements until break token or case or default or return keywords
-        while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens) && !(0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Case, KeywordType_1.KeywordType.Default, KeywordType_1.KeywordType.Return, KeywordType_1.KeywordType.Break])) {
+        while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens) && !(0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Case, KeywordType_1.KeywordType.Default, KeywordType_1.KeywordType.Return, KeywordType_1.KeywordType.Break])) {
             // parse body statement
-            let bodyStatementResult = (0, exports.parseStatement)(state, true);
+            let bodyStatementResult = (0, exports.parseStatement)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
             if (bodyStatementResult) {
                 state = bodyStatementResult.state;
                 finalState = state;
@@ -794,7 +799,7 @@ const parseDefaultCaseStatement = (state) => {
                 continue;
             }
             // skip comments and whitespaces
-            state = (0, exports.skipComments)(state, true, true);
+            state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
             if (state.cursor !== finalState.cursor) {
                 continue;
             }
@@ -807,19 +812,19 @@ const parseDefaultCaseStatement = (state) => {
         if ((0, exports.getTokenOfType)(state, breakTokens))
             break;
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, true);
+        state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
         // skip everything until break tokens or keyword
-        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens]) !== undefined || (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Case, KeywordType_1.KeywordType.Default, KeywordType_1.KeywordType.Return, KeywordType_1.KeywordType.Break]) !== undefined);
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens]) !== undefined || (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Case, KeywordType_1.KeywordType.Default, KeywordType_1.KeywordType.Return, KeywordType_1.KeywordType.Break]) !== undefined);
         // parse consequent
         // parse retrun or break statements
-        let breakStatementResult = (0, exports.parseBreakStatement)(state);
+        let breakStatementResult = (0, exports.parseBreakStatement)(state, options);
         if (breakStatementResult) {
             consequent = breakStatementResult.result;
             state = breakStatementResult.state;
             finalState = state;
         }
         else {
-            let returnStatementResult = (0, exports.parseReturnStatement)(state, true);
+            let returnStatementResult = (0, exports.parseReturnStatement)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
             if (returnStatementResult) {
                 consequent = returnStatementResult.result;
                 state = returnStatementResult.state;
@@ -838,14 +843,14 @@ const parseDefaultCaseStatement = (state) => {
     };
 };
 exports.parseDefaultCaseStatement = parseDefaultCaseStatement;
-const parseDoWhileStatement = (state, isMultiline) => {
+const parseDoWhileStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     let condition = undefined;
     let bodyProgram = undefined;
     let finalState = undefined;
-    let doResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Do]);
+    let doResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Do]);
     if (!doResult) {
         return undefined;
     }
@@ -853,20 +858,20 @@ const parseDoWhileStatement = (state, isMultiline) => {
     state = doResult.state;
     finalState = state;
     // prepare break tokens that will break the statement
-    let breakTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
+    let breakTokens = options.isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     breakTokens = [...breakTokens, CodeTokenType_1.CodeTokenType.Semicolon];
     // parse until break tokens
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // skip everything until { or breakTokens or while
-        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined || (0, exports.parseKeyword)(state) !== undefined);
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined || (0, exports.parseKeyword)(state, options) !== undefined);
         // check sequence end
         if ((0, exports.getTokenOfType)(state, breakTokens)) {
             break;
         }
         // parse body program
-        let codeBlockResult = (0, exports.parseCodeBlock)(state, isMultiline);
+        let codeBlockResult = (0, exports.parseCodeBlock)(state, options);
         if (codeBlockResult) {
             bodyProgram = codeBlockResult.result;
             state = codeBlockResult.state;
@@ -877,15 +882,15 @@ const parseDoWhileStatement = (state, isMultiline) => {
             break;
         }
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // skip everything until ( or breakTokens or while
-        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.ParenOpen]) !== undefined || (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.While]) !== undefined);
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.ParenOpen]) !== undefined || (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.While]) !== undefined);
         // check sequence end
         if ((0, exports.getTokenOfType)(state, breakTokens)) {
             break;
         }
         // parse while
-        let whileResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.While]);
+        let whileResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.While]);
         if (whileResult) {
             state = whileResult.state;
             finalState = state;
@@ -894,15 +899,15 @@ const parseDoWhileStatement = (state, isMultiline) => {
                 break;
             }
             // skip comments and whitespaces
-            state = (0, exports.skipComments)(state, true, isMultiline);
+            state = (0, exports.skipComments)(state, true, options);
             // skip everything until ( or breakTokens or while
-            state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.ParenOpen]) !== undefined || (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.While]) !== undefined);
+            state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.ParenOpen]) !== undefined || (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.While]) !== undefined);
             // check sequence end
             if ((0, exports.getTokenOfType)(state, breakTokens)) {
                 break;
             }
             // parse condition
-            let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseExpression)(state, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, isMultiline));
+            let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, options), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseExpression)(state, options), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, options));
             if (conditionScopeResult) {
                 state = conditionScopeResult.state;
                 finalState = state;
@@ -929,14 +934,14 @@ const parseDoWhileStatement = (state, isMultiline) => {
     };
 };
 exports.parseDoWhileStatement = parseDoWhileStatement;
-const parseWhileStatement = (state, isMultiline) => {
+const parseWhileStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     let condition = undefined;
     let bodyProgram = undefined;
     let finalState = undefined;
-    let whileResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.While]);
+    let whileResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.While]);
     if (!whileResult) {
         return undefined;
     }
@@ -947,12 +952,12 @@ const parseWhileStatement = (state, isMultiline) => {
     let condEnd = (0, exports.getCursorPosition)(state);
     let codeBlockStart = (0, exports.getCursorPosition)(state);
     // prepare break tokens that will break the statement
-    let breakTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
+    let breakTokens = options.isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     breakTokens = [...breakTokens, CodeTokenType_1.CodeTokenType.Semicolon];
     // parse until break tokens
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // parse condition
-        let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseExpression)(state, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, true));
+        let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, options), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseExpression)(state, options), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true })));
         if (conditionScopeResult) {
             state = conditionScopeResult.state;
             finalState = state;
@@ -977,16 +982,16 @@ const parseWhileStatement = (state, isMultiline) => {
             break;
         }
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // skip everything until { or else or breakTokens
-        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined || (0, exports.parseKeyword)(state) !== undefined);
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined || (0, exports.parseKeyword)(state, options) !== undefined);
         // check sequence end
         if ((0, exports.getTokenOfType)(state, breakTokens)) {
             break;
         }
         codeBlockStart = (0, exports.getCursorPosition)(state);
         // parse body program
-        let codeBlockResult = (0, exports.parseCodeBlock)(state, isMultiline);
+        let codeBlockResult = (0, exports.parseCodeBlock)(state, options);
         if (codeBlockResult) {
             bodyProgram = codeBlockResult.result;
             state = codeBlockResult.state;
@@ -1012,7 +1017,7 @@ const parseWhileStatement = (state, isMultiline) => {
     };
 };
 exports.parseWhileStatement = parseWhileStatement;
-const parseForStatement = (state, isMultiline) => {
+const parseForStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -1021,7 +1026,7 @@ const parseForStatement = (state, isMultiline) => {
     let update = undefined;
     let bodyProgram = undefined;
     let finalState = undefined;
-    let forResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.For]);
+    let forResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.For]);
     if (!forResult) {
         return undefined;
     }
@@ -1029,15 +1034,15 @@ const parseForStatement = (state, isMultiline) => {
     state = forResult.state;
     finalState = state;
     // prepare break tokens that will break the statement
-    let breakTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
+    let breakTokens = options.isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     breakTokens = [...breakTokens, CodeTokenType_1.CodeTokenType.Semicolon];
     // parse until break tokens
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // parse condition
-        let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseStatement)(state, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => {
+        let conditionScopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, options), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseStatement)(state, options), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => {
             // comments
             let cursor = state.cursor;
-            state = (0, exports.skipComments)(state, true, isMultiline);
+            state = (0, exports.skipComments)(state, true, options);
             if (state.cursor > cursor) {
                 return state;
             }
@@ -1072,15 +1077,15 @@ const parseForStatement = (state, isMultiline) => {
             break;
         }
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // skip everything until { or else or breakTokens
-        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined || (0, exports.parseKeyword)(state) !== undefined);
+        state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.BraceOpen]) !== undefined || (0, exports.parseKeyword)(state, options) !== undefined);
         // check sequence end
         if ((0, exports.getTokenOfType)(state, breakTokens)) {
             break;
         }
         // parse body program
-        let codeBlockResult = (0, exports.parseCodeBlock)(state, isMultiline);
+        let codeBlockResult = (0, exports.parseCodeBlock)(state, options);
         if (codeBlockResult) {
             bodyProgram = codeBlockResult.result;
             state = codeBlockResult.state;
@@ -1098,20 +1103,20 @@ const parseForStatement = (state, isMultiline) => {
     };
 };
 exports.parseForStatement = parseForStatement;
-const parseForCoditions = (state) => {
+const parseForCoditions = (state, options) => {
     let result = {
         init: undefined,
         test: undefined,
         update: undefined
     };
     // parse init statement
-    let initStatementResult = (0, exports.parseExpression)(state, true);
+    let initStatementResult = (0, exports.parseExpression)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
     if (initStatementResult) {
         state = initStatementResult.state;
         result = Object.assign(Object.assign({}, result), { init: initStatementResult.result });
     }
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, true);
+    state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
     // everything until ; or ) are errors
     state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Semicolon, CodeTokenType_1.CodeTokenType.ParenClose]) !== undefined);
     // if it's ), then return
@@ -1126,8 +1131,8 @@ const parseForCoditions = (state) => {
         state = (0, exports.skipTokens)(state, 1);
     }
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, true);
-    let testExpressionResult = (0, exports.parseExpression)(state, true);
+    state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
+    let testExpressionResult = (0, exports.parseExpression)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
     if (testExpressionResult) {
         result = Object.assign(Object.assign({}, result), { test: testExpressionResult.result });
         state = testExpressionResult.state;
@@ -1152,13 +1157,13 @@ const parseForCoditions = (state) => {
         state = (0, exports.skipTokens)(state, 1);
     }
     // parse update statement
-    let updateStatementResult = (0, exports.parseExpression)(state, true);
+    let updateStatementResult = (0, exports.parseExpression)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
     if (updateStatementResult) {
         state = updateStatementResult.state;
         result = Object.assign(Object.assign({}, result), { update: updateStatementResult.result });
     }
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, true);
+    state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
     // parse everything until or )
     let updateErrorResult = (0, exports.readString)(state, [CodeTokenType_1.CodeTokenType.ParenClose]);
     if (updateErrorResult) {
@@ -1173,7 +1178,7 @@ const parseForCoditions = (state) => {
     };
 };
 exports.parseForCoditions = parseForCoditions;
-const parseConditionBlock = (state) => {
+const parseConditionBlock = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -1183,16 +1188,16 @@ const parseConditionBlock = (state) => {
     }
     state = (0, exports.skipTokens)(state, 1);
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, true);
+    state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
     // parse expression
-    let expressionResult = (0, exports.parseExpression)(state, true);
+    let expressionResult = (0, exports.parseExpression)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
     let expression = undefined;
     if (expressionResult) {
         expression = expressionResult.result;
         state = expressionResult.state;
     }
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, true);
+    state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
     // parse everything until or )
     let updateErrorResult = (0, exports.readString)(state, [CodeTokenType_1.CodeTokenType.ParenClose]);
     if (updateErrorResult) {
@@ -1207,18 +1212,18 @@ const parseConditionBlock = (state) => {
     };
 };
 exports.parseConditionBlock = parseConditionBlock;
-const parseForInConditions = (state) => {
+const parseForInConditions = (state, options) => {
     // parse left expression
     let variable = undefined;
     // parse identifier
-    let identifierResult = (0, exports.parseOperandIdentifier)(state);
+    let identifierResult = (0, exports.parseOperandIdentifier)(state, options);
     if (identifierResult) {
         state = identifierResult.state;
         variable = identifierResult.result;
     }
     else {
         // if no identifier, parse variable declaration
-        let varDeclarationResult = (0, exports.parseVariableDeclaration)(state, true);
+        let varDeclarationResult = (0, exports.parseVariableDeclaration)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
         if (varDeclarationResult) {
             state = varDeclarationResult.state;
             variable = varDeclarationResult.result;
@@ -1234,9 +1239,9 @@ const parseForInConditions = (state) => {
     let expression = undefined;
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, true);
+        state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
         // check in keyword
-        let inResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.In]);
+        let inResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.In]);
         if (inResult) {
             state = inResult.state;
         }
@@ -1245,13 +1250,13 @@ const parseForInConditions = (state) => {
             return undefined;
         }
         finalState = state;
-        state = (0, exports.skipComments)(state, true, true);
+        state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
         // check break tokens
         if ((0, exports.isEndOfFile)(state) || (0, exports.getTokenOfType)(state, breakTokens)) {
             break;
         }
         // parse right expression
-        let exprResult = (0, exports.parseExpression)(state, true);
+        let exprResult = (0, exports.parseExpression)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
         if (exprResult) {
             state = exprResult.state;
             expression = exprResult.result;
@@ -1271,18 +1276,18 @@ const parseForInConditions = (state) => {
     };
 };
 exports.parseForInConditions = parseForInConditions;
-const parseForOfConditions = (state) => {
+const parseForOfConditions = (state, options) => {
     // parse left expression
     let variable = undefined;
     // parse identifier
-    let identifierResult = (0, exports.parseOperandIdentifier)(state);
+    let identifierResult = (0, exports.parseOperandIdentifier)(state, options);
     if (identifierResult) {
         state = identifierResult.state;
         variable = identifierResult.result;
     }
     else {
         // if no identifier, parse variable declaration
-        let varDeclarationResult = (0, exports.parseVariableDeclaration)(state, true);
+        let varDeclarationResult = (0, exports.parseVariableDeclaration)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
         if (varDeclarationResult) {
             state = varDeclarationResult.state;
             variable = varDeclarationResult.result;
@@ -1298,9 +1303,9 @@ const parseForOfConditions = (state) => {
     let expression = undefined;
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, true);
+        state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
         // check of keyword
-        let inResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Of]);
+        let inResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Of]);
         if (inResult) {
             state = inResult.state;
         }
@@ -1309,13 +1314,13 @@ const parseForOfConditions = (state) => {
             return undefined;
         }
         finalState = state;
-        state = (0, exports.skipComments)(state, true, true);
+        state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
         // check break tokens
         if ((0, exports.isEndOfFile)(state) || (0, exports.getTokenOfType)(state, breakTokens)) {
             break;
         }
         // parse right expression
-        let exprResult = (0, exports.parseExpression)(state, true);
+        let exprResult = (0, exports.parseExpression)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
         if (exprResult) {
             state = exprResult.state;
             expression = exprResult.result;
@@ -1335,19 +1340,19 @@ const parseForOfConditions = (state) => {
     };
 };
 exports.parseForOfConditions = parseForOfConditions;
-const parseForInStatement = (state, isMultiline) => {
+const parseForInStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // parse for (initStatement; in updateStatement) {body}
-    let forResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.For]);
+    let forResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.For]);
     if (!forResult) {
         return undefined;
     }
     let start = (0, exports.getCursorPosition)(state);
     state = forResult.state;
     // skip comments and whitespases
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // parse condition block
     // parse open paren (
     if (!(0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.ParenOpen])) {
@@ -1357,16 +1362,16 @@ const parseForInStatement = (state, isMultiline) => {
     let finalState = state;
     // prepare break tokens
     let breakTokens = [CodeTokenType_1.CodeTokenType.Semicolon];
-    breakTokens = isMultiline ? breakTokens : [...breakTokens, CodeTokenType_1.CodeTokenType.Endline];
+    breakTokens = options.isMultiline ? breakTokens : [...breakTokens, CodeTokenType_1.CodeTokenType.Endline];
     // parse for in body
     let variable;
     let expression;
     let bodyProgram;
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // parse for conditions
-        let conditionsResult = (0, exports.parseForInConditions)(state);
+        let conditionsResult = (0, exports.parseForInConditions)(state, options);
         if (conditionsResult) {
             state = conditionsResult.state;
             let condition = conditionsResult.result;
@@ -1377,7 +1382,7 @@ const parseForInStatement = (state, isMultiline) => {
         else {
             return undefined;
         }
-        state = (0, exports.skipComments)(state, true, true);
+        state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
         // parse error tokens everything until )
         state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.ParenClose]) !== undefined);
         finalState = state;
@@ -1387,7 +1392,7 @@ const parseForInStatement = (state, isMultiline) => {
             finalState = state;
         }
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // check break tokens
         if ((0, exports.isEndOfFile)(state) || (0, exports.getTokenOfType)(state, breakTokens)) {
             break;
@@ -1401,7 +1406,7 @@ const parseForInStatement = (state, isMultiline) => {
             break;
         }
         // parse body code block
-        let codeBlockResult = (0, exports.parseCodeBlock)(state, isMultiline);
+        let codeBlockResult = (0, exports.parseCodeBlock)(state, options);
         if (codeBlockResult) {
             bodyProgram = codeBlockResult.result;
             state = codeBlockResult.state;
@@ -1419,19 +1424,19 @@ const parseForInStatement = (state, isMultiline) => {
     };
 };
 exports.parseForInStatement = parseForInStatement;
-const parseForOfStatement = (state, isMultiline) => {
+const parseForOfStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // parse for (initStatement; in updateStatement) {body}
-    let forResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.For]);
+    let forResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.For]);
     if (!forResult) {
         return undefined;
     }
     let start = (0, exports.getCursorPosition)(state);
     state = forResult.state;
     // skip comments and whitespases
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // parse condition block
     // parse open paren (
     if (!(0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.ParenOpen])) {
@@ -1441,16 +1446,16 @@ const parseForOfStatement = (state, isMultiline) => {
     let finalState = state;
     // prepare break tokens
     let breakTokens = [CodeTokenType_1.CodeTokenType.Semicolon];
-    breakTokens = isMultiline ? breakTokens : [...breakTokens, CodeTokenType_1.CodeTokenType.Endline];
+    breakTokens = options.isMultiline ? breakTokens : [...breakTokens, CodeTokenType_1.CodeTokenType.Endline];
     // parse for of body
     let variable;
     let expression;
     let bodyProgram;
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // parse for conditions
-        let conditionsResult = (0, exports.parseForOfConditions)(state);
+        let conditionsResult = (0, exports.parseForOfConditions)(state, options);
         if (conditionsResult) {
             state = conditionsResult.state;
             let condition = conditionsResult.result;
@@ -1461,7 +1466,7 @@ const parseForOfStatement = (state, isMultiline) => {
         else {
             return undefined;
         }
-        state = (0, exports.skipComments)(state, true, true);
+        state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true }));
         // parse error tokens everything until )
         state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.ParenClose]) !== undefined);
         finalState = state;
@@ -1471,7 +1476,7 @@ const parseForOfStatement = (state, isMultiline) => {
             finalState = state;
         }
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // check break tokens
         if ((0, exports.isEndOfFile)(state) || (0, exports.getTokenOfType)(state, breakTokens)) {
             break;
@@ -1485,7 +1490,7 @@ const parseForOfStatement = (state, isMultiline) => {
             break;
         }
         // parse body code block
-        let codeBlockResult = (0, exports.parseCodeBlock)(state, isMultiline);
+        let codeBlockResult = (0, exports.parseCodeBlock)(state, options);
         if (codeBlockResult) {
             bodyProgram = codeBlockResult.result;
             state = codeBlockResult.state;
@@ -1503,7 +1508,7 @@ const parseForOfStatement = (state, isMultiline) => {
     };
 };
 exports.parseForOfStatement = parseForOfStatement;
-const parseImportStatement = (state, isMultiline) => {
+const parseImportStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -1511,21 +1516,21 @@ const parseImportStatement = (state, isMultiline) => {
     // import [variable] as [alias] from [path]$
     // import in [variable] as [alias] from [path]$
     // parse import
-    let keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Import]);
+    let keywordResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Import]);
     if (!keywordResult) {
         return undefined;
     }
     state = keywordResult.state;
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // check if there is a 'in' variable next to the 'import': import in * as varname from "path"
     let isImportInContext = false;
-    let inKeywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.In]);
+    let inKeywordResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.In]);
     if (inKeywordResult) {
         isImportInContext = true;
         state = inKeywordResult.state;
         state = (0, exports.skipComments)(state, true);
     }
-    let variableResult = (0, exports.parseOperandIdentifier)(state); //parseAnyIdentifier(state);
+    let variableResult = (0, exports.parseOperandIdentifier)(state, options);
     if (!variableResult) {
         return undefined;
     }
@@ -1534,14 +1539,14 @@ const parseImportStatement = (state, isMultiline) => {
     // parse from
     state = (0, exports.skipComments)(state, true);
     let importPathAst = undefined;
-    let fromResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.From]);
+    let fromResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.From]);
     if (!fromResult) {
         return undefined;
     }
     state = fromResult.state;
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // parse import path
-    let importPathResult = (0, exports.parseImportPath)(state);
+    let importPathResult = (0, exports.parseImportPath)(state, options);
     if (importPathResult) {
         state = importPathResult.state;
         importPathAst = importPathResult.result;
@@ -1568,19 +1573,19 @@ const parseImportStatement = (state, isMultiline) => {
     };
 };
 exports.parseImportStatement = parseImportStatement;
-const parseImportPath = (state) => {
+const parseImportPath = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
-    let expressionResult = (0, exports.parseExpression)(state, false);
+    let expressionResult = (0, exports.parseExpression)(state, Object.assign(Object.assign({}, options), { isMultiline: false }));
     if (expressionResult) {
         return expressionResult;
     }
-    let stringResult = (0, exports.parseStringLiteral)(state);
+    let stringResult = (0, exports.parseStringLiteral)(state, options);
     if (stringResult) {
         return stringResult;
     }
-    let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Prime]), (state) => (0, exports.parseStringLiteralItem)(state, true), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Prime]));
+    let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Prime]), (state) => (0, exports.parseStringLiteralItem)(state, Object.assign(Object.assign({}, options), { isMultiline: true })), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Prime]));
     if (!scopeResult) {
         return undefined;
     }
@@ -1596,13 +1601,13 @@ const parseImportPath = (state) => {
     };
 };
 exports.parseImportPath = parseImportPath;
-const parseRawImportStatement = (state, isMultiline) => {
+const parseRawImportStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     const start = (0, exports.getCursorPosition)(state);
     // parse import
-    let keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Import]);
+    let keywordResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Import]);
     if (!keywordResult) {
         return undefined;
     }
@@ -1610,22 +1615,22 @@ const parseRawImportStatement = (state, isMultiline) => {
     state = (0, exports.skipComments)(state, true);
     // parse import item or import items
     let identifier = undefined;
-    const importItemResult = (0, exports.parseImportItem)(state, isMultiline);
+    const importItemResult = (0, exports.parseImportItem)(state, options);
     if (importItemResult) {
         state = importItemResult.state;
         identifier = importItemResult.result;
     }
     else {
-        let scopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceOpen]), (state) => (0, exports.parseImportItem)(state, isMultiline), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => (0, exports.skipComments)(state, true, isMultiline));
+        let scopeResult = (0, exports.parseScope)((0, exports.skipComments)(state, true, options), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceOpen]), (state) => (0, exports.parseImportItem)(state, options), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => (0, exports.skipComments)(state, true, options));
         if (scopeResult) {
             identifier = scopeResult.result.content;
             state = scopeResult.state;
         }
     }
     // skip comments
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // parse from
-    const fromResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.From]);
+    const fromResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.From]);
     if (fromResult) {
         state = fromResult.state;
     }
@@ -1634,10 +1639,10 @@ const parseRawImportStatement = (state, isMultiline) => {
         state = (0, exports.addParsingError)(state, IParsingError_1.ParsingErrorType.Error, "Expected 'from' keyword", errorPos, errorPos);
     }
     // skip comments
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // parse path
     let path = undefined;
-    const pathResult = (0, exports.parseImportPath)(state);
+    const pathResult = (0, exports.parseImportPath)(state, options);
     if (pathResult) {
         state = pathResult.state;
         path = pathResult.result;
@@ -1651,7 +1656,7 @@ const parseRawImportStatement = (state, isMultiline) => {
     };
 };
 exports.parseRawImportStatement = parseRawImportStatement;
-const parseImportItem = (state, isMultiline) => {
+const parseImportItem = (state, options) => {
     var _a, _b;
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
@@ -1659,14 +1664,14 @@ const parseImportItem = (state, isMultiline) => {
     const start = (0, exports.getCursorPosition)(state);
     // parse identifier
     let identifier = undefined;
-    const identifierResult = (0, exports.parseIdentifier)(state);
+    const identifierResult = (0, exports.parseIdentifier)(state, options);
     if (identifierResult) {
         state = identifierResult.state;
         identifier = identifierResult.result;
     }
     else {
         // try to parse it as raw identifier
-        const rawIdentResult = (0, exports.parseRawIdentifier)(state);
+        const rawIdentResult = (0, exports.parseRawIdentifier)(state, options);
         if (rawIdentResult) {
             state = rawIdentResult.state;
             identifier = (_a = rawIdentResult.result) === null || _a === void 0 ? void 0 : _a.value;
@@ -1685,23 +1690,23 @@ const parseImportItem = (state, isMultiline) => {
     }
     // we always parse it as raw identifier
     identifier = astFactory_1.astFactory.rawIndentifier(identifier, identifier === null || identifier === void 0 ? void 0 : identifier.start, identifier === null || identifier === void 0 ? void 0 : identifier.end);
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // parse alias
     let alias = undefined;
-    const asResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.As]);
+    const asResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.As]);
     if (asResult) {
         state = asResult.state;
         // skip comments
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // parse alias
-        const aliasResult = (0, exports.parseIdentifier)(state);
+        const aliasResult = (0, exports.parseIdentifier)(state, options);
         if (aliasResult) {
             alias = aliasResult.result;
             state = aliasResult.state;
         }
         else {
             // try to parse raw identifier
-            const rawIdentifierResult = (0, exports.parseRawIdentifier)(state);
+            const rawIdentifierResult = (0, exports.parseRawIdentifier)(state, options);
             if (rawIdentifierResult) {
                 alias = (_b = rawIdentifierResult.result) === null || _b === void 0 ? void 0 : _b.value;
             }
@@ -1720,12 +1725,12 @@ const parseImportItem = (state, isMultiline) => {
     };
 };
 exports.parseImportItem = parseImportItem;
-const parseTryStatement = (state, isMultiline) => {
+const parseTryStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // parse try
-    let tryResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Try]);
+    let tryResult = (0, exports.parseKeywordOfType)(state, Object.assign(Object.assign({}, options), { isMultiline: true }), [KeywordType_1.KeywordType.Try]);
     if (!tryResult) {
         return undefined;
     }
@@ -1735,38 +1740,38 @@ const parseTryStatement = (state, isMultiline) => {
     let body = undefined;
     let catchClause = undefined;
     let finallyBlock = undefined;
-    let breakTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
+    let breakTokens = options.isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // parse code block
-        let codeBlockResult = (0, exports.parseCodeBlock)(state, isMultiline);
+        let codeBlockResult = (0, exports.parseCodeBlock)(state, options);
         if (codeBlockResult) {
             state = codeBlockResult.state;
             body = codeBlockResult.result;
             finalState = state;
         }
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // check break tokens
         if ((0, exports.isEndOfFile)(state) && (0, exports.getTokenOfType)(state, breakTokens)) {
             break;
         }
         // parse catch
-        let catchResult = (0, exports.parseCatchStatement)(state, isMultiline);
+        let catchResult = (0, exports.parseCatchStatement)(state, options);
         if (catchResult) {
             state = catchResult.state;
             catchClause = catchResult.result;
             finalState = state;
         }
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // check break tokens
         if ((0, exports.isEndOfFile)(state) && (0, exports.getTokenOfType)(state, breakTokens)) {
             break;
         }
         // parse finally
-        let finallyResult = (0, exports.parseFinallyStatement)(state, isMultiline);
+        let finallyResult = (0, exports.parseFinallyStatement)(state, options);
         if (finallyResult) {
             state = finallyResult.state;
             finallyBlock = finallyResult.result;
@@ -1783,13 +1788,13 @@ const parseTryStatement = (state, isMultiline) => {
     };
 };
 exports.parseTryStatement = parseTryStatement;
-const parseCatchStatement = (state, isMultiline) => {
+const parseCatchStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // catch (varDeclaration) {body}
     // parse catch keyword
-    let keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Catch]);
+    let keywordResult = (0, exports.parseKeywordOfType)(state, Object.assign(Object.assign({}, options), { isMultiline: true }), [KeywordType_1.KeywordType.Catch]);
     if (!keywordResult) {
         return undefined;
     }
@@ -1798,12 +1803,12 @@ const parseCatchStatement = (state, isMultiline) => {
     let finalState = state;
     let body = undefined;
     let varDeclaration = undefined;
-    let breakTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
+    let breakTokens = options.isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // parse (identifier)
-        let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseOperandIdentifier)(state), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, true));
+        let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseOperandIdentifier)(state, Object.assign(Object.assign({}, options), { isMultiline: true })), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true })));
         if (scopeResult) {
             // extract first item from parsed scope to 
             let scopeContent = scopeResult.result.content;
@@ -1814,13 +1819,13 @@ const parseCatchStatement = (state, isMultiline) => {
             finalState = state;
         }
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // check break tokens
         if ((0, exports.isEndOfFile)(state) || (0, exports.getTokenOfType)(state, breakTokens)) {
             break;
         }
         // parse body
-        let bodyResult = (0, exports.parseCodeBlock)(state, isMultiline);
+        let bodyResult = (0, exports.parseCodeBlock)(state, options);
         if (bodyResult) {
             state = bodyResult.state;
             finalState = bodyResult.state;
@@ -1837,13 +1842,13 @@ const parseCatchStatement = (state, isMultiline) => {
     };
 };
 exports.parseCatchStatement = parseCatchStatement;
-const parseFinallyStatement = (state, isMultiline) => {
+const parseFinallyStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // finally {body}
     // parse finally keyword
-    let keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Finally]);
+    let keywordResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Finally]);
     if (!keywordResult) {
         return undefined;
     }
@@ -1851,13 +1856,13 @@ const parseFinallyStatement = (state, isMultiline) => {
     state = keywordResult.state;
     let finalState = state;
     let body = undefined;
-    let breakTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
+    let breakTokens = options.isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // check break tokens
     if (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // parse body
-        let bodyResult = (0, exports.parseCodeBlock)(state, isMultiline);
+        let bodyResult = (0, exports.parseCodeBlock)(state, options);
         if (bodyResult) {
             state = bodyResult.state;
             finalState = bodyResult.state;
@@ -1874,27 +1879,27 @@ const parseFinallyStatement = (state, isMultiline) => {
     };
 };
 exports.parseFinallyStatement = parseFinallyStatement;
-const parseThrowStatement = (state, isMultiline) => {
+const parseThrowStatement = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // parse throw keyword
-    let keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Throw]);
+    let keywordResult = (0, exports.parseKeywordOfType)(state, Object.assign(Object.assign({}, options), { isMultiline: true }), [KeywordType_1.KeywordType.Throw]);
     if (!keywordResult) {
         return undefined;
     }
     let start = (0, exports.getCursorPosition)(state);
     state = keywordResult.state;
     let finalState = state;
-    let breakTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
+    let breakTokens = options.isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     breakTokens = [...breakTokens, CodeTokenType_1.CodeTokenType.Semicolon];
     let expression = undefined;
     // parse expression
     if (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // parse expression
-        let expressionResult = (0, exports.parseExpression)(state, isMultiline);
+        let expressionResult = (0, exports.parseExpression)(state, options);
         if (expressionResult) {
             state = expressionResult.state;
             expression = expressionResult.result;
@@ -1911,7 +1916,7 @@ const parseThrowStatement = (state, isMultiline) => {
     };
 };
 exports.parseThrowStatement = parseThrowStatement;
-const parseOperator = (state) => {
+const parseOperator = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -2324,11 +2329,11 @@ const parseOperator = (state) => {
     return undefined;
 };
 exports.parseOperator = parseOperator;
-const parseOperatorOfType = (state, operatorTypes) => {
+const parseOperatorOfType = (state, options, operatorTypes) => {
     if ((0, exports.isEndOfFile)(state) || !operatorTypes) {
         return undefined;
     }
-    let operatorResult = (0, exports.parseOperator)(state);
+    let operatorResult = (0, exports.parseOperator)(state, options);
     if (!operatorResult) {
         return undefined;
     }
@@ -2342,8 +2347,8 @@ const parseOperatorOfType = (state, operatorTypes) => {
     return undefined;
 };
 exports.parseOperatorOfType = parseOperatorOfType;
-const parseBinaryOperator = (state) => {
-    return (0, exports.parseOperatorOfType)(state, [
+const parseBinaryOperator = (state, options) => {
+    return (0, exports.parseOperatorOfType)(state, options, [
         OperatorType_1.OperatorType.PercentEquals,
         OperatorType_1.OperatorType.Percent,
         OperatorType_1.OperatorType.GreaterOrEquals,
@@ -2375,8 +2380,8 @@ const parseBinaryOperator = (state) => {
     ]);
 };
 exports.parseBinaryOperator = parseBinaryOperator;
-const parseUnaryOperatorPrefix = (state) => {
-    return (0, exports.parseOperatorOfType)(state, [
+const parseUnaryOperatorPrefix = (state, options) => {
+    return (0, exports.parseOperatorOfType)(state, options, [
         OperatorType_1.OperatorType.SpreadAssign,
         OperatorType_1.OperatorType.PlusPlus,
         OperatorType_1.OperatorType.MinusMinus,
@@ -2385,14 +2390,14 @@ const parseUnaryOperatorPrefix = (state) => {
     ]);
 };
 exports.parseUnaryOperatorPrefix = parseUnaryOperatorPrefix;
-const parseUnaryOperatorPostfix = (state) => {
-    return (0, exports.parseOperatorOfType)(state, [
+const parseUnaryOperatorPostfix = (state, options) => {
+    return (0, exports.parseOperatorOfType)(state, options, [
         OperatorType_1.OperatorType.PlusPlus,
         OperatorType_1.OperatorType.MinusMinus
     ]);
 };
 exports.parseUnaryOperatorPostfix = parseUnaryOperatorPostfix;
-const parseKeyword = (state) => {
+const parseKeyword = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -2419,8 +2424,8 @@ const parseKeyword = (state) => {
     return undefined;
 };
 exports.parseKeyword = parseKeyword;
-const parseDebuggerKeyword = (state) => {
-    let keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Debugger]);
+const parseDebuggerKeyword = (state, options) => {
+    let keywordResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Debugger]);
     if (!keywordResult) {
         return undefined;
     }
@@ -2434,8 +2439,8 @@ const parseDebuggerKeyword = (state) => {
     };
 };
 exports.parseDebuggerKeyword = parseDebuggerKeyword;
-const parseKeywordOfType = (state, keywordTypes) => {
-    let keywordResult = (0, exports.parseKeyword)(state);
+const parseKeywordOfType = (state, options, keywordTypes) => {
+    let keywordResult = (0, exports.parseKeyword)(state, options);
     if (!keywordResult || !keywordResult.result) {
         return undefined;
     }
@@ -2448,7 +2453,7 @@ const parseKeywordOfType = (state, keywordTypes) => {
     return undefined;
 };
 exports.parseKeywordOfType = parseKeywordOfType;
-const parseCommentLine = (state) => {
+const parseCommentLine = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -2474,7 +2479,7 @@ const parseCommentLine = (state) => {
     };
 };
 exports.parseCommentLine = parseCommentLine;
-const parseCommentBlock = (state) => {
+const parseCommentBlock = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -2515,12 +2520,12 @@ const parseCommentBlock = (state) => {
     };
 };
 exports.parseCommentBlock = parseCommentBlock;
-const parseCodeBlock = (state, isMultiline) => {
+const parseCodeBlock = (state, options) => {
     var _a, _b, _c;
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
-    const scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceOpen]), (state) => (0, exports.parseStatement)(state, true), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => (0, exports.skipComments)(state, true, isMultiline), undefined, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Semicolon]));
+    const scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceOpen]), (state) => (0, exports.parseStatement)(state, Object.assign(Object.assign({}, options), { isMultiline: true })), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true })), undefined, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Semicolon]));
     if (!scopeResult) {
         return undefined;
     }
@@ -2532,13 +2537,13 @@ const parseCodeBlock = (state, isMultiline) => {
     };
 };
 exports.parseCodeBlock = parseCodeBlock;
-const parseFunctionParameters = (state, isMultiline) => {
+const parseFunctionParameters = (state, options) => {
     var _a, _b;
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // parse function params scope
-    let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseAnyIdentifier)(state), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, isMultiline), undefined, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Comma]));
+    let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenOpen]), (state) => (0, exports.parseAnyIdentifier)(state, Object.assign(Object.assign({}, options), { isMultiline: true })), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.ParenClose]), (state) => (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true })), undefined, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Comma]));
     if (!scopeResult) {
         return undefined;
     }
@@ -2551,21 +2556,21 @@ const parseFunctionParameters = (state, isMultiline) => {
     };
 };
 exports.parseFunctionParameters = parseFunctionParameters;
-const parseObjectLineTags = (state, isMultiline) => {
+const parseObjectLineTags = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
-    const brakeTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
+    const brakeTokens = options.isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     const result = [];
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, brakeTokens)) {
-        let tagResult = (0, exports.parseTag)(state);
+        let tagResult = (0, exports.parseTag)(state, options);
         if (!tagResult) {
             break;
         }
         if (tagResult.result) {
             result.push(tagResult.result);
         }
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
     }
     return {
         state,
@@ -2574,22 +2579,22 @@ const parseObjectLineTags = (state, isMultiline) => {
 };
 exports.parseObjectLineTags = parseObjectLineTags;
 // literals
-const parseLiteral = (state, isMultiline) => {
+const parseLiteral = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
-    return (0, exports.parseNode)(state, isMultiline, [
+    return (0, exports.parseNode)(state, options, [
         exports.parseFunction,
         exports.parseNumberLiteral,
         exports.parseBooleanLiteral,
         exports.parseStringLiteral,
-        exports.parseArrayLiteral,
+        (state, options) => (0, exports.parseArrayLiteral)(state, options, false),
         exports.parseObject,
         exports.parseRegexLiteral
     ]);
 };
 exports.parseLiteral = parseLiteral;
-const parseNumberLiteral = (state) => {
+const parseNumberLiteral = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -2628,7 +2633,7 @@ const parseNumberLiteral = (state) => {
     return undefined;
 };
 exports.parseNumberLiteral = parseNumberLiteral;
-const parseStringLiteral = (state, allowIncludes = true) => {
+const parseStringLiteral = (state, options, allowIncludes = true) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -2645,7 +2650,7 @@ const parseStringLiteral = (state, allowIncludes = true) => {
             break;
         }
         // parse array item
-        let stringItem = (0, exports.parseStringLiteralItem)(state, allowIncludes);
+        let stringItem = (0, exports.parseStringLiteralItem)(state, Object.assign(Object.assign({}, options), { isMultiline: false }), allowIncludes);
         if (stringItem) {
             state = stringItem.state;
             content.push(stringItem.result);
@@ -2669,13 +2674,13 @@ const parseStringLiteral = (state, allowIncludes = true) => {
     };
 };
 exports.parseStringLiteral = parseStringLiteral;
-const parseStringLiteralItem = (state, allowIncludes = true) => {
+const parseStringLiteralItem = (state, options, allowIncludes = true) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // parse include
     if (allowIncludes) {
-        let stringIncludeResult = (0, exports.parseStringInclude)(state);
+        let stringIncludeResult = (0, exports.parseStringInclude)(state, options);
         if (stringIncludeResult) {
             return stringIncludeResult;
         }
@@ -2713,7 +2718,7 @@ const parseStringLiteralItem = (state, allowIncludes = true) => {
     return undefined;
 };
 exports.parseStringLiteralItem = parseStringLiteralItem;
-const parseStringInclude = (state) => {
+const parseStringInclude = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -2729,19 +2734,19 @@ const parseStringInclude = (state) => {
     state = (0, exports.skipTokens)(state, 1);
     // *[space|comment|endline|endfile] is not an include
     // skip comments and whitespace
-    let nextState = (0, exports.skipComments)(state, true, false);
+    let nextState = (0, exports.skipComments)(state, true, exports.emptyOptions);
     if (nextState && nextState.cursor > state.cursor) {
         return undefined;
     }
     // parse expression
     let expression = undefined;
-    let expressionResult = (0, exports.parseExpression)(state, false);
+    let expressionResult = (0, exports.parseExpression)(state, Object.assign(Object.assign({}, options), { isMultiline: false, allowContextIdentifiers: true }));
     if (expressionResult) {
         expression = expressionResult.result;
         state = expressionResult.state;
     }
     // skip comments
-    state = (0, exports.skipComments)(state, true, false);
+    state = (0, exports.skipComments)(state, true, exports.emptyOptions);
     // check for semicolon
     state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Endline, CodeTokenType_1.CodeTokenType.Semicolon]) !== undefined);
     // skip ; if any
@@ -2756,7 +2761,7 @@ const parseStringInclude = (state) => {
     };
 };
 exports.parseStringInclude = parseStringInclude;
-const parseBooleanLiteral = (state) => {
+const parseBooleanLiteral = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -2778,7 +2783,7 @@ const parseBooleanLiteral = (state) => {
     return undefined;
 };
 exports.parseBooleanLiteral = parseBooleanLiteral;
-const parseRegexLiteral = (state) => {
+const parseRegexLiteral = (state, options) => {
     var _a, _b, _c, _d;
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
@@ -2820,7 +2825,7 @@ const parseRegexLiteral = (state) => {
         }
         // if it's not an escaped ( symbol, we need to add the entire string until ) to regex
         if (nextToken.type == CodeTokenType_1.CodeTokenType.ParenOpen && !escapeSymbol) {
-            let regexParenScopeResult = (0, exports.parseRegexParenScope)(state);
+            let regexParenScopeResult = (0, exports.parseRegexParenScope)(state, options);
             if (regexParenScopeResult) {
                 state = regexParenScopeResult.state;
                 values.push((_c = regexParenScopeResult.result) === null || _c === void 0 ? void 0 : _c.value);
@@ -2859,7 +2864,7 @@ const parseRegexLiteral = (state) => {
     };
 };
 exports.parseRegexLiteral = parseRegexLiteral;
-const parseRegexParenScope = (state) => {
+const parseRegexParenScope = (state, options) => {
     var _a, _b, _c;
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
@@ -2895,7 +2900,7 @@ const parseRegexParenScope = (state) => {
         }
         // if it's not an escaped ( symbol, we need to add the entire string until ) to regex
         if (nextToken.type == CodeTokenType_1.CodeTokenType.ParenOpen && !escapeSymbol) {
-            let regexParenScopeResult = (0, exports.parseRegexParenScope)(state);
+            let regexParenScopeResult = (0, exports.parseRegexParenScope)(state, options);
             if (regexParenScopeResult) {
                 state = regexParenScopeResult.state;
                 values.push((_a = regexParenScopeResult.result) === null || _a === void 0 ? void 0 : _a.value);
@@ -2923,12 +2928,12 @@ const parseRegexParenScope = (state) => {
     };
 };
 exports.parseRegexParenScope = parseRegexParenScope;
-const parseArrayLiteral = (state, allowEmptyItems) => {
+const parseArrayLiteral = (state, options, allowEmptyItems) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // parse array scope
-    let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BracketOpen]), (state) => (0, exports.parseArrayElement)(state, true, allowEmptyItems), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BracketClose]), (state) => (0, exports.skipComments)(state, true, true), undefined, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Comma]));
+    let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BracketOpen]), (state) => (0, exports.parseArrayElement)(state, Object.assign(Object.assign({}, options), { isMultiline: true }), allowEmptyItems), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BracketClose]), (state) => (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true })), undefined, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Comma]));
     if (!scopeResult) {
         return undefined;
     }
@@ -2945,11 +2950,11 @@ const parseArrayLiteral = (state, allowEmptyItems) => {
     };
 };
 exports.parseArrayLiteral = parseArrayLiteral;
-const parseArrayElement = (state, isMultiline, allowEmptyItems) => {
+const parseArrayElement = (state, options, allowEmptyItems) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
-    let expressionResult = (0, exports.parseExpression)(state, isMultiline);
+    let expressionResult = (0, exports.parseExpression)(state, options);
     if (expressionResult) {
         return expressionResult;
     }
@@ -2973,12 +2978,12 @@ const parseArrayElement = (state, isMultiline, allowEmptyItems) => {
     return undefined;
 };
 exports.parseArrayElement = parseArrayElement;
-const parseObject = (state) => {
+const parseObject = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // parse array scope
-    let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceOpen]), (state) => (0, exports.parseObjectLiteralItem)(state, true), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => (0, exports.skipComments)(state, true, true), undefined, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Comma]));
+    let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceOpen]), (state) => (0, exports.parseObjectLiteralItem)(state, Object.assign(Object.assign({}, options), { isMultiline: true })), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: true })), undefined, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Comma]));
     if (!scopeResult) {
         return undefined;
     }
@@ -2995,11 +3000,11 @@ const parseObject = (state) => {
     };
 };
 exports.parseObject = parseObject;
-const parseObjectLiteralItem = (state, isMultiline) => {
+const parseObjectLiteralItem = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
-    return (0, exports.parseNode)(state, isMultiline, [
+    return (0, exports.parseNode)(state, options, [
         exports.parseGetterSetter,
         exports.parseFunction,
         exports.parseObjectProperty,
@@ -3007,26 +3012,26 @@ const parseObjectLiteralItem = (state, isMultiline) => {
     ]);
 };
 exports.parseObjectLiteralItem = parseObjectLiteralItem;
-const parseObjectProperty = (state, isMultiline) => {
+const parseObjectProperty = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     const start = (0, exports.getCursorPosition)(state);
     // parse identifier
     let identifier = undefined;
-    let literalIdentResult = (0, exports.parseStringLiteral)(state, false);
+    let literalIdentResult = (0, exports.parseStringLiteral)(state, Object.assign(Object.assign({}, options), { isMultiline: false }), false);
     if (literalIdentResult) {
         state = literalIdentResult.state;
         identifier = literalIdentResult.result;
     }
     else {
-        let identifierResult = (0, exports.parseAnyIdentifier)(state);
+        let identifierResult = (0, exports.parseAnyIdentifier)(state, options);
         if (identifierResult) {
             state = identifierResult.state;
             identifier = identifierResult.result;
         }
         else {
-            let arrayResult = (0, exports.parseArrayLiteral)(state, false);
+            let arrayResult = (0, exports.parseArrayLiteral)(state, options, false);
             if (arrayResult != null) {
                 state = arrayResult.state;
                 identifier = arrayResult.result;
@@ -3037,15 +3042,15 @@ const parseObjectProperty = (state, isMultiline) => {
         return undefined;
     }
     const end = identifier === null || identifier === void 0 ? void 0 : identifier.end;
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     let value;
     let initializer;
     // parse =
     if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Equals])) {
         state = (0, exports.skipTokens)(state, 1);
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // parse value
-        let valueResult = (0, exports.parseExpression)(state, isMultiline);
+        let valueResult = (0, exports.parseExpression)(state, options);
         if (valueResult) {
             state = valueResult.state;
             initializer = valueResult.result;
@@ -3054,9 +3059,9 @@ const parseObjectProperty = (state, isMultiline) => {
     // parse colon
     else if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Colon])) {
         state = (0, exports.skipTokens)(state, 1);
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // parse value
-        let valueResult = (0, exports.parseExpression)(state, isMultiline);
+        let valueResult = (0, exports.parseExpression)(state, options);
         if (valueResult) {
             state = valueResult.state;
             value = valueResult.result;
@@ -3069,7 +3074,7 @@ const parseObjectProperty = (state, isMultiline) => {
     };
 };
 exports.parseObjectProperty = parseObjectProperty;
-const parseFunction = (state, isMultiline) => {
+const parseFunction = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -3080,15 +3085,15 @@ const parseFunction = (state, isMultiline) => {
     const start = (0, exports.getCursorPosition)(state);
     // parse async
     let isAsync = false;
-    const asyncResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Async]);
+    const asyncResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Async]);
     if (asyncResult) {
         state = asyncResult.state;
         isAsync = true;
     }
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // skip comments and whitespaces
     // parse keyword
-    const keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Function]);
+    const keywordResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Function]);
     if (keywordResult) {
         state = keywordResult.state;
     }
@@ -3098,24 +3103,24 @@ const parseFunction = (state, isMultiline) => {
         state = (0, exports.skipTokens)(state, 1);
     }
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // parse function name
     let name;
-    const nameResult = (0, exports.parseIdentifier)(state);
+    const nameResult = (0, exports.parseIdentifier)(state, options);
     if (nameResult) {
         name = nameResult.result;
         state = nameResult.state;
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
     }
     // parse function parameters
-    let parametersResult = (0, exports.parseFunctionParameters)(state, true);
+    let parametersResult = (0, exports.parseFunctionParameters)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
     if (!parametersResult) {
         return undefined;
     }
     state = parametersResult.state;
     const args = parametersResult.result || [];
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // parse =>
     let isLambda = false;
     const arrowResult = (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Equals, CodeTokenType_1.CodeTokenType.TupleClose]);
@@ -3129,9 +3134,9 @@ const parseFunction = (state, isMultiline) => {
         isLambda = true;
     }
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // parse function body
-    let bodyResult = (0, exports.parseCodeBlock)(state, true);
+    let bodyResult = (0, exports.parseCodeBlock)(state, Object.assign(Object.assign({}, options), { isMultiline: true, allowContextIdentifiers: false }));
     if (!bodyResult) {
         return undefined;
     }
@@ -3147,11 +3152,11 @@ const parseFunction = (state, isMultiline) => {
     };
 };
 exports.parseFunction = parseFunction;
-const parseGetterSetter = (state, isMultiline) => {
+const parseGetterSetter = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
-    return (0, exports.parseKeywordNode)(state, true, isMultiline, [
+    return (0, exports.parseKeywordNode)(state, true, options, [
         KeywordType_1.KeywordType.Get,
         KeywordType_1.KeywordType.Set
     ], [
@@ -3160,7 +3165,7 @@ const parseGetterSetter = (state, isMultiline) => {
 };
 exports.parseGetterSetter = parseGetterSetter;
 // identifiers
-const parseIdentifier = (state) => {
+const parseIdentifier = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -3253,12 +3258,12 @@ const parseIdentifier = (state) => {
     };
 };
 exports.parseIdentifier = parseIdentifier;
-const parseIdentifierScope = (state) => {
+const parseIdentifierScope = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     let start = (0, exports.getCursorPosition)(state);
-    let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Prime]), (state) => (0, exports.parseStringLiteralItem)(state, true), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Prime]));
+    let scopeResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Prime]), (state) => (0, exports.parseStringLiteralItem)(state, Object.assign(Object.assign({}, options), { isMultiline: true })), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.Prime]));
     if (!scopeResult) {
         return undefined;
     }
@@ -3273,7 +3278,7 @@ const parseIdentifierScope = (state) => {
     };
 };
 exports.parseIdentifierScope = parseIdentifierScope;
-const parseObjectLineIdentifier = (state) => {
+const parseObjectLineIdentifier = (state, options) => {
     var _a;
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
@@ -3293,7 +3298,7 @@ const parseObjectLineIdentifier = (state) => {
         state = (0, exports.skipTokens)(state, 1);
         resultValues.push((_a = token.value) !== null && _a !== void 0 ? _a : '');
         if (!isEscaping) {
-            state = (0, exports.skipComments)(state, false, false);
+            state = (0, exports.skipComments)(state, false, exports.emptyOptions);
         }
         if (token.type == CodeTokenType_1.CodeTokenType.Slash) {
             isEscaping = !isEscaping;
@@ -3310,7 +3315,7 @@ const parseObjectLineIdentifier = (state) => {
     };
 };
 exports.parseObjectLineIdentifier = parseObjectLineIdentifier;
-const parseRawIdentifier = (state) => {
+const parseRawIdentifier = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -3319,7 +3324,7 @@ const parseRawIdentifier = (state) => {
         let start = (0, exports.getCursorPosition)(state);
         state = (0, exports.skipTokens)(state, 1);
         // identifier scope
-        let identScopeResult = (0, exports.parseIdentifierScope)(state);
+        let identScopeResult = (0, exports.parseIdentifierScope)(state, options);
         if (identScopeResult) {
             state = identScopeResult.state;
             let end = (0, exports.getCursorPosition)(state);
@@ -3330,7 +3335,7 @@ const parseRawIdentifier = (state) => {
             };
         }
         // identifier
-        let identifierResult = (0, exports.parseIdentifier)(state);
+        let identifierResult = (0, exports.parseIdentifier)(state, options);
         if (identifierResult) {
             state = identifierResult.state;
             let end = (0, exports.getCursorPosition)(state);
@@ -3344,22 +3349,22 @@ const parseRawIdentifier = (state) => {
     return undefined;
 };
 exports.parseRawIdentifier = parseRawIdentifier;
-const parseAnyIdentifier = (state) => {
+const parseAnyIdentifier = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
-    return (0, exports.parseNode)(state, false, [
+    return (0, exports.parseNode)(state, Object.assign(Object.assign({}, options), { isMultiline: false }), [
         exports.parseRawIdentifier,
         exports.parseIdentifierScope,
         exports.parseIdentifier
     ]);
 };
 exports.parseAnyIdentifier = parseAnyIdentifier;
-const parseContextIdentifier = (state) => {
+const parseContextIdentifier = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
-    let identifierResult = (0, exports.parseAnyIdentifier)(state);
+    let identifierResult = (0, exports.parseAnyIdentifier)(state, options);
     if (!identifierResult) {
         return undefined;
     }
@@ -3378,37 +3383,50 @@ exports.parseContextIdentifier = parseContextIdentifier;
 /**
  * Operand identifier means: if no '@' symbol before identifier, it's context identifier (context['identifier'])
  */
-const parseOperandIdentifier = (state) => {
-    return (0, exports.parseNode)(state, false, [
-        exports.parseRawIdentifier,
-        exports.parseContextIdentifier
-    ]);
+const parseOperandIdentifier = (state, options) => {
+    const parsers = options.allowContextIdentifiers
+        ? [exports.parseRawIdentifier, exports.parseContextIdentifier]
+        : [exports.parseRawIdentifier, exports.parseIdentifierScope, exports.parseIdentifier];
+    const nodeResult = (0, exports.parseNode)(state, Object.assign(Object.assign({}, options), { isMultiline: false }), parsers);
+    if (nodeResult && !options.allowContextIdentifiers) {
+        const identifierScope = astFactory_1.astFactory.asNode(nodeResult.result, AstNodeType_1.AstNodeType.IdentifierScope);
+        if (identifierScope) {
+            nodeResult.result = astFactory_1.astFactory.contextIndentifier(identifierScope, identifierScope.start, identifierScope.end);
+        }
+        else {
+            const identifierResult = astFactory_1.astFactory.asNode(nodeResult.result, AstNodeType_1.AstNodeType.Identifier);
+            if (identifierResult && identifierResult.isJsIdentifier !== true) {
+                nodeResult.result = astFactory_1.astFactory.contextIndentifier(identifierResult, identifierResult.start, identifierResult.end);
+            }
+        }
+    }
+    return nodeResult;
 };
 exports.parseOperandIdentifier = parseOperandIdentifier;
 // declarations
-const parseClassDeclaration = (state, isMultiline) => {
+const parseClassDeclaration = (state, options) => {
     var _a, _b;
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     const start = (0, exports.getCursorPosition)(state);
     // parse class keyword
-    const classResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Class]);
+    const classResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Class]);
     if (!classResult) {
         return undefined;
     }
     state = classResult.state;
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // parse name
-    const nameResult = (0, exports.parseAnyIdentifier)(state);
+    const nameResult = (0, exports.parseAnyIdentifier)(state, options);
     if (!nameResult) {
         return undefined;
     }
     const name = nameResult.result;
     state = nameResult.state;
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // parse contents
-    const contentsResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceOpen]), (state) => (0, exports.parseClassMember)(state, true), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => (0, exports.skipComments)(state, true, isMultiline));
+    const contentsResult = (0, exports.parseScope)(state, (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceOpen]), (state) => (0, exports.parseClassMember)(state, Object.assign(Object.assign({}, options), { isMultiline: true })), (state) => (0, exports.parseTokenSequence)(state, [CodeTokenType_1.CodeTokenType.BraceClose]), (state) => (0, exports.skipComments)(state, true, options));
     let contents = [];
     if (contentsResult) {
         state = contentsResult.state;
@@ -3422,24 +3440,72 @@ const parseClassDeclaration = (state, isMultiline) => {
     };
 };
 exports.parseClassDeclaration = parseClassDeclaration;
-const parseClassMember = (state, isMultiline) => {
+const parseClassMember = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // parse object literal item
-    const itemResult = (0, exports.parseObjectLiteralItem)(state, isMultiline);
+    const itemResult = (0, exports.parseObjectLiteralItem)(state, options);
     if (itemResult) {
         return itemResult;
     }
     // parse any statement? 
-    const statementResult = (0, exports.parseStatement)(state, isMultiline);
+    const statementResult = (0, exports.parseStatement)(state, options);
     if (statementResult) {
         return statementResult;
     }
     return undefined;
 };
 exports.parseClassMember = parseClassMember;
-const parseVariableDeclaration = (state, isMultiline) => {
+const parseDeconstructionAssignment = (state, options) => {
+    if ((0, exports.isEndOfFile)(state)) {
+        return undefined;
+    }
+    const start = (0, exports.getCursorPosition)(state);
+    // parse array literal
+    let variables = undefined;
+    const arrayResult = (0, exports.parseArrayLiteral)(state, Object.assign(Object.assign({}, options), { isMultiline: true }), true);
+    if (arrayResult) {
+        state = arrayResult.state;
+        variables = arrayResult.result;
+    }
+    else {
+        const objResult = (0, exports.parseObject)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
+        if (objResult) {
+            state = objResult.state;
+            variables = objResult.result;
+        }
+    }
+    if (!variables) {
+        return undefined;
+    }
+    state = (0, exports.skipComments)(state, true, options);
+    // parse =
+    const equalsResult = (0, exports.parseOperatorOfType)(state, options, [OperatorType_1.OperatorType.Equals]);
+    if (!equalsResult) {
+        return undefined;
+    }
+    state = equalsResult.state;
+    state = (0, exports.skipComments)(state, true, options);
+    // parse identifier
+    let initializer = undefined;
+    const identifierResult = (0, exports.parseExpression)(state, options);
+    if (identifierResult) {
+        state = identifierResult.state;
+        initializer = identifierResult.result;
+    }
+    else {
+        state = (0, exports.addParsingError)(state, IParsingError_1.ParsingErrorType.Error, 'initialization expected', (0, exports.getCursorPosition)(state), (0, exports.getCursorPosition)(state));
+    }
+    const end = (0, exports.getCursorPosition)(state);
+    const result = astFactory_1.astFactory.deconstructionAssignment(variables, initializer, start, end);
+    return {
+        state,
+        result
+    };
+};
+exports.parseDeconstructionAssignment = parseDeconstructionAssignment;
+const parseVariableDeclaration = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -3447,7 +3513,7 @@ const parseVariableDeclaration = (state, isMultiline) => {
     let start = (0, exports.getCursorPosition)(state);
     // var|let|const Identifier = Expression
     // parse keyword
-    let keywordResult = (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Var, KeywordType_1.KeywordType.Let, KeywordType_1.KeywordType.Const]);
+    let keywordResult = (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Var, KeywordType_1.KeywordType.Let, KeywordType_1.KeywordType.Const]);
     if (!keywordResult) {
         return undefined;
     }
@@ -3478,30 +3544,30 @@ const parseVariableDeclaration = (state, isMultiline) => {
     let identifiers = [];
     let initValue = undefined;
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // parse identifier
-        let identifierResult = (0, exports.parseAnyIdentifier)(state);
+        let identifierResult = (0, exports.parseAnyIdentifier)(state, options);
         if (identifierResult) {
             state = identifierResult.state;
             identifiers.push(identifierResult.result);
         }
         else {
             // parse object expression
-            let objResult = (0, exports.parseObject)(state);
+            let objResult = (0, exports.parseObject)(state, options);
             if (objResult) {
                 state = objResult.state;
                 identifiers.push(objResult.result);
             }
             else {
                 // parse array expression
-                let arrayResult = (0, exports.parseArrayLiteral)(state, true);
+                let arrayResult = (0, exports.parseArrayLiteral)(state, Object.assign(Object.assign({}, options), { isMultiline: true }), true);
                 if (arrayResult) {
                     state = arrayResult.state;
                     identifiers.push(arrayResult.result);
                 }
             }
         }
-        state = (0, exports.skipComments)(state, true, false);
+        state = (0, exports.skipComments)(state, true, exports.emptyOptions);
         // now there can be a ',' which means we have another variable to parse
         if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Comma])) {
             state = (0, exports.skipTokens)(state, 1);
@@ -3509,14 +3575,14 @@ const parseVariableDeclaration = (state, isMultiline) => {
         }
         break;
     }
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // parse equals
     if ((0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Equals])) {
         /// skip equals token
         state = (0, exports.skipTokens)(state, 1);
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // parse init value expression
-        let expressionResult = (0, exports.parseExpression)(state, isMultiline);
+        let expressionResult = (0, exports.parseExpression)(state, options);
         if (expressionResult) {
             state = expressionResult.state;
             initValue = expressionResult.result;
@@ -3532,21 +3598,21 @@ const parseVariableDeclaration = (state, isMultiline) => {
 };
 exports.parseVariableDeclaration = parseVariableDeclaration;
 // expression statements
-const parseExpression = (state, isMultiline) => {
+const parseExpression = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
-    return (0, exports.parseNode)(state, isMultiline, [
+    return (0, exports.parseNode)(state, options, [
         exports.parseKeywordExpression,
         exports.parseOperationExpression
     ]);
 };
 exports.parseExpression = parseExpression;
-const parseKeywordExpression = (state, isMultiline) => {
+const parseKeywordExpression = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
-    return (0, exports.parseKeywordNode)(state, true, isMultiline, [
+    return (0, exports.parseKeywordNode)(state, true, options, [
         KeywordType_1.KeywordType.New,
         KeywordType_1.KeywordType.Await,
         KeywordType_1.KeywordType.Yield,
@@ -3555,16 +3621,16 @@ const parseKeywordExpression = (state, isMultiline) => {
     ], [exports.parseExpression]);
 };
 exports.parseKeywordExpression = parseKeywordExpression;
-const parseOperationExpression = (state, isMultiline) => {
+const parseOperationExpression = (state, options) => {
     // prefix
     let prefixStart = (0, exports.getCursorPosition)(state);
     // parse unary prefix
-    let prefixOperatorResult = (0, exports.parseUnaryOperatorPrefix)(state);
+    let prefixOperatorResult = (0, exports.parseUnaryOperatorPrefix)(state, options);
     if (prefixOperatorResult) {
         state = prefixOperatorResult.state;
     }
     // parse first operand
-    let operandResult = (0, exports.parseOperand)(state, isMultiline);
+    let operandResult = (0, exports.parseOperand)(state, options);
     if (!operandResult) {
         return undefined;
     }
@@ -3578,19 +3644,19 @@ const parseOperationExpression = (state, isMultiline) => {
     }
     // parse operation
     let breakTokens = [CodeTokenType_1.CodeTokenType.Semicolon, CodeTokenType_1.CodeTokenType.Comma, CodeTokenType_1.CodeTokenType.BracketClose, CodeTokenType_1.CodeTokenType.ParenClose, CodeTokenType_1.CodeTokenType.BraceClose, CodeTokenType_1.CodeTokenType.Colon];
-    if (!isMultiline) {
+    if (!options.isMultiline) {
         breakTokens = [...breakTokens, CodeTokenType_1.CodeTokenType.Endline];
     }
     let finalState = state;
     while (!(0, exports.isEndOfFile)(state) || (0, exports.getTokenOfType)(state, breakTokens)) {
         // skip comments
         let curPos = state.cursor;
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         if (state.cursor !== curPos) {
             continue;
         }
         // parse operation
-        let operationResult = (0, exports.parseOperation)(state, result, isMultiline);
+        let operationResult = (0, exports.parseOperation)(state, result, options);
         if (operationResult) {
             state = operationResult.state;
             result = operationResult.result;
@@ -3607,82 +3673,56 @@ const parseOperationExpression = (state, isMultiline) => {
     };
 };
 exports.parseOperationExpression = parseOperationExpression;
-const parseOperand = (state, isMultiline) => {
+const parseOperand = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
-    return (0, exports.parseNode)(state, isMultiline, [
+    return (0, exports.parseNode)(state, options, [
         exports.parseLiteral,
         exports.parseParenExpression,
         exports.parseOperandIdentifier,
-        (state) => (0, exports.parseKeywordOfType)(state, [KeywordType_1.KeywordType.Null, KeywordType_1.KeywordType.Undefined])
+        (state) => (0, exports.parseKeywordOfType)(state, options, [KeywordType_1.KeywordType.Null, KeywordType_1.KeywordType.Undefined])
     ]);
-    // // literal
-    // let literalResult = parseLiteral(state, isMultiline);
-    // if (literalResult) {
-    // 	return literalResult;
-    // }
-    // // function expression
-    // let funcExpression = parseFunctionExpression(state, isMultiline);
-    // if (funcExpression != null) {
-    // 	return funcExpression;
-    // }
-    // // paren expression
-    // let parenExpressionResult = parseParenExpression(state);
-    // if (parenExpressionResult) {
-    // 	return parenExpressionResult;
-    // }
-    // // identifier
-    // let identifierResult = parseOperandIdentifier(state);
-    // if (identifierResult) {
-    // 	return identifierResult;
-    // }
-    // // keyword
-    // let keywordResult = parseKeywordOfType(state, [KeywordType.Null, KeywordType.Undefined]);
-    // if (keywordResult) {
-    // 	return keywordResult;
-    // }
-    // return undefined;
 };
 exports.parseOperand = parseOperand;
-const parseOperation = (state, leftOperand, isMultiline) => {
+const parseOperation = (state, leftOperand, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // parse member expression
-    let memberResult = (0, exports.parseMemberExpression)(state, leftOperand, isMultiline);
+    let memberResult = (0, exports.parseMemberExpression)(state, leftOperand, options);
     if (memberResult) {
         return memberResult;
     }
     // parse call expression
-    let callResult = (0, exports.parseCallExpression)(state, leftOperand, isMultiline);
+    let callResult = (0, exports.parseCallExpression)(state, leftOperand, options);
     if (callResult) {
         return callResult;
     }
     // parse indexer expression
-    let indexerResult = (0, exports.parseIndexerExpression)(state, leftOperand, isMultiline);
+    let indexerResult = (0, exports.parseIndexerExpression)(state, leftOperand, options);
     if (indexerResult) {
         return indexerResult;
     }
     // parse update expression
-    let updateResult = (0, exports.parseUpdateExpressionPostfix)(state, leftOperand);
+    let updateResult = (0, exports.parseUpdateExpressionPostfix)(state, leftOperand, options);
     if (updateResult) {
         return updateResult;
     }
     // parse binary expression
-    let binaryResult = (0, exports.parseBinaryExpression)(state, leftOperand, isMultiline);
+    let binaryResult = (0, exports.parseBinaryExpression)(state, leftOperand, options);
     if (binaryResult) {
         return binaryResult;
     }
     // parse conditional expression
-    let conditionalExpressionResult = (0, exports.parseConditionalExpression)(state, leftOperand, isMultiline);
+    let conditionalExpressionResult = (0, exports.parseConditionalExpression)(state, leftOperand, options);
     if (conditionalExpressionResult) {
         return conditionalExpressionResult;
     }
     return undefined;
 };
 exports.parseOperation = parseOperation;
-const parseParenExpression = (state) => {
+const parseParenExpression = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -3693,16 +3733,16 @@ const parseParenExpression = (state) => {
     let start = (0, exports.getCursorPosition)(state);
     state = (0, exports.skipTokens)(state, 1);
     // skip comments
-    state = (0, exports.skipComments)(state, true, true);
+    state = (0, exports.skipComments)(state, true, options);
     // parse expression
     let expression = undefined;
-    let expressionResult = (0, exports.parseExpression)(state, true);
+    let expressionResult = (0, exports.parseExpression)(state, options);
     if (expressionResult) {
         expression = expressionResult.result;
         state = expressionResult.state;
     }
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, true);
+    state = (0, exports.skipComments)(state, true, options);
     // skip everything until close token )
     state = (0, exports.parseErrorTokens)(state, (st) => (0, exports.getTokenOfType)(st, [CodeTokenType_1.CodeTokenType.ParenClose]) !== undefined);
     // parse close paren
@@ -3720,15 +3760,15 @@ const parseParenExpression = (state) => {
     };
 };
 exports.parseParenExpression = parseParenExpression;
-const parseCallExpression = (state, leftOperand, isMultiline) => {
+const parseCallExpression = (state, leftOperand, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     let start = (0, exports.getCursorPosition)(state);
     // parse function args
-    let funcArgsResult = (0, exports.parseCallArguments)(state);
+    let funcArgsResult = (0, exports.parseCallArguments)(state, Object.assign(Object.assign({}, options), { isMultiline: true }));
     if (!funcArgsResult) {
         return undefined;
     }
@@ -3743,7 +3783,7 @@ const parseCallExpression = (state, leftOperand, isMultiline) => {
     };
 };
 exports.parseCallExpression = parseCallExpression;
-const parseCallArguments = (state) => {
+const parseCallArguments = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -3756,9 +3796,9 @@ const parseCallArguments = (state) => {
     let result = [];
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.ParenClose])) {
         // skip whitespace and comments
-        state = (0, exports.skipComments)(state, true, true);
+        state = (0, exports.skipComments)(state, true, options);
         // parse expression
-        let expressionResult = (0, exports.parseExpression)(state, true);
+        let expressionResult = (0, exports.parseExpression)(state, options);
         if (expressionResult) {
             state = expressionResult.state;
             result = [
@@ -3774,7 +3814,7 @@ const parseCallArguments = (state) => {
         }
         // skip whitespace
         let prevCursor = state.cursor;
-        let newState = (0, exports.skipComments)(state, true, true);
+        let newState = (0, exports.skipComments)(state, true, options);
         if (newState && newState.cursor > prevCursor) {
             state = newState;
             continue;
@@ -3800,7 +3840,7 @@ const parseCallArguments = (state) => {
     };
 };
 exports.parseCallArguments = parseCallArguments;
-const parseIndexerExpression = (state, leftOperand, isMultiline) => {
+const parseIndexerExpression = (state, leftOperand, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -3812,16 +3852,16 @@ const parseIndexerExpression = (state, leftOperand, isMultiline) => {
     }
     state = (0, exports.skipTokens)(state, 1);
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // parse property
     let property = undefined;
-    let expressionResult = (0, exports.parseExpression)(state, isMultiline);
+    let expressionResult = (0, exports.parseExpression)(state, options);
     if (expressionResult) {
         property = expressionResult.result;
         state = expressionResult.state;
     }
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // skip everything until close token
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.BracketClose])) {
         let errorStart = (0, exports.getCursorPosition)(state);
@@ -3844,11 +3884,11 @@ const parseIndexerExpression = (state, leftOperand, isMultiline) => {
     };
 };
 exports.parseIndexerExpression = parseIndexerExpression;
-const parseUpdateExpressionPostfix = (state, leftOperand) => {
+const parseUpdateExpressionPostfix = (state, leftOperand, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
-    let operatorResult = (0, exports.parseUnaryOperatorPostfix)(state);
+    let operatorResult = (0, exports.parseUnaryOperatorPostfix)(state, options);
     if (!operatorResult) {
         return undefined;
     }
@@ -3863,12 +3903,12 @@ const parseUpdateExpressionPostfix = (state, leftOperand) => {
     };
 };
 exports.parseUpdateExpressionPostfix = parseUpdateExpressionPostfix;
-const parseBinaryExpression = (state, leftOperand, isMultiline) => {
+const parseBinaryExpression = (state, leftOperand, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
     // parse operator
-    let operatorResult = (0, exports.parseBinaryOperator)(state);
+    let operatorResult = (0, exports.parseBinaryOperator)(state, options);
     if (!operatorResult) {
         return undefined;
     }
@@ -3877,10 +3917,10 @@ const parseBinaryExpression = (state, leftOperand, isMultiline) => {
     let operator = operatorResult.result;
     let rightStart = (0, exports.getCursorPosition)(state);
     // skip comments and whitespaces
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // parse right operand
     let rightOperand;
-    let rightOperandResult = (0, exports.parseExpression)(state, isMultiline);
+    let rightOperandResult = (0, exports.parseExpression)(state, options);
     if (rightOperandResult) {
         state = rightOperandResult.state;
         rightOperand = rightOperandResult.result;
@@ -3898,7 +3938,7 @@ const parseBinaryExpression = (state, leftOperand, isMultiline) => {
     };
 };
 exports.parseBinaryExpression = parseBinaryExpression;
-const parseMemberExpression = (state, leftOperand, isMultiline) => {
+const parseMemberExpression = (state, leftOperand, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -3916,9 +3956,9 @@ const parseMemberExpression = (state, leftOperand, isMultiline) => {
     let start = (0, exports.getCursorPosition)(state);
     state = (0, exports.skipTokens)(state, 1);
     // skip comments and whitespace
-    state = (0, exports.skipComments)(state, true, isMultiline);
+    state = (0, exports.skipComments)(state, true, options);
     // parse identifier
-    let identifierResult = (0, exports.parseAnyIdentifier)(state);
+    let identifierResult = (0, exports.parseAnyIdentifier)(state, options);
     if (identifierResult) {
         state = identifierResult.state;
         let identifier = identifierResult.result;
@@ -3933,7 +3973,7 @@ const parseMemberExpression = (state, leftOperand, isMultiline) => {
     return undefined;
 };
 exports.parseMemberExpression = parseMemberExpression;
-const parseConditionalExpression = (state, condition, isMultiline) => {
+const parseConditionalExpression = (state, condition, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -3946,7 +3986,7 @@ const parseConditionalExpression = (state, condition, isMultiline) => {
     let start = (0, exports.getCursorPosition)(state);
     state = (0, exports.skipTokens)(state, 1);
     let finalState = state;
-    let breakTokens = isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
+    let breakTokens = options.isMultiline ? [] : [CodeTokenType_1.CodeTokenType.Endline];
     breakTokens.push(CodeTokenType_1.CodeTokenType.Semicolon);
     let whenTrue;
     let whenFalse;
@@ -3954,20 +3994,20 @@ const parseConditionalExpression = (state, condition, isMultiline) => {
     // parse operator content
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, breakTokens)) {
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // parse when true
-        let rightOperandResult = (0, exports.parseExpression)(state, isMultiline);
+        let rightOperandResult = (0, exports.parseExpression)(state, options);
         if (rightOperandResult) {
             state = rightOperandResult.state;
             whenTrue = rightOperandResult.result;
             finalState = state;
         }
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // check sequence end
         if ((0, exports.getTokenOfType)(state, breakTokens))
             break;
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // skip everything until break tokens or colon
         state = (0, exports.parseErrorTokens)(state, (state) => (0, exports.getTokenOfType)(state, [...breakTokens, CodeTokenType_1.CodeTokenType.Colon]) !== undefined);
         // check sequence end
@@ -3984,12 +4024,12 @@ const parseConditionalExpression = (state, condition, isMultiline) => {
         if ((0, exports.getTokenOfType)(state, breakTokens))
             break;
         // skip comments and whitespaces
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
         // check sequence end
         if ((0, exports.getTokenOfType)(state, breakTokens))
             break;
         // parse whenFalse
-        let whenFalseResult = (0, exports.parseExpression)(state, isMultiline);
+        let whenFalseResult = (0, exports.parseExpression)(state, options);
         if (whenFalseResult) {
             whenFalse = whenFalseResult.result;
             state = whenFalseResult.state;
@@ -4007,56 +4047,28 @@ const parseConditionalExpression = (state, condition, isMultiline) => {
     };
 };
 exports.parseConditionalExpression = parseConditionalExpression;
-const parseNewExpression = (state, isMultiline) => {
-    return (0, exports.parseKeywordNode)(state, true, isMultiline, [KeywordType_1.KeywordType.New], [exports.parseExpression]);
+const parseNewExpression = (state, options) => {
+    return (0, exports.parseKeywordNode)(state, true, options, [KeywordType_1.KeywordType.New], [exports.parseExpression]);
 };
 exports.parseNewExpression = parseNewExpression;
-const parseAwaitExpression = (state, isMultiline) => {
-    return (0, exports.parseKeywordNode)(state, true, isMultiline, [KeywordType_1.KeywordType.Await], [exports.parseExpression]);
+const parseAwaitExpression = (state, options) => {
+    return (0, exports.parseKeywordNode)(state, true, options, [KeywordType_1.KeywordType.Await], [exports.parseExpression]);
 };
 exports.parseAwaitExpression = parseAwaitExpression;
-const parseYieldExpression = (state, isMultiline) => {
-    return (0, exports.parseKeywordNode)(state, true, isMultiline, [KeywordType_1.KeywordType.Yield], [exports.parseExpression]);
+const parseYieldExpression = (state, options) => {
+    return (0, exports.parseKeywordNode)(state, true, options, [KeywordType_1.KeywordType.Yield], [exports.parseExpression]);
 };
 exports.parseYieldExpression = parseYieldExpression;
-const parseDeleteExpression = (state, isMultiline) => {
-    return (0, exports.parseKeywordNode)(state, true, isMultiline, [KeywordType_1.KeywordType.Delete], [exports.parseExpression]);
+const parseDeleteExpression = (state, options) => {
+    return (0, exports.parseKeywordNode)(state, true, options, [KeywordType_1.KeywordType.Delete], [exports.parseExpression]);
 };
 exports.parseDeleteExpression = parseDeleteExpression;
-const parseTypeofExpression = (state, isMultiline) => {
-    return (0, exports.parseKeywordNode)(state, true, isMultiline, [KeywordType_1.KeywordType.Typeof], [exports.parseExpression]);
+const parseTypeofExpression = (state, options) => {
+    return (0, exports.parseKeywordNode)(state, true, options, [KeywordType_1.KeywordType.Typeof], [exports.parseExpression]);
 };
 exports.parseTypeofExpression = parseTypeofExpression;
 // storytailor-specific
-const parsePrototypeExpression = (state) => {
-    if ((0, exports.isEndOfFile)(state)) {
-        return undefined;
-    }
-    let start = (0, exports.getCursorPosition)(state);
-    // parse :
-    if (!(0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Colon])) {
-        return undefined;
-    }
-    state = (0, exports.skipTokens)(state, 1);
-    // skip comments and whitespace
-    state = (0, exports.skipComments)(state, true, false);
-    // parse prototype expression
-    let expression;
-    let expressionResult = (0, exports.parseExpression)(state, false);
-    if (expressionResult) {
-        state = expressionResult.state;
-        expression = expressionResult.result;
-    }
-    // prepare result
-    let end = (0, exports.getCursorPosition)(state);
-    let result = astFactory_1.astFactory.prototypeExpression(expression, start, end);
-    return {
-        state,
-        result
-    };
-};
-exports.parsePrototypeExpression = parsePrototypeExpression;
-const parseTag = (state) => {
+const parseTag = (state, options) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -4075,7 +4087,7 @@ const parseTag = (state) => {
 };
 exports.parseTag = parseTag;
 // SYSTEM FUNCTIONS
-const parseNode = (state, isMultiline, parsers) => {
+const parseNode = (state, options, parsers) => {
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -4084,7 +4096,7 @@ const parseNode = (state, isMultiline, parsers) => {
     }
     for (let fIndex = 0; fIndex < parsers.length; fIndex++) {
         const parser = parsers[fIndex];
-        const parseResult = parser(state, isMultiline);
+        const parseResult = parser(state, options);
         if (parseResult) {
             return parseResult;
         }
@@ -4092,7 +4104,7 @@ const parseNode = (state, isMultiline, parsers) => {
     return undefined;
 };
 exports.parseNode = parseNode;
-const parseKeywordNode = (state, isKeywordFirst, isMultiline, keywords, parsers) => {
+const parseKeywordNode = (state, isKeywordFirst, options, keywords, parsers) => {
     if ((0, exports.isEndOfFile)(state) || !parsers || parsers.length <= 0 || !keywords || keywords.length <= 0) {
         return undefined;
     }
@@ -4100,13 +4112,13 @@ const parseKeywordNode = (state, isKeywordFirst, isMultiline, keywords, parsers)
     // parse keyword
     let keyword = undefined;
     if (isKeywordFirst === true) {
-        const keywordResult = (0, exports.parseKeywordOfType)(state, keywords);
+        const keywordResult = (0, exports.parseKeywordOfType)(state, options, keywords);
         if (!keywordResult) {
             return undefined;
         }
         keyword = keywordResult.result;
         state = keywordResult.state;
-        state = (0, exports.skipComments)(state, true, isMultiline);
+        state = (0, exports.skipComments)(state, true, options);
     }
     // parse node
     let node = undefined;
@@ -4115,7 +4127,7 @@ const parseKeywordNode = (state, isKeywordFirst, isMultiline, keywords, parsers)
         if (!parser) {
             continue;
         }
-        const nodeResult = parser(state, isMultiline);
+        const nodeResult = parser(state, options);
         if (!nodeResult) {
             continue;
         }
@@ -4124,8 +4136,8 @@ const parseKeywordNode = (state, isKeywordFirst, isMultiline, keywords, parsers)
         break;
     }
     if (!isKeywordFirst) {
-        state = (0, exports.skipComments)(state, true, isMultiline);
-        const keywordResult = (0, exports.parseKeywordOfType)(state, keywords);
+        state = (0, exports.skipComments)(state, true, options);
+        const keywordResult = (0, exports.parseKeywordOfType)(state, options, keywords);
         if (!keywordResult) {
             return undefined;
         }
@@ -4243,7 +4255,7 @@ const parseErrorTokens = (state, endSequence) => {
     while (!(0, exports.isEndOfFile)(state)) {
         // skip comments if any
         let curPos = state.cursor;
-        state = (0, exports.skipComments)(state, false, false);
+        state = (0, exports.skipComments)(state, false, exports.emptyOptions);
         if (curPos != state.cursor) {
             // comments was skipped
             continue;
@@ -4404,47 +4416,47 @@ const getCursorPosition = (state) => {
     return nextToken.start;
 };
 exports.getCursorPosition = getCursorPosition;
-const skipComments = (state, isSkipWhitespace = false, isMultiline = false) => {
+const skipComments = (state, isSkipWhitespace = false, options = exports.emptyOptions) => {
     while (true) {
         if (isSkipWhitespace === true) {
-            state = (0, exports.skipWhitespace)(state, isMultiline);
+            state = (0, exports.skipWhitespace)(state, options);
         }
-        let commentBlockResult = (0, exports.parseCommentBlock)(state);
+        let commentBlockResult = (0, exports.parseCommentBlock)(state, options);
         if (commentBlockResult) {
             state = commentBlockResult.state;
             continue;
         }
-        let commentLineResult = (0, exports.parseCommentLine)(state);
+        let commentLineResult = (0, exports.parseCommentLine)(state, options);
         if (commentLineResult) {
             state = commentLineResult.state;
             continue;
         }
         if (isSkipWhitespace === true) {
-            state = (0, exports.skipWhitespace)(state, isMultiline);
+            state = (0, exports.skipWhitespace)(state, options);
         }
         break;
     }
     return state;
 };
 exports.skipComments = skipComments;
-const skipCommentLine = (state) => {
-    let parseResult = (0, exports.parseCommentLine)(state);
+const skipCommentLine = (state, options) => {
+    let parseResult = (0, exports.parseCommentLine)(state, options);
     if (parseResult) {
         return parseResult.state;
     }
     return undefined;
 };
 exports.skipCommentLine = skipCommentLine;
-const skipCommentBlock = (state) => {
-    let parseResult = (0, exports.parseCommentBlock)(state);
+const skipCommentBlock = (state, options) => {
+    let parseResult = (0, exports.parseCommentBlock)(state, options);
     if (parseResult) {
         return parseResult.state;
     }
     return undefined;
 };
 exports.skipCommentBlock = skipCommentBlock;
-const skipWhitespace = (state, multiline = false) => {
-    const tokenTypes = multiline
+const skipWhitespace = (state, options) => {
+    const tokenTypes = (options === null || options === void 0 ? void 0 : options.isMultiline) === true
         ? [CodeTokenType_1.CodeTokenType.Space, CodeTokenType_1.CodeTokenType.Tab, CodeTokenType_1.CodeTokenType.Endline]
         : [CodeTokenType_1.CodeTokenType.Space, CodeTokenType_1.CodeTokenType.Tab];
     return (0, exports.skipTokensOfType)(state, tokenTypes);
@@ -4698,3 +4710,15 @@ const prepareTokens = (tokens) => {
     return result;
 };
 exports.prepareTokens = prepareTokens;
+exports.emptyOptions = {
+    isMultiline: false,
+    allowContextIdentifiers: false
+};
+exports.optionsOuterLine = {
+    isMultiline: false,
+    allowContextIdentifiers: true
+};
+exports.optionsCodeBlock = {
+    isMultiline: true,
+    allowContextIdentifiers: false
+};

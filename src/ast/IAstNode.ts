@@ -110,6 +110,10 @@ export interface IAstClassDeclaration extends IAstNode {
 	name: IAstNode;
 	contents: IAstNode[];
 }
+export interface IAstDeconstructingAssignment extends IAstNode {
+	variables: IAstNode;
+	initializer: IAstNode;
+}
 
 // Statements
 export interface IAstBreakStatement extends IAstNode { }

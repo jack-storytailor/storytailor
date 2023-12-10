@@ -211,6 +211,15 @@ exports.astFactory = {
             initializer
         };
     },
+    deconstructionAssignment: (variables, initializer, start, end) => {
+        return {
+            nodeType: AstNodeType_1.AstNodeType.DeconstructionAssignment,
+            variables,
+            initializer,
+            start,
+            end
+        };
+    },
     classDeclaration: (name, contents, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.ClassDeclaration,

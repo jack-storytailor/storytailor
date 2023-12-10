@@ -30,6 +30,7 @@ var AstNodeType;
     // declarations
     AstNodeType["VariableDeclaration"] = "VariableDeclaration";
     AstNodeType["PropertyDeclaration"] = "PropertyDeclaration";
+    AstNodeType["DeconstructionAssignment"] = "DeconstructionAssignment";
     // statements
     AstNodeType["BreakStatement"] = "BreakStatement";
     AstNodeType["ContinueStatement"] = "ContinueStatement";

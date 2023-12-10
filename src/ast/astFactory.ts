@@ -58,7 +58,8 @@ import {
 	IAstImportItem,
 	IAstClassDeclaration,
 	IAstKeywordNode,
-	IAstFunction
+	IAstFunction,
+	IAstDeconstructingAssignment
 } from "./IAstNode";
 import { KeywordType } from "./KeywordType";
 import { OperatorType } from "./OperatorType";
@@ -278,6 +279,15 @@ export const astFactory = {
 			identifier,
 			value,
 			initializer
+		}
+	},
+	deconstructionAssignment: (variables: IAstNode, initializer: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstDeconstructingAssignment => {
+		return {
+			nodeType: AstNodeType.DeconstructionAssignment,
+			variables,
+			initializer,
+			start, 
+			end
 		}
 	},
 	classDeclaration: (name: IAstNode, contents: IAstNode[], start: ISymbolPosition, end: ISymbolPosition): IAstClassDeclaration => {

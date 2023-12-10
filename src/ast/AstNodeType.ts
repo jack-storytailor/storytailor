@@ -26,6 +26,7 @@ export enum AstNodeType {
   // declarations
   VariableDeclaration = "VariableDeclaration",
   PropertyDeclaration = "PropertyDeclaration",
+  DeconstructionAssignment = "DeconstructionAssignment",
   // statements
   BreakStatement = "BreakStatement",
   ContinueStatement = "ContinueStatement",
