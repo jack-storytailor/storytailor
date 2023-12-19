@@ -110,11 +110,12 @@ exports.astFactory = {
             end
         };
     },
-    stringLiteral: (value, allowIncludes, start, end) => {
+    stringLiteral: (value, allowIncludes, hasIncludes, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.String,
             allowIncludes,
             value,
+            hasIncludes,
             start,
             end
         };
@@ -492,23 +493,23 @@ exports.astFactory = {
             statement
         };
     },
-    textLineStatement: (indent, text, start, end) => {
+    textLineStatement: (indent, text, hasIncludes, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.TextLineStatement,
             start,
             end,
             indent,
-            text
+            text,
+            hasIncludes
         };
     },
-    objectLineStatement: (object, value, tags, start, end) => {
+    objectLineStatement: (object, value, start, end) => {
         return {
             nodeType: AstNodeType_1.AstNodeType.ObjectLineStatement,
             start,
             end,
             object,
-            value,
-            tags
+            value
         };
     },
     stringIncludeStatement: (expression, start, end) => {

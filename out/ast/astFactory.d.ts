@@ -17,7 +17,7 @@ export declare const astFactory: {
     commentLine: (text: string, start: ISymbolPosition, end: ISymbolPosition) => IAstCommentLine;
     commentBlock: (text: string, start: ISymbolPosition, end: ISymbolPosition) => IAstCommentBlock;
     numberLiteral: (value: number, start: ISymbolPosition, end: ISymbolPosition) => IAstNumber;
-    stringLiteral: (value: IAstNode[], allowIncludes: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstString;
+    stringLiteral: (value: IAstNode[], allowIncludes: boolean, hasIncludes: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstString;
     regexLiteral: (value: string, start: ISymbolPosition, end: ISymbolPosition) => IAstRegexLiteral;
     booleanLiteral: (value: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstBoolean;
     arrayLiteral: (value: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstArray;
@@ -58,8 +58,8 @@ export declare const astFactory: {
     IndexerExpression: (member: IAstMemberExpression, start: ISymbolPosition, end: ISymbolPosition) => IAstIndexerExpression;
     conditionalExpression: (condition: IAstNode, whenTrue: IAstNode, whenFalse: IAstNode, colonToken: IAstNode, questionToken: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstConditionalExpression;
     outerStatement: (indent: number, statement: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstOuterStatement;
-    textLineStatement: (indent: number, text: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstTextLineStatement;
-    objectLineStatement: (object: IAstNode, value: IAstNode, tags: IAstNode[], start: ISymbolPosition, end: ISymbolPosition) => IAstObjectLineStatement;
+    textLineStatement: (indent: number, text: IAstNode[], hasIncludes: boolean, start: ISymbolPosition, end: ISymbolPosition) => IAstTextLineStatement;
+    objectLineStatement: (object: IAstNode, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstObjectLineStatement;
     stringIncludeStatement: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstStringIncludeStatement;
     prototypeExpression: (value: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstPrototypeExpression;
     deleteLineExpression: (object: IAstNode, start: ISymbolPosition, end: ISymbolPosition) => IAstDeleteLineExpression;

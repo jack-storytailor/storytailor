@@ -178,11 +178,12 @@ export const astFactory = {
 			end
 		}
 	},
-	stringLiteral: (value: IAstNode[], allowIncludes: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstString => {
+	stringLiteral: (value: IAstNode[], allowIncludes: boolean, hasIncludes: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstString => {
 		return {
 			nodeType: AstNodeType.String,
 			allowIncludes,
 			value,
+			hasIncludes,
 			start,
 			end
 		}
@@ -566,23 +567,23 @@ export const astFactory = {
 			statement
 		}
 	},
-	textLineStatement: (indent: number, text: IAstNode[], start: ISymbolPosition, end: ISymbolPosition): IAstTextLineStatement => {
+	textLineStatement: (indent: number, text: IAstNode[], hasIncludes: boolean, start: ISymbolPosition, end: ISymbolPosition): IAstTextLineStatement => {
 		return {
 			nodeType: AstNodeType.TextLineStatement,
 			start,
 			end,
 			indent,
-			text
+			text,
+			hasIncludes
 		}
 	},
-	objectLineStatement: (object: IAstNode, value: IAstNode, tags: IAstNode[], start: ISymbolPosition, end: ISymbolPosition): IAstObjectLineStatement => {
+	objectLineStatement: (object: IAstNode, value: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstObjectLineStatement => {
 		return {
 			nodeType: AstNodeType.ObjectLineStatement,
 			start,
 			end,
 			object,
-			value,
-			tags
+			value
 		}
 	},
 	stringIncludeStatement: (expression: IAstNode, start: ISymbolPosition, end: ISymbolPosition): IAstStringIncludeStatement => {

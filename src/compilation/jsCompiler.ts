@@ -828,8 +828,8 @@ export const compileTextLine = (node: IAstNode, state: ICompilerState): ICompile
 	// write .push(
 	state = writeJsToken(state, `.push(`);
 
-	// write open `
-	state = writeJsToken(state, '`');
+	// write " or ` depending on wheter there are includes or not
+	state = writeJsToken(state, ast.hasIncludes ? "`" : "`");
 
 	// write whitespace
 	state = writeJsToken(state, whitespace);
@@ -843,8 +843,11 @@ export const compileTextLine = (node: IAstNode, state: ICompilerState): ICompile
 		}
 	}
 
-	// write `);
-	state = writeJsToken(state, '`);');
+	// write " or ` depending on wheter there are includes or not
+	state = writeJsToken(state, ast.hasIncludes ? "`" : "`");
+
+	// write );
+	state = writeJsToken(state, ');');
 
 	// write endline
 	state = writeEndline(state);
@@ -2302,7 +2305,8 @@ export const compileStringLiteral = (node: IAstNode, state: ICompilerState): ICo
 	state = addSourceMapAtCurrentPlace(state, undefined, ast.start);
 
 	// open `
-	state = writeJsToken(state, ast.allowIncludes ? '`' : '\'');
+	const withIncludes = ast.allowIncludes === true && ast.hasIncludes === true;
+	state = writeJsToken(state, withIncludes ? '`' : '"');
 
 	let content = ast.value;
 	for (let i = 0; i < content.length; i++) {
@@ -2314,7 +2318,7 @@ export const compileStringLiteral = (node: IAstNode, state: ICompilerState): ICo
 	}
 
 	// close `
-	state = writeJsToken(state, ast.allowIncludes ? '`' : '\'');
+	state = writeJsToken(state, withIncludes ? '`' : '"');
 
 	return {
 		state,

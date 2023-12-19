@@ -58,6 +58,7 @@ export interface IAstNumber extends IAstNode {
 export interface IAstString extends IAstNode {
 	allowIncludes: boolean;
 	value: IAstNode[];
+	hasIncludes: boolean;
 }
 export interface IAstRegexLiteral extends IAstNode {
 	value: string;
@@ -233,11 +234,11 @@ export interface IAstOuterStatement extends IAstNode {
 export interface IAstTextLineStatement extends IAstNode {
 	indent: number;
 	text: IAstNode[];
+	hasIncludes: boolean;
 }
 export interface IAstObjectLineStatement extends IAstNode {
 	object: IAstNode;
 	value: IAstNode;
-	tags: IAstNode[];
 }
 export interface IAstStringIncludeStatement extends IAstNode {
 	expression: IAstNode;

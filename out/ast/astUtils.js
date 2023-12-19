@@ -289,7 +289,7 @@ const childrenRegistry = {
         if (!ast) {
             return undefined;
         }
-        return [ast.object, ast.value, ...ast.tags];
+        return [ast.object, ast.value];
     },
     StringIncludeStatement: (ast) => {
         if (!ast) {

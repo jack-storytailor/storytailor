@@ -257,13 +257,6 @@ const parseObjectLine = (state, options) => {
     const start = identifier === null || identifier === void 0 ? void 0 : identifier.start;
     // skip comments
     state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: false }));
-    // parse tags
-    let tags = undefined;
-    const tagsResult = (0, exports.parseObjectLineTags)(state, Object.assign(Object.assign({}, options), { isMultiline: false }));
-    if (tagsResult) {
-        state = tagsResult.state;
-        tags = tagsResult.result;
-    }
     // skip comments
     state = (0, exports.skipComments)(state, true, Object.assign(Object.assign({}, options), { isMultiline: false }));
     // read init operation
@@ -282,7 +275,7 @@ const parseObjectLine = (state, options) => {
     // and skip everything until the end of line
     state = (0, exports.skipUntil)(state, [CodeTokenType_1.CodeTokenType.Endline]);
     // create result ast node
-    const result = astFactory_1.astFactory.objectLineStatement(identifier, initValue, tags, start, (_a = initValue === null || initValue === void 0 ? void 0 : initValue.end) !== null && _a !== void 0 ? _a : identifier === null || identifier === void 0 ? void 0 : identifier.end);
+    const result = astFactory_1.astFactory.objectLineStatement(identifier, initValue, start, (_a = initValue === null || initValue === void 0 ? void 0 : initValue.end) !== null && _a !== void 0 ? _a : identifier === null || identifier === void 0 ? void 0 : identifier.end);
     return {
         state,
         result
@@ -319,7 +312,7 @@ const parseDeleteLineExpression = (state, options) => {
 };
 exports.parseDeleteLineExpression = parseDeleteLineExpression;
 const parseTextLineStatement = (state, options) => {
-    var _a, _b;
+    var _a, _b, _c;
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -334,6 +327,7 @@ const parseTextLineStatement = (state, options) => {
     // parse text line as string literal content
     let content = [];
     let isSkippedLine = false;
+    let hasIncludes = false;
     while (!(0, exports.isEndOfFile)(state) && !(0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Endline])) {
         const contextSymbol = (_a = (0, exports.getCursorPosition)(state)) === null || _a === void 0 ? void 0 : _a.symbol;
         // skip comments
@@ -349,10 +343,10 @@ const parseTextLineStatement = (state, options) => {
         let stringItem = (0, exports.parseStringLiteralItem)(state, options);
         if (stringItem) {
             state = stringItem.state;
-            content = [
-                ...content,
-                stringItem.result
-            ];
+            content.push(stringItem.result);
+            if (((_c = stringItem.result) === null || _c === void 0 ? void 0 : _c.nodeType) === AstNodeType_1.AstNodeType.StringIncludeStatement) {
+                hasIncludes = true;
+            }
         }
         // skip comments
         state = (0, exports.skipComments)(state, false, Object.assign(Object.assign({}, options), { isMultiline: false }));
@@ -364,7 +358,7 @@ const parseTextLineStatement = (state, options) => {
     let end = (0, exports.getCursorPosition)(state);
     let result = isSkippedLine
         ? undefined
-        : astFactory_1.astFactory.textLineStatement(indent, content, start, end);
+        : astFactory_1.astFactory.textLineStatement(indent, content, hasIncludes, start, end);
     return {
         state: state,
         result: result
@@ -1606,7 +1600,16 @@ const parseImportPath = (state, options) => {
     let pathContent = scopeResult.result.content;
     let start = scopeResult.result.start;
     let end = scopeResult.result.end;
-    let result = astFactory_1.astFactory.stringLiteral(pathContent, true, start, end);
+    let hasIncludes = false;
+    if (pathContent && pathContent.length > 0) {
+        for (let pcIndex = 0; pcIndex < pathContent.length; pcIndex++) {
+            const element = pathContent[pcIndex];
+            if (element.nodeType === AstNodeType_1.AstNodeType.StringIncludeStatement) {
+                hasIncludes = true;
+            }
+        }
+    }
+    let result = astFactory_1.astFactory.stringLiteral(pathContent, true, hasIncludes, start, end);
     return {
         result,
         state
@@ -2678,6 +2681,7 @@ const parseNumberLiteral = (state, options) => {
 };
 exports.parseNumberLiteral = parseNumberLiteral;
 const parseStringLiteral = (state, options, allowIncludes = true) => {
+    var _a;
     if ((0, exports.isEndOfFile)(state)) {
         return undefined;
     }
@@ -2689,6 +2693,7 @@ const parseStringLiteral = (state, options, allowIncludes = true) => {
     state = (0, exports.skipTokens)(state, 1);
     // read content until close mark
     let content = [];
+    let hasIncludes = false;
     while (true) {
         if ((0, exports.isEndOfFile)(state) || (0, exports.getTokenOfType)(state, [CodeTokenType_1.CodeTokenType.Quote])) {
             break;
@@ -2698,6 +2703,9 @@ const parseStringLiteral = (state, options, allowIncludes = true) => {
         if (stringItem) {
             state = stringItem.state;
             content.push(stringItem.result);
+            if (((_a = stringItem.result) === null || _a === void 0 ? void 0 : _a.nodeType) === AstNodeType_1.AstNodeType.StringIncludeStatement) {
+                hasIncludes = true;
+            }
         }
         continue;
     }
@@ -2711,7 +2719,7 @@ const parseStringLiteral = (state, options, allowIncludes = true) => {
     }
     // prepare result
     let end = (0, exports.getCursorPosition)(state);
-    let result = astFactory_1.astFactory.stringLiteral(content, allowIncludes, start, end);
+    let result = astFactory_1.astFactory.stringLiteral(content, allowIncludes, hasIncludes, start, end);
     return {
         result,
         state

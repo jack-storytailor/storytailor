@@ -341,7 +341,7 @@ const childrenRegistry = {
   ObjectLineStatement: (ast: IAstObjectLineStatement): IAstNode[] => {
     if (!ast) { return undefined; }
   
-    return [ast.object, ast.value, ...ast.tags];
+    return [ast.object, ast.value];
   },
   
   StringIncludeStatement: (ast: IAstStringIncludeStatement): IAstNode[] => {

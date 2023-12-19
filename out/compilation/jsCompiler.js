@@ -628,8 +628,8 @@ const compileTextLine = (node, state) => {
     state = (0, exports.writeJsToken)(state, `.${exports.compilerConfig.textFieldName}`);
     // write .push(
     state = (0, exports.writeJsToken)(state, `.push(`);
-    // write open `
-    state = (0, exports.writeJsToken)(state, '`');
+    // write " or ` depending on wheter there are includes or not
+    state = (0, exports.writeJsToken)(state, ast.hasIncludes ? "`" : "`");
     // write whitespace
     state = (0, exports.writeJsToken)(state, whitespace);
     // write string content
@@ -641,8 +641,10 @@ const compileTextLine = (node, state) => {
             state = compileItemResult.state;
         }
     }
-    // write `);
-    state = (0, exports.writeJsToken)(state, '`);');
+    // write " or ` depending on wheter there are includes or not
+    state = (0, exports.writeJsToken)(state, ast.hasIncludes ? "`" : "`");
+    // write );
+    state = (0, exports.writeJsToken)(state, ');');
     // write endline
     state = (0, exports.writeEndline)(state);
     return {
@@ -1345,7 +1347,7 @@ const compileImportStatement = (node, state) => {
         // endline
         state = (0, exports.writeJsToken)(state, `;`);
         state = (0, exports.writeEndline)(state);
-        // __context = { ...[identifier], ...__context };
+        // __context = { ...__context, ...[identifier], __text };
         // __context = { ...
         state = (0, exports.writeJsToken)(state, `${exports.compilerConfig.contextVarName} = { ...${exports.compilerConfig.contextVarName}, ...`);
         // identifier
@@ -1948,7 +1950,8 @@ const compileStringLiteral = (node, state) => {
     // add sourcemap
     state = (0, exports.addSourceMapAtCurrentPlace)(state, undefined, ast.start);
     // open `
-    state = (0, exports.writeJsToken)(state, ast.allowIncludes ? '`' : '\'');
+    const withIncludes = ast.allowIncludes === true && ast.hasIncludes === true;
+    state = (0, exports.writeJsToken)(state, withIncludes ? '`' : '"');
     let content = ast.value;
     for (let i = 0; i < content.length; i++) {
         const contentItem = content[i];
@@ -1958,7 +1961,7 @@ const compileStringLiteral = (node, state) => {
         }
     }
     // close `
-    state = (0, exports.writeJsToken)(state, ast.allowIncludes ? '`' : '\'');
+    state = (0, exports.writeJsToken)(state, withIncludes ? '`' : '"');
     return {
         state,
         result: ast
